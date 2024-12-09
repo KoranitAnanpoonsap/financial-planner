@@ -42,7 +42,7 @@ export default function PortfolioSelectionCFP() {
     const fetchAssets = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/assets/${clientId}` // Adjust the URL as needed
+          `http://localhost:8080/api/portassets/${clientId}` // Adjust the URL as needed
         )
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -69,7 +69,7 @@ export default function PortfolioSelectionCFP() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/assets`, {
+      const response = await fetch(`http://localhost:8080/api/portassets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

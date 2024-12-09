@@ -39,7 +39,7 @@ const PortfolioCreationCFP = () => {
     const fetchAssets = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/assets/${clientId}`
+          `http://localhost:8080/api/portassets/${clientId}`
         )
         if (!response.ok) {
           throw new Error("Network response was not ok")
