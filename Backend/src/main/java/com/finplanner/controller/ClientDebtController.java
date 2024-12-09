@@ -36,4 +36,29 @@ public class ClientDebtController {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Update a debt record by clientId and clientDebtName
+    @PutMapping("/{clientId}/{clientDebtName}")
+    public ResponseEntity<ClientDebt> updateDebt(@PathVariable Integer clientId,
+            @PathVariable String clientDebtName,
+            @RequestBody ClientDebt updatedDebt) {
+
+        ClientDebtId id = new ClientDebtId(clientId, clientDebtName);
+
+        return repository.findById(id)
+                .map(existingDebt -> {
+                    // Update fields as needed. Assuming the PUT request provides all fields:
+                    existingDebt.setClientDebtType(updatedDebt.getClientDebtType());
+                    existingDebt.setClientDebtTerm(updatedDebt.getClientDebtTerm());
+                    existingDebt.setClientDebtAmount(updatedDebt.getClientDebtAmount());
+                    existingDebt.setClientDebtAnnualInterest(updatedDebt.getClientDebtAnnualInterest());
+                    existingDebt.setClientStartDateDebt(updatedDebt.getClientStartDateDebt());
+                    existingDebt.setClientDebtDuration(updatedDebt.getClientDebtDuration());
+                    existingDebt.setClientDebtPrincipal(updatedDebt.getClientDebtPrincipal());
+
+                    ClientDebt savedDebt = repository.save(existingDebt);
+                    return ResponseEntity.ok(savedDebt);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
