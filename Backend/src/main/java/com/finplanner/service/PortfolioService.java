@@ -1,7 +1,6 @@
 package com.finplanner.service;
 
 import com.finplanner.model.CfpClientPortfolioAssets;
-import com.finplanner.model.PortfolioSummary;
 import com.finplanner.repository.CfpClientPortfolioAssetsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,5 +41,23 @@ public class PortfolioService {
         weightedReturnSum = weightedReturnSum.setScale(4, RoundingMode.HALF_UP);
 
         return new PortfolioSummary(totalInvestAmount, weightedReturnSum);
+    }
+
+    public static class PortfolioSummary {
+        private BigDecimal totalInvestAmount;
+        private BigDecimal portfolioReturn;
+
+        public PortfolioSummary(BigDecimal totalInvestAmount, BigDecimal portfolioReturn) {
+            this.totalInvestAmount = totalInvestAmount;
+            this.portfolioReturn = portfolioReturn;
+        }
+
+        public BigDecimal getTotalInvestAmount() {
+            return totalInvestAmount;
+        }
+
+        public BigDecimal getPortfolioReturn() {
+            return portfolioReturn;
+        }
     }
 }

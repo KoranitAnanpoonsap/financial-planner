@@ -98,7 +98,7 @@ export default function PortfolioSelectionCFP() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/assets/${clientId}/${investName}`,
+        `http://localhost:8080/api/portassets/${clientId}/${investName}`,
         {
           method: "DELETE",
         }

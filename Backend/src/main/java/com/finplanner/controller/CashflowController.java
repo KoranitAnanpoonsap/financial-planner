@@ -2,9 +2,10 @@ package com.finplanner.controller;
 
 import com.finplanner.model.CashflowGoal;
 import com.finplanner.model.CashflowGoalId;
-import com.finplanner.model.CashflowResult;
 import com.finplanner.repository.CashflowGoalRepository;
 import com.finplanner.service.CashflowCalculationService;
+import com.finplanner.service.CashflowCalculationService.CashflowResult;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,8 @@
 package com.finplanner.controller;
 
-import com.finplanner.model.PortfolioSummary;
 import com.finplanner.service.PortfolioService;
+import com.finplanner.service.PortfolioService.PortfolioSummary;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
