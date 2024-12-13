@@ -3,7 +3,6 @@ import { motion } from "framer-motion"
 import emailIcon from "../assets/email.png"
 import passwordIcon from "../assets/password.png"
 import { useState } from "react"
-import "@fontsource/ibm-plex-sans-thai"
 import { useNavigate } from "react-router-dom"
 
 const pageVariants = {

@@ -125,10 +125,12 @@ export default function PortfolioSelectionCFP() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel></ClientBluePanel>
+        <ClientBluePanel />
         <div className="flex-1 p-4">
           <div className="mb-4">
-            <h3 className="text-lg mb-2">สร้างสินทรัพย์</h3>
+            <h3 className="text-lg mb-2 font-ibm font-bold text-tfpa_blue">
+              สร้างสินทรัพย์
+            </h3>
             <select
               value={investType}
               onChange={(e) => {
@@ -137,7 +139,7 @@ export default function PortfolioSelectionCFP() {
                 const returnValue = calculateYearlyReturn(selectedType) // Calculate based on selected type
                 setYearlyReturn(returnValue) // Set the new return immediately
               }}
-              className="border rounded p-2 mb-2 w-full"
+              className="border rounded p-2 mb-2 w-full font-ibm font-bold text-gray-500"
             >
               <option value="เลือก">เลือก</option>
               <option value="หุ้นไทย">หุ้นไทย</option>
@@ -155,7 +157,7 @@ export default function PortfolioSelectionCFP() {
                 placeholder="ผลตอบแทนต่อปี (%)"
                 value={customReturn}
                 onChange={(e) => setCustomReturn(e.target.value)}
-                className="border rounded p-2 mb-2 w-full"
+                className="border rounded p-2 mb-2 w-full font-ibm"
               />
             )}
             <input
@@ -163,29 +165,31 @@ export default function PortfolioSelectionCFP() {
               placeholder="ชื่อการลงทุน"
               value={investName}
               onChange={(e) => setInvestName(e.target.value)}
-              className="border rounded p-2 mb-2 w-full"
+              className="border rounded p-2 mb-2 w-full font-ibm"
             />
             <input
               type="number"
               placeholder="มูลค่าที่ลงทุนปัจจุบัน"
               value={investAmount}
               onChange={(e) => setInvestAmount(e.target.value)}
-              className="border rounded p-2 mb-2 w-full"
+              className="border rounded p-2 mb-2 w-full font-ibm"
             />
-            <p className="mb-2">
+            <p className="mb-2 font-ibm font-bold text-tfpa_blue">
               ผลตอบแทนต่อปี: {((yearlyReturn || 0) * 100).toFixed(2)}%
             </p>
             <button
               onClick={handleCreateAsset}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="bg-blue-500 text-white px-4 py-2 rounded font-ibm"
             >
               เพิ่ม
             </button>
           </div>
-          <h3 className="text-lg mb-2">สินทรัพย์ปัจจุบัน</h3>
+          <h3 className="text-lg mb-2 font-ibm font-bold text-tfpa_blue">
+            สินทรัพย์ปัจจุบัน
+          </h3>
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
-              <tr className="bg-gray-200">
+              <tr className="bg-gray-200 font-ibm font-bold text-tfpa_blue">
                 <th className="py-2 px-4 border">ประเภทการลงทุน</th>
                 <th className="py-2 px-4 border">ชื่อการลงทุน</th>
                 <th className="py-2 px-4 border">มูลค่าที่ลงทุน</th>
@@ -205,7 +209,7 @@ export default function PortfolioSelectionCFP() {
                   <td className="py-2 px-4 border">
                     <button
                       onClick={() => handleDeleteAsset(asset)}
-                      className="text-red-500"
+                      className="text-red-500 font-ibm"
                     >
                       ลบ
                     </button>
@@ -216,7 +220,7 @@ export default function PortfolioSelectionCFP() {
           </table>
           <button
             onClick={handleNavigateToChart}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded font-ibm"
           >
             สร้างพอร์ต
           </button>

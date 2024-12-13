@@ -5,7 +5,6 @@ import DateInput from "../components/dateInput.jsx"
 import FileUpload from "../components/fileUpload.jsx"
 import Footer from "../components/footer.jsx"
 import Header from "../components/headerLogin.jsx"
-import "@fontsource/ibm-plex-sans-thai"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 

@@ -49,7 +49,7 @@ export default function Header() {
       <div className="relative">
         <button
           onClick={toggleDropdown}
-          className="bg-blue-500 text-white px-6 py-2 rounded"
+          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-6 py-2 rounded font-ibm"
         >
           CFP {cfpFirstName}
         </button>
@@ -57,13 +57,13 @@ export default function Header() {
           <div className="absolute right-0 bg-white shadow-md mt-2 rounded">
             <button
               onClick={handleHomePage}
-              className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200"
+              className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200 font-ibm"
             >
               หน้าแรก
             </button>
             <button
               onClick={handleLogout}
-              className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200"
+              className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200 font-ibm"
             >
               ออกจากระบบ
             </button>

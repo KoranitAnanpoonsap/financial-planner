@@ -1,6 +1,5 @@
 import LoginTemplate from "../components/login_template.jsx"
 import { useNavigate } from "react-router-dom"
-import "@fontsource/ibm-plex-sans-thai"
 import { motion } from "framer-motion"
 
 const pageVariants = {

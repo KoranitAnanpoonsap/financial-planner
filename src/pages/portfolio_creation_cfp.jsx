@@ -9,7 +9,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js" // Impo
 // Register required Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const PortfolioCreationCFP = () => {
+export default function PortfolioCreationCFP() {
   const { clientId } = useParams()
   const { cfpId } = useParams()
   const [totalInvestment, setTotalInvestment] = useState(0)
@@ -18,24 +18,7 @@ const PortfolioCreationCFP = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Fetch total investment and annual return from the portfolio endpoint
-    const fetchPortfolioData = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/portfolio/${clientId}`
-        )
-        if (!response.ok) {
-          throw new Error("Network response was not ok")
-        }
-        const portfolioData = await response.json()
-        setTotalInvestment(portfolioData.totalInvestAmount)
-        setAnnualReturn(portfolioData.portfolioReturn)
-      } catch (error) {
-        console.error("Error fetching portfolio data:", error)
-      }
-    }
-
-    // Fetch asset data
+    // Fetch asset data, then calculate total investment and annual return here
     const fetchAssets = async () => {
       try {
         const response = await fetch(
@@ -46,14 +29,45 @@ const PortfolioCreationCFP = () => {
         }
         const data = await response.json()
         setAssets(data)
+
+        // Once we have the assets, calculate totalInvestment and annualReturn
+        calculatePortfolioSummary(data)
       } catch (error) {
         console.error("Error fetching asset data:", error)
       }
     }
 
-    fetchPortfolioData()
     fetchAssets()
   }, [clientId])
+
+  const calculatePortfolioSummary = (assets) => {
+    // Replicate the logic from the backend PortfolioService
+    let totalInvestAmount = 0
+    let weightedReturnSum = 0
+
+    // Calculate total investment
+    for (const asset of assets) {
+      totalInvestAmount += asset.investAmount
+    }
+
+    if (totalInvestAmount > 0) {
+      // Calculate weighted return
+      for (const asset of assets) {
+        const investAmount = asset.investAmount
+        const yearlyReturn = asset.yearlyReturn
+        const proportion = investAmount / totalInvestAmount
+        weightedReturnSum += proportion * yearlyReturn
+      }
+    }
+
+    // Round values as in backend logic
+    totalInvestAmount = parseFloat(totalInvestAmount.toFixed(2))
+    // annualReturn (portfolioReturn) was weightedReturnSum, round to 4 decimal places
+    const portfolioReturn = parseFloat(weightedReturnSum.toFixed(4))
+
+    setTotalInvestment(totalInvestAmount)
+    setAnnualReturn(portfolioReturn)
+  }
 
   const dataForChart = {
     labels: [],
@@ -81,9 +95,9 @@ const PortfolioCreationCFP = () => {
       case "หุ้นกู้":
         return "#FF9F40"
       case "การลงทุนอื่นๆ":
-        return "#FF6384" // Default color
+        return "#FF6384"
       default:
-        return "#CCCCCC" // Fallback color
+        return "#CCCCCC"
     }
   }
 
@@ -123,22 +137,20 @@ const PortfolioCreationCFP = () => {
             </div>
           </div>
           <div className="flex justify-center mb-4">
-            <p className="text-lg">
+            <p className="text-lg font-ibm font-bold text-tfpa_blue">
               เงินรวมปัจจุบันในการลงทุน: {totalInvestment.toFixed(2)} บาท
             </p>
           </div>
           <div className="flex justify-center mb-4">
-            <p className="text-lg">
+            <p className="text-lg font-ibm font-bold text-tfpa_blue">
               ผลตอบแทนต่อปีของพอร์ตที่ลงทุนปัจจุบัน:{" "}
               {(annualReturn * 100).toFixed(2)} %
             </p>
           </div>
           <div className="flex justify-end mt-4">
-            {" "}
-            {/* Align the button to the right */}
             <button
               onClick={handleEditPortfolio}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-red-500 text-white px-4 py-2 rounded font-ibm"
             >
               แก้ไขพอร์ต
             </button>
@@ -149,5 +161,3 @@ const PortfolioCreationCFP = () => {
     </div>
   )
 }
-
-export default PortfolioCreationCFP

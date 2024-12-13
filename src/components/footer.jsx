@@ -3,7 +3,6 @@ import logo from "../assets/TFPA_logo.png"
 import facebook from "../assets/facebook.png"
 import line from "../assets/line.png"
 import youtube from "../assets/youtube.png"
-import "@fontsource/ibm-plex-sans-thai"
 
 export default function Footer() {
   return (
@@ -16,7 +15,7 @@ export default function Footer() {
         <div className="flex flex-col items-start">
           <img src={logo} alt="TFPA Logo" className="h-14 mb-1" />
           <div className="text-left">
-            <p className="text-tfpa_blue text-sm">
+            <p className="text-tfpa_blue text-sm font-ibm">
               สมาคมนักวางแผนการเงินไทยชั้น 6 อาคารตลาดหลักทรัพย์แห่งประเทศไทย
               <br />
               93 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดงกรุงเทพมหานคร 10400
@@ -26,7 +25,7 @@ export default function Footer() {
 
         {/* Right Section with Contact Info */}
         <div className="text-right flex flex-col items-end">
-          <p className="text-tfpa_blue text-sm">
+          <p className="text-tfpa_blue text-sm font-ibm">
             โทรศัพท์: 0 2009 9393
             <br />
             Website:{" "}
@@ -70,7 +69,7 @@ export default function Footer() {
       <div className="h-[0.2px] bg-gray-300 w-full"></div>
 
       <div className="w-full text-center mt-2">
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-400 text-xs font-ibm">
           Copyright © 2024 Thai Financial Planners Association
         </p>
       </div>

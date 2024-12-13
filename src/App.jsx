@@ -7,6 +7,9 @@ import Register from "./pages/register"
 import CfpHomepage from "./pages/cfp_homepage"
 import PortfolioSelectionCFP from "./pages/portfolio_selection_cfp"
 import PortfolioCreationCFP from "./pages/portfolio_creation_cfp"
+import CFPCashflowBase from "./pages/cfp_cashflow_base"
+import CFPCashflowBaseCalculated from "./pages/cfp_cashflow_base_calculated"
+import "@fontsource/ibm-plex-sans-thai"
 
 function App() {
   return (
@@ -25,6 +28,14 @@ function App() {
         <Route
           path="/:cfpId/portfolio-chart/:clientId"
           element={<PortfolioCreationCFP />}
+        />
+        <Route
+          path="/:cfpId/cashflow-base/:clientId"
+          element={<CFPCashflowBase />}
+        />
+        <Route
+          path="/:cfpId/cashflow-base-calculated/:clientId"
+          element={<CFPCashflowBaseCalculated />}
         />
       </Routes>
     </Router>

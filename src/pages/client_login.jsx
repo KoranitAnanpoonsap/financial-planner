@@ -1,5 +1,4 @@
 import LoginTemplate from "../components/login_template.jsx"
-import "@fontsource/ibm-plex-sans-thai"
 import { motion } from "framer-motion"
 import emailIcon from "../assets/email.png"
 import passwordIcon from "../assets/password.png"

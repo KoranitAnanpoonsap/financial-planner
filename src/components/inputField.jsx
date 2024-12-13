@@ -1,5 +1,3 @@
-import "@fontsource/ibm-plex-sans-thai"
-
 export default function InputField({
   type,
   label,
