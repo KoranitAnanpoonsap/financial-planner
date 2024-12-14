@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-thai": "^5.1.0",
-    "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "framer-motion": "^11.11.0",
     "react": "^18.3.1",

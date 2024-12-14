@@ -4,6 +4,14 @@ import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
 
+// Import the calculation functions
+import {
+  calculatePortfolioSummary,
+  calculateYearlyIncome,
+  calculateYearlyExpense,
+  calculateGoalPayments,
+} from "../components/calculations.js"
+
 export default function CFPCashflowBaseCalculated() {
   const { clientId } = useParams()
   const { cfpId } = useParams()
@@ -12,8 +20,7 @@ export default function CFPCashflowBaseCalculated() {
   const [incomes, setIncomes] = useState([])
   const [expenses, setExpenses] = useState([])
   const [goals, setGoals] = useState([])
-
-  const [annualReturn, setAnnualReturn] = useState(0)
+  const [portfolioReturn, setPortfolioReturn] = useState(0)
 
   const years = [1, 2, 3, 4, 5]
 
@@ -43,93 +50,13 @@ export default function CFPCashflowBaseCalculated() {
       setExpenses(expensesData)
       setGoals(goalsData)
 
-      calculatePortfolioSummary(assetsData)
+      const { portReturn } = calculatePortfolioSummary(assetsData)
+      setPortfolioReturn(portReturn)
     } catch (error) {
       console.error("Error fetching data:", error)
     }
   }
 
-  const calculatePortfolioSummary = (assetsData) => {
-    let totalInvestAmount = 0
-    let weightedReturnSum = 0
-
-    for (const asset of assetsData) {
-      totalInvestAmount += asset.investAmount
-    }
-
-    if (totalInvestAmount > 0) {
-      for (const asset of assetsData) {
-        const proportion = asset.investAmount / totalInvestAmount
-        weightedReturnSum += proportion * asset.yearlyReturn
-      }
-    }
-
-    const portReturn = parseFloat(weightedReturnSum.toFixed(4))
-    setAnnualReturn(portReturn)
-  }
-
-  const calculateYearlyIncome = (incomes, year) => {
-    const details = []
-    for (const income of incomes) {
-      let amount = income.clientIncomeAmount
-      if (income.clientIncomeFrequency === "ทุกเดือน") {
-        amount *= 12
-      }
-      for (let y = 1; y < year; y++) {
-        amount = amount * (1 + income.clientIncomeAnnualGrowthRate)
-      }
-      details.push({ [income.id.clientIncomeName]: amount.toFixed(2) })
-    }
-    return details
-  }
-
-  const calculateYearlyExpense = (expenses, year) => {
-    const details = []
-    for (const expense of expenses) {
-      let amount = expense.clientExpenseAmount
-      if (expense.clientExpenseFrequency === "ทุกเดือน") {
-        amount *= 12
-      }
-      for (let y = 1; y < year; y++) {
-        amount = amount * (1 + expense.clientExpenseAnnualGrowthRate)
-      }
-      details.push({ [expense.id.clientExpenseName]: amount.toFixed(2) })
-    }
-    return details
-  }
-
-  const calculateGoalPayments = (goals, portfolioReturn, year) => {
-    const payments = []
-    let anyPayment = false
-    for (const goal of goals) {
-      const clientGoalValue = goal.clientGoalValue
-      const clientSavingGrowth = goal.clientSavingGrowth
-      const clientGoalPeriod = goal.clientGoalPeriod
-
-      let payment = 0
-      if (year <= clientGoalPeriod) {
-        const numerator = portfolioReturn - clientSavingGrowth
-        const denom =
-          Math.pow(1 + portfolioReturn, clientGoalPeriod) -
-          Math.pow(1 + clientSavingGrowth, clientGoalPeriod)
-        if (denom !== 0) {
-          payment = clientGoalValue * (numerator / denom)
-          anyPayment = true
-        }
-      }
-      payments.push({ [goal.id.clientGoalName]: payment.toFixed(2) })
-    }
-
-    if (!anyPayment && goals.length === 0) {
-      // if no goals at all
-      payments.push({ "No Payments": "0.00" })
-    }
-    return payments
-  }
-
-  // Perform calculation for 5 years
-  const portfolioReturn = annualReturn
-  // We'll store final results for display
   const calculationResults = years.map((year) => {
     const incomeDetails = calculateYearlyIncome(incomes, year)
     const expenseDetails = calculateYearlyExpense(expenses, year)
@@ -173,7 +100,7 @@ export default function CFPCashflowBaseCalculated() {
       <div className="flex flex-1">
         <ClientBluePanel />
         <div className="flex-1 p-4 space-y-8">
-          <div className="overflow-x-auto mt-20">
+          <div className="overflow-x-auto mt-16">
             <table className="min-w-full bg-white border border-gray-300 text-sm">
               <thead>
                 <tr>
@@ -296,7 +223,7 @@ export default function CFPCashflowBaseCalculated() {
 
                 {/* Net Income */}
                 <tr className="border-t-2">
-                  <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
+                  <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_gold">
                     กระแสนเงินสดสุทธิ
                   </td>
                   {calculationResults.map((r, i) => (
@@ -312,7 +239,7 @@ export default function CFPCashflowBaseCalculated() {
                 {/* Goals */}
                 {goals.map((goal) => (
                   <tr key={goal.id.clientGoalName}>
-                    <td className="py-2 px-4 border text-red-600 font-ibm font-semibold">
+                    <td className="py-2 px-4 border text-lg text-red-600 font-ibm font-semibold">
                       การออมเพื่อเป้าหมาย {goal.id.clientGoalName}
                     </td>
                     {calculationResults.map((r, i) => {
@@ -334,7 +261,7 @@ export default function CFPCashflowBaseCalculated() {
 
                 {/* Net Income After Goals */}
                 <tr className="border-t-2">
-                  <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue">
+                  <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
                     กระแสนเงินสดสุทธิหลังเป้าหมาย
                   </td>
                   {calculationResults.map((r, i) => {

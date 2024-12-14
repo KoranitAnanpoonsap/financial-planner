@@ -3,10 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
-import { Pie } from "react-chartjs-2"
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
-
-ChartJS.register(ArcElement, Tooltip, Legend)
+import { calculatePortfolioSummary } from "../components/calculations.js"
+import PortfolioPieChart from "../components/portfolioPieChart.jsx"
 
 export default function CFPCashflowBase() {
   const { clientId } = useParams()
@@ -15,7 +13,7 @@ export default function CFPCashflowBase() {
 
   const [assets, setAssets] = useState([])
   const [totalInvestment, setTotalInvestment] = useState(0)
-  const [annualReturn, setAnnualReturn] = useState(0)
+  const [portfolioReturn, setPortfolioReturn] = useState(0)
 
   // For client incomes
   const [incomes, setIncomes] = useState([])
@@ -43,34 +41,13 @@ export default function CFPCashflowBase() {
       }
       const data = await response.json()
       setAssets(data)
-      calculatePortfolioSummary(data)
+
+      const { totalInvestAmount, portReturn } = calculatePortfolioSummary(data)
+      setTotalInvestment(totalInvestAmount)
+      setPortfolioReturn(portReturn)
     } catch (error) {
       console.error("Error fetching assets:", error)
     }
-  }
-
-  const calculatePortfolioSummary = (assets) => {
-    let totalInvestAmount = 0
-    let weightedReturnSum = 0
-
-    for (const asset of assets) {
-      totalInvestAmount += asset.investAmount
-    }
-
-    if (totalInvestAmount > 0) {
-      for (const asset of assets) {
-        const investAmount = asset.investAmount
-        const yearlyReturn = asset.yearlyReturn
-        const proportion = investAmount / totalInvestAmount
-        weightedReturnSum += proportion * yearlyReturn
-      }
-    }
-
-    totalInvestAmount = parseFloat(totalInvestAmount.toFixed(2))
-    const portfolioReturn = parseFloat(weightedReturnSum.toFixed(4))
-
-    setTotalInvestment(totalInvestAmount)
-    setAnnualReturn(portfolioReturn)
   }
 
   const fetchIncomes = async () => {
@@ -162,44 +139,6 @@ export default function CFPCashflowBase() {
     }
   }
 
-  // Chart data
-  const dataMap = {}
-  assets.forEach((asset) => {
-    const { investType, investAmount } = asset
-    dataMap[investType] = (dataMap[investType] || 0) + investAmount
-  })
-
-  const getColorForType = (type) => {
-    switch (type) {
-      case "หุ้นไทย":
-        return "#FF6384"
-      case "หุ้นต่างประเทศ":
-        return "#36A2EB"
-      case "เงินฝาก":
-        return "#FFCE56"
-      case "ทองคำ":
-        return "#4BC0C0"
-      case "ตราสารหนี้":
-        return "#9966FF"
-      case "หุ้นกู้":
-        return "#FF9F40"
-      case "การลงทุนอื่นๆ":
-        return "#FF6384"
-      default:
-        return "#CCCCCC"
-    }
-  }
-
-  const chartData = {
-    labels: Object.keys(dataMap),
-    datasets: [
-      {
-        data: Object.values(dataMap),
-        backgroundColor: Object.keys(dataMap).map(getColorForType),
-      },
-    ],
-  }
-
   const handleCalculate = () => {
     navigate(`/${cfpId}/cashflow-base-calculated/${clientId}`)
   }
@@ -212,16 +151,15 @@ export default function CFPCashflowBase() {
         <div className="flex-1 p-4 space-y-8">
           {/* Top Part: Chart and Summary */}
           <div className="flex space-x-8">
-            <div style={{ width: "300px", height: "300px" }}>
-              <Pie data={chartData} />
-            </div>
+            <PortfolioPieChart assets={assets} width={300} height={300} />
             <div className="flex flex-col justify-center space-y-2">
               <p className="text-lg font-ibm font-bold text-tfpa_blue">
-                เงินรวมปัจจุบันในการลงทุน: {totalInvestment.toFixed(2)} บาท
+                เงินรวมปัจจุบันในการลงทุน: {totalInvestment.toLocaleString()}{" "}
+                บาท
               </p>
               <p className="text-lg font-ibm font-bold text-tfpa_blue">
                 ผลตอบแทนต่อปีของพอร์ตที่ลงทุนปัจจุบัน:{" "}
-                {(annualReturn * 100).toFixed(2)} %
+                {(portfolioReturn * 100).toFixed(2)} %
               </p>
             </div>
             {/* Client Income Growth Table */}
@@ -329,7 +267,9 @@ export default function CFPCashflowBase() {
                     <td className="py-2 px-4 border">
                       {goal.id.clientGoalName}
                     </td>
-                    <td className="py-2 px-4 border">{goal.clientGoalValue}</td>
+                    <td className="py-2 px-4 border">
+                      {goal.clientGoalValue.toLocaleString()}
+                    </td>
                     <td className="py-2 px-4 border">
                       {goal.clientGoalPeriod}
                     </td>

@@ -202,7 +202,9 @@ export default function PortfolioSelectionCFP() {
                 <tr key={`${asset.id.clientId}-${asset.id.investName}`}>
                   <td className="py-2 px-4 border">{asset.investType}</td>
                   <td className="py-2 px-4 border">{asset.id.investName}</td>
-                  <td className="py-2 px-4 border">{asset.investAmount}</td>
+                  <td className="py-2 px-4 border">
+                    {asset.investAmount.toLocaleString()}
+                  </td>
                   <td className="py-2 px-4 border">
                     {((asset.yearlyReturn || 0) * 100).toFixed(2)}%
                   </td>
