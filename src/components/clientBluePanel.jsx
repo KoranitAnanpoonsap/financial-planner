@@ -75,12 +75,16 @@ export default function ClientBluePanel() {
     {
       label: "ตรวจสุขภาพทางการเงิน",
       icon: checkIcon,
-      routes: [`/${cfpId}/financial-health-check/${clientId}`],
+      routes: [`/${cfpId}/financial-healthcheck/${clientId}`],
     },
     {
       label: "การคำนวณภาษี",
       icon: checkIcon,
-      routes: [`/${cfpId}/tax/${clientId}`],
+      routes: [
+        `/${cfpId}/tax-income/${clientId}`,
+        `/${cfpId}/tax-deduction/${clientId}`,
+        `/${cfpId}/tax-calculation/${clientId}`,
+      ],
     },
   ]
 

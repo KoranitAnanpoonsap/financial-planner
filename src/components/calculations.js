@@ -150,3 +150,126 @@ export function calculateRetirementGoal(retirementGoalInfo, retiredExpensePortio
     retirementGoal
   }
 }
+
+export function computeVariables(incomes, expenses, assets, debts) {
+  const annualIncome = incomes.map((i) => {
+    const amt = i.clientIncomeFrequency === "ทุกเดือน"
+      ? i.clientIncomeAmount * 12
+      : i.clientIncomeAmount
+    return { type: i.clientIncomeType, amt }
+  })
+  const totalIncome = annualIncome.reduce((sum, a) => sum + a.amt, 0)
+
+  const annualExpense = expenses.map((e) => {
+    const amt = e.clientExpenseFrequency === "ทุกเดือน"
+      ? e.clientExpenseAmount * 12
+      : e.clientExpenseAmount
+    return { ...e, amt }
+  })
+  const totalExpense = annualExpense.reduce((sum, e) => sum + e.amt, 0)
+  const netIncome = totalIncome - totalExpense
+
+  let monthlyExpense = 0
+  for (const e of expenses) {
+    let amt = e.clientExpenseAmount
+    if (e.clientExpenseFrequency === "ทุกปี") amt = amt / 12
+    monthlyExpense += amt
+  }
+
+  const savingExpenses = annualExpense
+    .filter((e) => e.clientSavingExpense === true)
+    .reduce((sum, e) => sum + e.amt, 0)
+  const savings = savingExpenses + (netIncome > 0 ? netIncome : 0)
+
+  const totalLiquidAssets = assets
+    .filter((a) => a.clientAssetType === "สินทรัพย์สภาพคล่อง")
+    .reduce((sum, a) => sum + a.clientAssetAmount, 0)
+
+  const totalInvestAsset = assets
+    .filter((a) => a.clientAssetType === "สินทรัพย์ลงทุนปัจจุบัน")
+    .reduce((sum, a) => sum + a.clientAssetAmount, 0)
+
+  const totalAsset = assets.reduce((sum, a) => sum + a.clientAssetAmount, 0)
+  const totalShortTermDebt = debts
+    .filter((d) => d.clientDebtTerm === "ระยะสั้น")
+    .reduce((sum, d) => sum + d.clientDebtAmount, 0)
+  const totalDebt = debts.reduce((sum, d) => sum + d.clientDebtAmount, 0)
+  const netWorth = totalAsset - totalDebt
+
+  const debtExpenses = annualExpense
+    .filter((e) => e.clientDebtExpense === true)
+    .reduce((sum, e) => sum + e.amt, 0)
+  const totalDebtExpense = debtExpenses
+
+  const nonMortDebtExp = annualExpense
+    .filter((e) => e.clientNonMortgageDebtExpense === true)
+    .reduce((sum, e) => sum + e.amt, 0)
+  const totalNonMortgageDebtExpense = nonMortDebtExp
+
+  const assetIncome = annualIncome
+    .filter((i) => i.type === "ดอกเบี้ย เงินปันผล")
+    .reduce((sum, i) => sum + i.amt, 0)
+  const totalAssetIncome = assetIncome
+
+  return {
+    totalLiquidAssets,
+    totalIncome,
+    totalExpense,
+    monthlyExpense,
+    netIncome,
+    savings,
+    totalShortTermDebt,
+    totalDebt,
+    totalAsset,
+    totalInvestAsset,
+    totalDebtExpense,
+    totalNonMortgageDebtExpense,
+    netWorth,
+    totalAssetIncome,
+  }
+}
+
+export function computeRatios({
+  totalLiquidAssets,
+  totalShortTermDebt,
+  monthlyExpense,
+  netWorth,
+  totalDebt,
+  totalAsset,
+  netIncome,
+  totalIncome,
+  totalExpense,
+  savings,
+  totalInvestAsset,
+  totalDebtExpense,
+  totalNonMortgageDebtExpense,
+  totalAssetIncome,
+}) {
+  const liquidity = totalShortTermDebt === 0 ? 0 : totalLiquidAssets / totalShortTermDebt
+  const basicLiquidity = monthlyExpense === 0 ? 0 : totalLiquidAssets / monthlyExpense
+  const liquidityToNetWorth = netWorth === 0 ? 0 : totalLiquidAssets / netWorth
+  const debtToAsset = totalAsset === 0 ? 0 : totalDebt / totalAsset
+  const repayAllDebts = totalAsset === 0 ? 0 : netWorth / totalAsset
+  const repayDebtFromIncome = totalIncome === 0 ? 0 : totalDebtExpense / totalIncome
+  const repayNonMortgageDebtFromIncome = totalIncome === 0 ? 0 : totalNonMortgageDebtExpense / totalIncome
+  const savingRatio = totalIncome === 0 ? 0 : savings / totalIncome
+  const investRatio = netWorth === 0 ? 0 : totalInvestAsset / netWorth
+  const netWorthRatio = totalAsset === 0 ? 0 : netWorth / totalAsset
+  const survivalRatio = totalExpense === 0 ? 0 : totalIncome / totalExpense
+  const wealthRatio = totalExpense === 0 ? 0 : totalAssetIncome / totalExpense
+
+  return {
+    liquidity,
+    basicLiquidity,
+    liquidityToNetWorth,
+    debtToAsset,
+    repayAllDebts,
+    repayDebtFromIncome,
+    repayNonMortgageDebtFromIncome,
+    savingRatio,
+    investRatio,
+    netWorthRatio,
+    survivalRatio,
+    wealthRatio,
+  }
+}

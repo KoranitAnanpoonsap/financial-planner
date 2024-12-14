@@ -14,6 +14,11 @@ import CFPGoalBase from "./pages/cfp_goal_base"
 import CFPGoalBaseCalculated from "./pages/cfp_goal_base_calculated"
 import RetirementGoalPage from "./pages/retirement_goal"
 import RetirementGoalCalculated from "./pages/retirement_goal_calculated"
+import TaxIncomePage from "./pages/tax_income"
+import TaxDeductionPage from "./pages/tax_deduction"
+import TaxCalculationPage from "./pages/tax_calculation"
+import CFPFinancialHealthCheck from "./pages/cfp_financial_healthcheck"
+import CFPClientInfoPage from "./pages/cfp_client_info"
 
 function App() {
   return (
@@ -53,6 +58,26 @@ function App() {
         <Route
           path="/:cfpId/retirement-goal-calculated/:clientId"
           element={<RetirementGoalCalculated />}
+        />
+        <Route
+          path="/:cfpId/tax-income/:clientId"
+          element={<TaxIncomePage />}
+        />
+        <Route
+          path="/:cfpId/tax-deduction/:clientId"
+          element={<TaxDeductionPage />}
+        />
+        <Route
+          path="/:cfpId/tax-calculation/:clientId"
+          element={<TaxCalculationPage />}
+        />
+        <Route
+          path="/:cfpId/financial-healthcheck/:clientId"
+          element={<CFPFinancialHealthCheck />}
+        />
+        <Route
+          path="/:cfpId/client-info/:clientId"
+          element={<CFPClientInfoPage />}
         />
       </Routes>
     </Router>
