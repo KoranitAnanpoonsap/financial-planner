@@ -150,7 +150,7 @@ export default function CFPCashflowBase() {
         <ClientBluePanel />
         <div className="flex-1 p-4 space-y-8">
           {/* Top Part: Chart and Summary */}
-          <div className="flex space-x-8">
+          <div className="flex justify-center items-center space-x-8">
             <PortfolioPieChart assets={assets} width={300} height={300} />
             <div className="flex flex-col justify-center space-y-2">
               <p className="text-lg font-ibm font-bold text-tfpa_blue">
