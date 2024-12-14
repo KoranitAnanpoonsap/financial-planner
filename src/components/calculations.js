@@ -79,3 +79,74 @@ export function calculateGoalPayments(goals, portfolioReturn, year) {
   }
   return payments
 }
+
+export function calculateGeneralGoal(generalGoal, totalInvestAmount, portReturn) {
+  const period = generalGoal.clientGeneralGoalPeriod
+  const goalValue = generalGoal.clientGeneralGoalValue
+  const netIncomeGrowth = generalGoal.clientNetIncomeGrowth
+
+  const fvOfCurrentInvestment = totalInvestAmount * Math.pow(1 + portReturn, period)
+  // newGeneralGoalValue = goalValue - fvOfCurrentInvestment
+  const newGeneralGoalValue = goalValue - fvOfCurrentInvestment
+
+  const numerator = portReturn - netIncomeGrowth
+  const denominator = Math.pow(1 + portReturn, period) - Math.pow(1 + netIncomeGrowth, period)
+
+  let generalGoalAnnualSaving = 0
+  if (denominator !== 0) {
+    generalGoalAnnualSaving = newGeneralGoalValue * (numerator / denominator)
+  }
+
+  return {
+    fvOfCurrentInvestment: parseFloat(fvOfCurrentInvestment.toFixed(2)),
+    generalGoalAnnualSaving: parseFloat(generalGoalAnnualSaving.toFixed(2))
+  }
+}
+
+export function calculateRetirementGoal(retirementGoalInfo, retiredExpensePortion) {
+  const { clientCurrentAge, clientRetirementAge, clientLifeExpectancy, clientCurrentYearlyExpense, clientExpectedRetiredPortReturn, inflationRate } = retirementGoalInfo
+  const currentAge = clientCurrentAge
+  const retirementAge = clientRetirementAge
+  const lifeExpectancy = clientLifeExpectancy
+  const currentYearlyExpense = clientCurrentYearlyExpense
+  const expectedRetPortReturn = clientExpectedRetiredPortReturn
+  const inflation = inflationRate
+
+  const yearsToRetirement = retirementAge - currentAge
+
+  const bdCurrentExpense = currentYearlyExpense
+  const bdInflationRate = inflation
+  const bdExpectedRetPortReturn = expectedRetPortReturn
+  const bdProportion = retiredExpensePortion
+
+  // fvCurrentExpense = currentExpense * (1+inflation)^yearsToRetirement
+  const fvCurrentExpense = bdCurrentExpense * Math.pow(1+bdInflationRate, yearsToRetirement)
+
+  // discount_rate = ((1+expectedRetPortReturn)/(1+inflation)) - 1
+  const discountRate = ((1+bdExpectedRetPortReturn)/(1+bdInflationRate))-1
+
+  // newFvCurrentExpense = fvCurrentExpense * proportion
+  const newFvCurrentExpense = fvCurrentExpense * bdProportion
+
+  // retirementDuration = lifeExpectancy - retirementAge
+  const retirementDuration = lifeExpectancy - retirementAge
+  const onePlusDiscount = 1 + discountRate
+
+  let retirementGoal
+  if (discountRate === 0) {
+    // If discount rate =0, retirement_goal = newFvCurrentExpense * retirementDuration
+    retirementGoal = newFvCurrentExpense * retirementDuration
+  } else {
+    // retirement_goal = newFvCurrentExpense * [1 - 1/(1+discount_rate)^(duration)] / discountRate * (1+discount_rate)
+    const denominatorDiscount = Math.pow(onePlusDiscount, retirementDuration)
+    const factor = 1 - (1/denominatorDiscount)
+    retirementGoal = newFvCurrentExpense * (factor / discountRate) * onePlusDiscount
+  }
+
+  return {
+    discountRate,
+    fvCurrentExpense,
+    newFvCurrentExpense,
+    retirementGoal
+  }
+}

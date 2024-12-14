@@ -57,7 +57,12 @@ export default function ClientBluePanel() {
     {
       label: "การวางแผนเป้าหมายเดียว",
       icon: loadingIcon,
-      routes: [`/${cfpId}/general-goal-base/${clientId}`],
+      routes: [
+        `/${cfpId}/goal-base/${clientId}`,
+        `/${cfpId}/goal-base-calculated/${clientId}`,
+        `/${cfpId}/retirement-goal/${clientId}`,
+        `/${cfpId}/retirement-goal-calculated/${clientId}`,
+      ],
     },
     {
       label: "การวางแผนหลายเป้าหมาย",
