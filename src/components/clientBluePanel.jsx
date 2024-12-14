@@ -44,7 +44,10 @@ export default function ClientBluePanel() {
       label: "ข้อมูลลูกค้า",
       icon: personListIcon,
       // Suppose these pages also count as "client-info" pages
-      routes: [`/${cfpId}/client-info/${clientId}`],
+      routes: [
+        `/${cfpId}/client-info/${clientId}`,
+        `/${cfpId}/client-income/${clientId}`,
+      ],
     },
     {
       label: "พอร์ตการลงทุน",

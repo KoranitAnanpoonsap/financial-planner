@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
+import { calculatePortfolioSummary } from "../components/calculations.js"
+import PortfolioPieChart from "../components/portfolioPieChart.jsx"
 
 export default function PortfolioSelectionCFP() {
   const { clientId } = useParams()
@@ -14,6 +16,19 @@ export default function PortfolioSelectionCFP() {
   const [yearlyReturn, setYearlyReturn] = useState(0)
   const [customReturn, setCustomReturn] = useState("")
   const navigate = useNavigate()
+
+  const [editMode, setEditMode] = useState(false)
+  const [editingAsset, setEditingAsset] = useState(null)
+
+  const investmentTypes = [
+    "หุ้นไทย",
+    "หุ้นต่างประเทศ",
+    "หุ้นกู้",
+    "ตราสารหนี้",
+    "ทองคำ",
+    "เงินฝาก",
+    "การลงทุนอื่นๆ",
+  ]
 
   // Returns the appropriate year return based on investment type
   const calculateYearlyReturn = (type) => {
@@ -57,8 +72,8 @@ export default function PortfolioSelectionCFP() {
     fetchAssets()
   }, [clientId])
 
-  const handleCreateAsset = async () => {
-    const newAsset = {
+  const handleCreateOrUpdateAsset = async () => {
+    const assetObj = {
       id: {
         clientId: clientId,
         investName: investName,
@@ -68,33 +83,56 @@ export default function PortfolioSelectionCFP() {
       yearlyReturn: calculateYearlyReturn(investType),
     }
 
+    let url = `http://localhost:8080/api/portassets`
+    let method = "POST"
+    if (editMode && editingAsset) {
+      url = `http://localhost:8080/api/portassets/${clientId}/${editingAsset.id.investName}`
+      method = "PUT"
+    }
+
     try {
-      const response = await fetch(`http://localhost:8080/api/portassets`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newAsset),
+        body: JSON.stringify(assetObj),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create asset")
+        throw new Error("Failed to create/update asset")
       }
 
-      const createdAsset = await response.json()
-      setAssets((prev) => [...prev, createdAsset])
-      // Reset input fields
-      setInvestType("เลือก")
-      setInvestName("")
-      setInvestAmount("")
-      setCustomReturn("")
+      // If successful, refresh the list
+      const data = await response.json()
+
+      // Refresh assets by refetching
+      await fetchAssetsAgain()
+
+      // Reset fields
+      resetFields()
     } catch (error) {
-      console.error("Error creating asset:", error)
+      console.error("Error creating/updating asset:", error)
+    }
+  }
+
+  const fetchAssetsAgain = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/portassets/${clientId}`
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch assets")
+      }
+      const data = await response.json()
+      setAssets(data)
+    } catch (error) {
+      console.error("Error fetching assets:", error)
     }
   }
 
   const handleDeleteAsset = async (asset) => {
-    const { clientId, investName } = asset.id // Extracting clientId and investName from the asset
+    const { clientId, investName } = asset.id
 
     try {
       const response = await fetch(
@@ -109,12 +147,41 @@ export default function PortfolioSelectionCFP() {
       }
 
       // Remove the deleted asset from the state
-      setAssets(
-        (prev) => prev.filter((a) => a.id.investName !== investName) // Adjust the filter logic as needed
-      )
+      setAssets((prev) => prev.filter((a) => a.id.investName !== investName))
     } catch (error) {
       console.error("Error deleting asset:", error)
     }
+  }
+
+  const handleEdit = (asset) => {
+    setEditMode(true)
+    setEditingAsset(asset)
+    setInvestType(asset.investType)
+    setInvestName(asset.id.investName)
+    setInvestAmount(asset.investAmount.toString())
+
+    // If it's "การลงทุนอื่นๆ", find the custom return from yearlyReturn
+    if (asset.investType === "การลงทุนอื่นๆ") {
+      setCustomReturn((asset.yearlyReturn * 100).toString())
+    } else {
+      setCustomReturn("")
+    }
+
+    setYearlyReturn(asset.yearlyReturn)
+  }
+
+  const handleCancelEdit = () => {
+    resetFields()
+  }
+
+  const resetFields = () => {
+    setEditMode(false)
+    setEditingAsset(null)
+    setInvestType("เลือก")
+    setInvestName("")
+    setInvestAmount("")
+    setCustomReturn("")
+    setYearlyReturn(0)
   }
 
   const handleNavigateToChart = () => {
@@ -131,35 +198,45 @@ export default function PortfolioSelectionCFP() {
             <h3 className="text-lg mb-2 font-ibm font-bold text-tfpa_blue">
               สร้างสินทรัพย์
             </h3>
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              เลือกสินทรัพย์
+            </label>
             <select
               value={investType}
               onChange={(e) => {
                 const selectedType = e.target.value
                 setInvestType(selectedType)
-                const returnValue = calculateYearlyReturn(selectedType) // Calculate based on selected type
-                setYearlyReturn(returnValue) // Set the new return immediately
+                const returnValue = calculateYearlyReturn(selectedType)
+                setYearlyReturn(returnValue)
               }}
               className="border rounded p-2 mb-2 w-full font-ibm font-bold text-gray-500"
             >
               <option value="เลือก">เลือก</option>
-              <option value="หุ้นไทย">หุ้นไทย</option>
-              <option value="หุ้นต่างประเทศ">หุ้นต่างประเทศ</option>
-              <option value="หุ้นกู้">หุ้นกู้</option>
-              <option value="ตราสารหนี้">ตราสารหนี้</option>
-              <option value="ทองคำ">ทองคำ</option>
-              <option value="เงินฝาก">เงินฝาก</option>
-              <option value="การลงทุนอื่นๆ">การลงทุนอื่นๆ</option>
+              {investmentTypes.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </select>
-
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              ผลตอบแทนต่อปี (%)
+            </label>
             {investType === "การลงทุนอื่นๆ" && (
               <input
                 type="text"
                 placeholder="ผลตอบแทนต่อปี (%)"
                 value={customReturn}
-                onChange={(e) => setCustomReturn(e.target.value)}
+                onChange={(e) => {
+                  setCustomReturn(e.target.value)
+                  const val = parseFloat(e.target.value) / 100 || 0
+                  setYearlyReturn(val)
+                }}
                 className="border rounded p-2 mb-2 w-full font-ibm"
               />
             )}
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              ชื่อการลงทุน
+            </label>
             <input
               type="text"
               placeholder="ชื่อการลงทุน"
@@ -167,6 +244,9 @@ export default function PortfolioSelectionCFP() {
               onChange={(e) => setInvestName(e.target.value)}
               className="border rounded p-2 mb-2 w-full font-ibm"
             />
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              มูลค่าที่ลงทุนปัจจุบัน
+            </label>
             <input
               type="number"
               placeholder="มูลค่าที่ลงทุนปัจจุบัน"
@@ -177,12 +257,31 @@ export default function PortfolioSelectionCFP() {
             <p className="mb-2 font-ibm font-bold text-tfpa_blue">
               ผลตอบแทนต่อปี: {((yearlyReturn || 0) * 100).toFixed(2)}%
             </p>
-            <button
-              onClick={handleCreateAsset}
-              className="bg-blue-500 text-white px-4 py-2 rounded font-ibm"
-            >
-              เพิ่ม
-            </button>
+            <div className="flex space-x-4">
+              {editMode ? (
+                <>
+                  <button
+                    onClick={handleCreateOrUpdateAsset}
+                    className="bg-red-500 text-white px-4 py-2 rounded font-ibm font-bold"
+                  >
+                    แก้ไข
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+                  >
+                    ยกเลิก
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleCreateOrUpdateAsset}
+                  className="bg-green-500 text-white px-4 py-2 rounded font-ibm font-bold"
+                >
+                  เพิ่ม
+                </button>
+              )}
+            </div>
           </div>
           <h3 className="text-lg mb-2 font-ibm font-bold text-tfpa_blue">
             สินทรัพย์ปัจจุบัน
@@ -209,12 +308,20 @@ export default function PortfolioSelectionCFP() {
                     {((asset.yearlyReturn || 0) * 100).toFixed(2)}%
                   </td>
                   <td className="py-2 px-4 border">
-                    <button
-                      onClick={() => handleDeleteAsset(asset)}
-                      className="text-red-500 font-ibm"
-                    >
-                      ลบ
-                    </button>
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => handleEdit(asset)}
+                        className="bg-blue-500 text-white px-4 py-1 rounded font-ibm"
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAsset(asset)}
+                        className="bg-red-500 text-white px-4 py-1 rounded font-ibm"
+                      >
+                        ลบ
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -222,7 +329,7 @@ export default function PortfolioSelectionCFP() {
           </table>
           <button
             onClick={handleNavigateToChart}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded font-ibm"
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded font-ibm font-bold"
           >
             สร้างพอร์ต
           </button>

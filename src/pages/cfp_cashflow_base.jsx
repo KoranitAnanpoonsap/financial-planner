@@ -25,6 +25,9 @@ export default function CFPCashflowBase() {
   const [clientGoalPeriod, setClientGoalPeriod] = useState("")
   const [clientSavingGrowth, setClientSavingGrowth] = useState("")
 
+  const [editMode, setEditMode] = useState(false)
+  const [editingGoal, setEditingGoal] = useState(null)
+
   useEffect(() => {
     fetchAssets()
     fetchIncomes()
@@ -67,7 +70,6 @@ export default function CFPCashflowBase() {
 
   const fetchGoals = async () => {
     try {
-      // GET /api/cashflow/{clientId} returns a list of CashflowGoal objects
       const response = await fetch(
         `http://localhost:8080/api/cashflow/${clientId}`
       )
@@ -81,8 +83,7 @@ export default function CFPCashflowBase() {
     }
   }
 
-  const handleCreateGoal = async () => {
-    // Construct the CashflowGoal object as expected by the POST /api/cashflow endpoint
+  const handleCreateOrUpdateGoal = async () => {
     const newGoal = {
       id: {
         clientId: parseInt(clientId),
@@ -90,39 +91,49 @@ export default function CFPCashflowBase() {
       },
       clientGoalValue: parseFloat(clientGoalValue),
       clientGoalPeriod: parseInt(clientGoalPeriod),
-      clientSavingGrowth: parseFloat(clientSavingGrowth / 100),
+      clientSavingGrowth: parseFloat(clientSavingGrowth) / 100,
+    }
+
+    let url = `http://localhost:8080/api/cashflow`
+    let method = "POST"
+    if (editMode && editingGoal) {
+      // Update mode
+      url = `http://localhost:8080/api/cashflow/${clientId}/${editingGoal.id.clientGoalName}`
+      method = "PUT"
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/cashflow`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newGoal),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create goal")
+        throw new Error("Failed to create/update goal")
       }
 
-      const createdGoal = await response.json()
-      setGoals((prev) => [...prev, createdGoal])
+      await response.json()
+
+      // Refresh goals
+      await fetchGoals()
 
       // Reset fields
       setClientGoalName("")
       setClientGoalValue("")
       setClientGoalPeriod("")
       setClientSavingGrowth("")
+      setEditMode(false)
+      setEditingGoal(null)
     } catch (error) {
-      console.error("Error creating goal:", error)
+      console.error("Error creating/updating goal:", error)
     }
   }
 
   const handleDeleteGoal = async (goal) => {
-    // goal.id contains { clientId, clientGoalName }
     const { clientId: gClientId, clientGoalName: gGoalName } = goal.id
 
     try {
-      // DELETE /api/cashflow/{clientId}/{clientGoalName}
       const response = await fetch(
         `http://localhost:8080/api/cashflow/${gClientId}/${gGoalName}`,
         {
@@ -137,6 +148,24 @@ export default function CFPCashflowBase() {
     } catch (error) {
       console.error("Error deleting goal:", error)
     }
+  }
+
+  const handleEdit = (goal) => {
+    setEditMode(true)
+    setEditingGoal(goal)
+    setClientGoalName(goal.id.clientGoalName)
+    setClientGoalValue(goal.clientGoalValue.toString())
+    setClientGoalPeriod(goal.clientGoalPeriod.toString())
+    setClientSavingGrowth((goal.clientSavingGrowth * 100).toString())
+  }
+
+  const handleCancelEdit = () => {
+    setEditMode(false)
+    setEditingGoal(null)
+    setClientGoalName("")
+    setClientGoalValue("")
+    setClientGoalPeriod("")
+    setClientSavingGrowth("")
   }
 
   const handleCalculate = () => {
@@ -197,9 +226,12 @@ export default function CFPCashflowBase() {
 
           {/* Goal Input Section */}
           <div>
-            <h3 className="text-lg mb-2 font-ibm font-bold text-tfpa_blue">
+            <h3 className="text-xl mb-2 font-ibm font-bold text-tfpa_blue">
               สร้างเป้าหมาย
             </h3>
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              ชื่อเป้าหมาย
+            </label>
             <input
               type="text"
               placeholder="ชื่อเป้าหมาย"
@@ -207,6 +239,9 @@ export default function CFPCashflowBase() {
               onChange={(e) => setClientGoalName(e.target.value)}
               className="border rounded p-2 mb-2 w-full font-ibm"
             />
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              จำนวนเงินเพื่อเป้าหมาย
+            </label>
             <input
               type="number"
               placeholder="จำนวนเงินเพื่อเป้าหมาย"
@@ -214,6 +249,9 @@ export default function CFPCashflowBase() {
               onChange={(e) => setClientGoalValue(e.target.value)}
               className="border rounded p-2 mb-2 w-full font-ibm"
             />
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              ระยะเวลาเป้าหมาย (ปี)
+            </label>
             <input
               type="number"
               placeholder="ระยะเวลาเป้าหมาย (ปี)"
@@ -221,6 +259,9 @@ export default function CFPCashflowBase() {
               onChange={(e) => setClientGoalPeriod(e.target.value)}
               className="border rounded p-2 mb-2 w-full font-ibm"
             />
+            <label className="text-tfpa_blue font-ibm font-bold mb-2">
+              อัตราเติบโตของเงินออม (%)
+            </label>
             <input
               type="number"
               placeholder="อัตราเติบโตของเงินออม (%)"
@@ -228,12 +269,32 @@ export default function CFPCashflowBase() {
               onChange={(e) => setClientSavingGrowth(e.target.value)}
               className="border rounded p-2 mb-2 w-full font-ibm"
             />
-            <button
-              onClick={handleCreateGoal}
-              className="bg-blue-500 text-white px-4 py-2 rounded font-ibm"
-            >
-              เพิ่มเป้าหมาย
-            </button>
+
+            <div className="flex space-x-4">
+              {editMode ? (
+                <>
+                  <button
+                    onClick={handleCreateOrUpdateGoal}
+                    className="bg-red-500 text-white px-4 py-2 rounded font-ibm font-bold"
+                  >
+                    แก้ไข
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+                  >
+                    ยกเลิก
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleCreateOrUpdateGoal}
+                  className="bg-green-500 text-white px-4 py-2 rounded font-ibm font-bold"
+                >
+                  เพิ่มเป้าหมาย
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Goals Table */}
@@ -277,12 +338,20 @@ export default function CFPCashflowBase() {
                       {(goal.clientSavingGrowth * 100).toFixed(2)}%
                     </td>
                     <td className="py-2 px-4 border">
-                      <button
-                        onClick={() => handleDeleteGoal(goal)}
-                        className="text-red-500 font-ibm"
-                      >
-                        ลบ
-                      </button>
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => handleEdit(goal)}
+                          className="bg-blue-500 text-white px-4 py-1 rounded font-ibm"
+                        >
+                          แก้ไข
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGoal(goal)}
+                          className="bg-red-500 text-white px-4 py-1 rounded font-ibm"
+                        >
+                          ลบ
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
