@@ -325,7 +325,9 @@ export default function TaxDeductionPage() {
           {/* First golden box: personal and family */}
           <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
             <h3 className="font-bold">ค่าลดหย่อนภาษีส่วนตัวและครอบครัว</h3>
+          </div>
 
+          <div className="text-tfpa_blue font-bold">
             <div>
               <span>สถานภาพสมรส</span>
               <select
@@ -396,7 +398,6 @@ export default function TaxDeductionPage() {
               </span>
             </div>
 
-            {/* ... Similarly for adoptedChild, parentalCare, disabledCare, prenatalCare */}
             <div className="flex items-center space-x-2">
               <span>บุตรบุญธรรม จำนวน</span>
               <input
@@ -509,7 +510,9 @@ export default function TaxDeductionPage() {
             <h3 className="font-bold">
               ค่าลดหย่อนภาษีกลุ่มประกัน เงินออม และการลงทุน
             </h3>
+          </div>
 
+          <div className="text-tfpa_blue font-bold">
             <div className="flex items-center space-x-2">
               <span>เบี้ยประกันชีวิต</span>
               <input
@@ -550,7 +553,6 @@ export default function TaxDeductionPage() {
               </span>
             </div>
 
-            {/* ... Similarly for pensionInsurance, spouseNoIncomeLifeInsurance, rmf, ssf, govPensionFund, pvd, nationSavingsFund, socialSecurityPremium, socialEnterprise, thaiEsg */}
             <div className="flex items-center space-x-2">
               <span>เบี้ยประกันชีวิตแบบบำนาญ</span>
               <input
@@ -760,7 +762,9 @@ export default function TaxDeductionPage() {
           {/* Third golden box: กลุ่มเงินบริจาค */}
           <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
             <h3 className="font-bold">ค่าลดหย่อนภาษีกลุ่มเงินบริจาค</h3>
+          </div>
 
+          <div className="text-tfpa_blue font-bold">
             <div className="flex items-center space-x-2">
               <span>เงินบริจาคทั่วไป</span>
               <input
