@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import Header from "../components/header"
 import Footer from "../components/footer"
 import ClientBluePanel from "../components/clientBluePanel"
-import { computeVariables, computeRatios } from "../components/calculations"
+import { computeVariables, computeRatios } from "../utils/calculations"
 
 function FractionDisplay({ topLabel, bottomLabel }) {
   // If value is numeric zero, we show "-" else show the formatted number
@@ -88,7 +88,7 @@ export default function CFPFinancialHealthCheck() {
     return pass ? "bg-green-300 text-tfpa_blue" : "bg-red-300 text-tfpa_blue"
   }
 
-  // Example standard checks (adjust as needed):
+  // standard checks
   const liquidityCheck = (v) => v > 1
   const basicLiquidityCheck = (v) => v >= 3 && v <= 6
   const liquidityToNetWorthCheck = (v) => v / 100 >= 0.15

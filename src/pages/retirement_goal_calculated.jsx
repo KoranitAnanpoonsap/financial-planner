@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
-import { calculateRetirementGoal } from "../components/calculations.js"
+import { calculateRetirementGoal } from "../utils/calculations.js"
 
 export default function RetirementGoalCalculated() {
   const { clientId, cfpId } = useParams()

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
-import { calculatePortfolioSummary } from "../components/calculations.js"
+import { calculatePortfolioSummary } from "../utils/calculations.js"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
 
 export default function CFPCashflowBase() {

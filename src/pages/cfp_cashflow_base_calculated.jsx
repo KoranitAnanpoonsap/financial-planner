@@ -10,7 +10,7 @@ import {
   calculateYearlyIncome,
   calculateYearlyExpense,
   calculateGoalPayments,
-} from "../components/calculations.js"
+} from "../utils/calculations.js"
 
 export default function CFPCashflowBaseCalculated() {
   const { clientId } = useParams()

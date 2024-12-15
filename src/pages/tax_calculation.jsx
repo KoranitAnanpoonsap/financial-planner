@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer"
 import Header from "../components/header"
 import ClientBluePanel from "../components/clientBluePanel"
-import { fetchAndCalculateTaxForClient } from "../components/taxCalculations"
+import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 
 export default function TaxCalculationPage() {
   const { clientId, cfpId } = useParams()

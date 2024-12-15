@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer"
 import Header from "../components/header"
 import ClientBluePanel from "../components/clientBluePanel"
-import { fetchAndCalculateTaxForClient } from "../components/taxCalculations"
+import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 
 export default function TaxDeductionPage() {
   const { clientId, cfpId } = useParams()
@@ -97,7 +97,7 @@ export default function TaxDeductionPage() {
       const result = await fetchAndCalculateTaxForClient(clientId)
       setTotalIncome(result.totalIncome)
       const expDeductions = result.totalIncome - result.incomeAfterDeductions
-      setExpenseDeductions(expDeductions)
+      setExpenseDeductions(result.totalExpenseDeductions)
 
       calculateDeductions(newData, result.totalIncome, expDeductions)
     } catch (error) {
@@ -231,10 +231,10 @@ export default function TaxDeductionPage() {
 
     // Now donation constraints:
     // generalDonation max 10% of (totalIncome - expDed - beforeDonationSum)
-    let baseForDonation = totalInc - expDed - beforeDonationSum
+    let baseForDonation = totalIncome - expenseDeductions - beforeDonationSum
     //if (baseForDonation < 0) baseForDonation = 0
 
-    let generalDonationMax = baseForDonation
+    let generalDonationMax = baseForDonation * 0.1
     let genDon = Math.min(data.generalDonation, generalDonationMax)
 
     // eduDonation = 2x input but max 10% of (total income minus expDed minus previous non-donation)

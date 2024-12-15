@@ -6,7 +6,7 @@ import ClientBluePanel from "../components/clientBluePanel.jsx"
 import {
   calculatePortfolioSummary,
   calculateGeneralGoal,
-} from "../components/calculations.js"
+} from "../utils/calculations.js"
 
 export default function CFPGoalBaseCalculated() {
   const { clientId, cfpId } = useParams()

@@ -4,7 +4,7 @@ import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
-import { calculatePortfolioSummary } from "../components/calculations.js"
+import { calculatePortfolioSummary } from "../utils/calculations.js"
 
 export default function CFPGoalBase() {
   const { clientId } = useParams()
