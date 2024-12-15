@@ -20,6 +20,9 @@ import TaxCalculationPage from "./pages/tax_calculation"
 import CFPFinancialHealthCheck from "./pages/cfp_financial_healthcheck"
 import CFPClientInfoPage from "./pages/cfp_client_info"
 import CFPClientIncomePage from "./pages/cfp_client_income"
+import CFPClientExpensePage from "./pages/cfp_client_expense"
+import CFPClientAssetPage from "./pages/cfp_client_asset"
+import CFPClientDebtPage from "./pages/cfp_client_debt"
 
 function App() {
   return (
@@ -83,6 +86,18 @@ function App() {
         <Route
           path="/:cfpId/client-income/:clientId"
           element={<CFPClientIncomePage />}
+        />
+        <Route
+          path="/:cfpId/client-expense/:clientId"
+          element={<CFPClientExpensePage />}
+        />
+        <Route
+          path="/:cfpId/client-asset/:clientId"
+          element={<CFPClientAssetPage />}
+        />
+        <Route
+          path="/:cfpId/client-debt/:clientId"
+          element={<CFPClientDebtPage />}
         />
       </Routes>
     </Router>

@@ -91,14 +91,14 @@ export default function CFPFinancialHealthCheck() {
   // Example standard checks (adjust as needed):
   const liquidityCheck = (v) => v > 1
   const basicLiquidityCheck = (v) => v >= 3 && v <= 6
-  const liquidityToNetWorthCheck = (v) => v >= 0.15
-  const debtToAssetCheck = (v) => v < 0.5
-  const repayAllDebtsCheck = (v) => v > 0.5
-  const repayDebtFromIncomeCheck = (v) => v < 0.45
-  const repayNonMortgageDebtFromIncomeCheck = (v) => v < 0.2
-  const savingRatioCheck = (v) => v > 0.1
-  const investRatioCheck = (v) => v > 0.5
-  const netWorthRatioCheck = (v) => v > 0.5
+  const liquidityToNetWorthCheck = (v) => v / 100 >= 0.15
+  const debtToAssetCheck = (v) => v / 100 < 0.5
+  const repayAllDebtsCheck = (v) => v / 100 > 0.5
+  const repayDebtFromIncomeCheck = (v) => v / 100 < 0.45
+  const repayNonMortgageDebtFromIncomeCheck = (v) => v / 100 < 0.2
+  const savingRatioCheck = (v) => v / 100 > 0.1
+  const investRatioCheck = (v) => v / 100 > 0.5
+  const netWorthRatioCheck = (v) => v / 100 > 0.5
   const survivalRatioCheck = (v) => v > 1
   const wealthRatioCheck = (v) => v > 1
 
@@ -220,7 +220,7 @@ export default function CFPFinancialHealthCheck() {
       calcBottom: "รายจ่าย",
       valTop: calculations.totalIncome,
       valBottom: calculations.totalExpense,
-      result: ratios.survivalRatio * 100,
+      result: ratios.survivalRatio,
       standard: "> 1",
       check: survivalRatioCheck,
       unit: "",
@@ -231,7 +231,7 @@ export default function CFPFinancialHealthCheck() {
       calcBottom: "รายจ่าย",
       valTop: calculations.totalAssetIncome,
       valBottom: calculations.totalExpense,
-      result: ratios.wealthRatio * 100,
+      result: ratios.wealthRatio,
       standard: "> 1",
       check: wealthRatioCheck,
       unit: "",

@@ -47,6 +47,9 @@ export default function ClientBluePanel() {
       routes: [
         `/${cfpId}/client-info/${clientId}`,
         `/${cfpId}/client-income/${clientId}`,
+        `/${cfpId}/client-expense/${clientId}`,
+        `/${cfpId}/client-asset/${clientId}`,
+        `/${cfpId}/client-debt/${clientId}`,
       ],
     },
     {

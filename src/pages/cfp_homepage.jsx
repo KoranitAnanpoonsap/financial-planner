@@ -48,8 +48,7 @@ export default function ClientsPage() {
   }
 
   const handleClientInfo = (clientId) => {
-    // Navigate to PortfolioSelectionCFP with the clientId
-    navigate(`/${cfpId}/portfolio-selection/${clientId}`)
+    navigate(`/${cfpId}/client-info/${clientId}`)
   }
 
   return (
