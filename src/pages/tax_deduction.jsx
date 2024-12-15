@@ -8,6 +8,7 @@ import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 export default function TaxDeductionPage() {
   const { clientId, cfpId } = useParams()
   const navigate = useNavigate()
+  const [baseForDonation, setBaseForDonation] = useState(0)
 
   const [deductionData, setDeductionData] = useState({
     maritalStatus: "",
@@ -96,10 +97,9 @@ export default function TaxDeductionPage() {
     try {
       const result = await fetchAndCalculateTaxForClient(clientId)
       setTotalIncome(result.totalIncome)
-      const expDeductions = result.totalIncome - result.incomeAfterDeductions
       setExpenseDeductions(result.totalExpenseDeductions)
 
-      calculateDeductions(newData, result.totalIncome, expDeductions)
+      calculateDeductions(newData, result.totalIncome)
     } catch (error) {
       console.error(error)
     }
@@ -139,17 +139,7 @@ export default function TaxDeductionPage() {
     handleUpdate(field, parseInt(val) || 0)
   }
 
-  function calculateDeductions(data, totalInc, expDed) {
-    // Implement all conditions fully here
-    // For brevity, let's assume all logic as before, now we also must consider beforeDonationDeduct:
-    // beforeDonationDeduct = sum of all deductions except generalDonation, eduDonation, politicalPartyDonation
-    // Then apply donation limits based on (totalIncome - expDed - beforeDonationDeduct)
-
-    // ... Full logic applying conditions, just as in previous snippet.
-    // We must strictly follow the rules given:
-    // We'll do a short example, you must fill all details:
-
-    const valOr0 = (v) => (v ? v : 0)
+  function calculateDeductions(data, totalInc) {
     let msDeduct = 0
     if (
       data.maritalStatus === "โสด" ||
@@ -163,51 +153,46 @@ export default function TaxDeductionPage() {
       msDeduct = 120000
     }
 
-    let cDeduct = data.child * 30000
-    let c2561Deduct = data.child2561 * 60000
-    let totalChildren = data.child + data.child2561 + data.adoptedChild
-    let adoptedDeduct = totalChildren > 3 ? 0 : data.adoptedChild * 30000
-    let pCareDeduct = data.parentalCare * 30000
-    let dCareDeduct = data.disabledCare * 60000
-    let prenatalDeduct = Math.min(data.prenatalCare, 60000)
-    let parentHealth = Math.min(data.parentHealthInsurance, 15000)
+    const cDeduct = data.child * 30000
+    const c2561Deduct = data.child > 0 ? data.child2561 * 60000 : 0
+    const legalChildren = data.child + data.child2561
+    const adoptedDeduct =
+      legalChildren < 3
+        ? Math.min(data.adoptedChild, 3 - legalChildren) * 30000
+        : 0
+
+    const pCareDeduct = data.parentalCare * 30000
+    const dCareDeduct = data.disabledCare * 60000
+    const prenatalDeduct = Math.min(data.prenatalCare, 60000)
+    const parentHealth = Math.min(data.parentHealthInsurance, 15000)
 
     let lifeIns = Math.min(data.lifeInsurance, 100000)
     let healthIns = Math.min(data.healthInsurance, 25000)
     if (lifeIns + healthIns > 100000) {
-      let excess = lifeIns + healthIns - 100000
-      healthIns -= excess
+      healthIns -= lifeIns + healthIns - 100000
     }
 
-    let pensionIns = data.pensionInsurance
+    let pensionIns = Math.min(data.pensionInsurance, 0.15 * totalInc, 200000)
     if (lifeIns + healthIns < 100000) {
       pensionIns = 0
-    } else {
-      pensionIns = Math.min(pensionIns, 200000)
     }
+    const spouseNoIncome = Math.min(data.spouseNoIncomeLifeInsurance, 10000)
 
-    let spouseNoIncome = Math.min(data.spouseNoIncomeLifeInsurance, 10000)
+    const rmf = Math.min(data.rmf, 0.3 * totalInc, 500000)
+    const ssf = Math.min(data.ssf, 0.3 * totalInc, 200000)
+    const govPension = Math.min(data.govPensionFund, 0.3 * totalInc, 500000)
+    const pvd = Math.min(data.pvd, 0.15 * totalInc, 500000)
+    const nsf = Math.min(data.nationSavingsFund, 30000)
+    const pensionGroup = Math.min(
+      rmf + ssf + govPension + pvd + nsf + pensionIns,
+      500000
+    )
 
-    // For RMF, SSF, govPensionFund, pvd, nationSavingsFund:
-    // apply max rules. For simplicity assume totalInc is known.
-    let rmf = Math.min(data.rmf, 0.3 * totalInc, 500000)
-    let ssf = Math.min(data.ssf, 0.3 * totalInc, 200000)
-    let govPension = Math.min(data.govPensionFund, 0.3 * totalInc, 500000)
-    let pvd = Math.min(data.pvd, 0.15 * totalInc, 500000)
-    let nsf = Math.min(data.nationSavingsFund, 30000)
-    let pensionGroup = pensionIns + rmf + ssf + govPension + pvd + nsf
-    if (pensionGroup > 500000) {
-      let excess = pensionGroup - 500000
-      // Reduce nsf first
-      nsf = Math.max(0, nsf - excess)
-    }
+    const ssp = Math.min(data.socialSecurityPremium, 9000)
+    const se = Math.min(data.socialEnterprise, 100000)
+    const esg = Math.min(data.thaiEsg, 0.3 * totalInc, 25000)
 
-    let ssp = Math.min(data.socialSecurityPremium, 9000)
-    let se = Math.min(data.socialEnterprise, 100000)
-    let esg = Math.min(data.thaiEsg, 0.3 * totalInc, 25000)
-
-    // Before donation sum (not including generalDonation, eduDonation, politicalPartyDonation)
-    let beforeDonationSum =
+    const beforeDonationSum =
       msDeduct +
       cDeduct +
       c2561Deduct +
@@ -218,42 +203,22 @@ export default function TaxDeductionPage() {
       parentHealth +
       lifeIns +
       healthIns +
-      pensionIns +
+      pensionGroup +
       spouseNoIncome +
-      rmf +
-      ssf +
-      govPension +
-      pvd +
-      nsf +
       ssp +
       se +
       esg
 
-    // Now donation constraints:
-    // generalDonation max 10% of (totalIncome - expDed - beforeDonationSum)
-    let baseForDonation = totalIncome - expenseDeductions - beforeDonationSum
-    //if (baseForDonation < 0) baseForDonation = 0
+    setBaseForDonation(
+      Math.max(0, totalInc - expenseDeductions - beforeDonationSum)
+    )
 
-    let generalDonationMax = baseForDonation * 0.1
-    let genDon = Math.min(data.generalDonation, generalDonationMax)
+    const genDon = Math.min(data.generalDonation, baseForDonation * 0.1)
+    const eduDon = Math.min(data.eduDonation * 2, baseForDonation * 0.1)
+    const polDon = Math.min(data.politicalPartyDonation, 10000)
 
-    // eduDonation = 2x input but max 10% of (total income minus expDed minus previous non-donation)
-    // It's similar to generalDonation but after generalDonation considered. Let's assume same base:
-    // Actually, eduDonation is also at 2x valueOfInput. Let eduVal = data.eduDonation * 2.
-    let eduVal = data.eduDonation * 2
-    // max at 10% again, but after generalDonation?
-    // It's a complex condition; for simplicity, apply same 10% limit:
-    let eduMax = baseForDonation * 0.1
-    let eduDon = Math.min(eduVal, eduMax)
-
-    // political_party_donation max 10,000
-    let polDon = Math.min(data.politicalPartyDonation, 10000)
-
-    // Sum all donations
-    let donationSum = genDon + eduDon + polDon
-
-    let beforeDonationDeduct = beforeDonationSum
-    let total = beforeDonationSum + donationSum
+    const donationSum = genDon + eduDon + polDon
+    const total = beforeDonationSum + donationSum
 
     setDisplayValues({
       maritalStatusDeduction: msDeduct,
@@ -362,12 +327,22 @@ export default function TaxDeductionPage() {
               <input
                 type="number"
                 value={deductionData.child}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    child: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = Math.max(0, Number(e.target.value))
+                  setDeductionData((prev) => {
+                    const totalChildren =
+                      value + prev.child2561 + prev.adoptedChild
+                    return {
+                      ...prev,
+                      child: e.target.value,
+                      child2561: value > 0 ? prev.child2561 : 0,
+                      adoptedChild:
+                        totalChildren > 3
+                          ? Math.max(0, 3 - value - prev.child2561)
+                          : prev.adoptedChild,
+                    }
+                  })
+                }}
                 onBlur={(e) => handleBlur("child", e.target.value)}
                 className="border p-1 w-16 text-right"
               />
@@ -383,12 +358,20 @@ export default function TaxDeductionPage() {
               <input
                 type="number"
                 value={deductionData.child2561}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    child2561: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                  setDeductionData((prev) => {
+                    const totalChildren = prev.child + value + prev.adoptedChild
+                    return {
+                      ...prev,
+                      child2561: prev.child > 0 ? e.target.value : 0,
+                      adoptedChild:
+                        totalChildren > 3
+                          ? Math.max(0, 3 - prev.child - value) // Adjust adopted children
+                          : prev.adoptedChild,
+                    }
+                  })
+                }}
                 onBlur={(e) => handleBlur("child2561", e.target.value)}
                 className="border p-1 w-16 text-right"
               />
@@ -403,12 +386,19 @@ export default function TaxDeductionPage() {
               <input
                 type="number"
                 value={deductionData.adoptedChild}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    adoptedChild: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                  setDeductionData((prev) => {
+                    const totalChildren = prev.child + prev.child2561 + value
+                    return {
+                      ...prev,
+                      adoptedChild:
+                        totalChildren > 3
+                          ? Math.max(0, 3 - prev.child - prev.child2561) // Adjust adopted children
+                          : e.target.value,
+                    }
+                  })
+                }}
                 onBlur={(e) => handleBlur("adoptedChild", e.target.value)}
                 className="border p-1 w-16 text-right"
               />
@@ -469,7 +459,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    prenatalCare: e.target.value,
+                    prenatalCare:
+                      e.target.value > 60000 ? 60000 : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("prenatalCare", e.target.value)}
@@ -489,7 +480,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    parentHealthInsurance: e.target.value,
+                    parentHealthInsurance:
+                      e.target.value > 15000 ? 15000 : e.target.value,
                   }))
                 }
                 onBlur={(e) =>
@@ -521,7 +513,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    lifeInsurance: e.target.value,
+                    lifeInsurance:
+                      e.target.value > 100000 ? 100000 : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("lifeInsurance", e.target.value)}
@@ -538,12 +531,20 @@ export default function TaxDeductionPage() {
               <input
                 type="number"
                 value={deductionData.healthInsurance}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    healthInsurance: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const inputValue = Math.max(0, Number(e.target.value)) // Ensure value is not negative
+                  setDeductionData((prev) => {
+                    let healthIns = Math.min(inputValue, 25000) // Limit healthInsurance to 25,000
+                    const lifeIns = prev.lifeInsurance || 0 // Get the current value of lifeInsurance
+                    if (lifeIns + healthIns > 100000) {
+                      healthIns -= lifeIns + healthIns - 100000 // Adjust healthInsurance to ensure total does not exceed 100,000
+                    }
+                    return {
+                      ...prev,
+                      healthInsurance: healthIns, // Set the adjusted healthInsurance value
+                    }
+                  })
+                }}
                 onBlur={(e) => handleBlur("healthInsurance", e.target.value)}
                 className="border p-1 w-24 text-right"
               />
@@ -561,7 +562,12 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    pensionInsurance: e.target.value,
+                    pensionInsurance:
+                      prev.lifeInsurance + prev.healthInsurance < 100000
+                        ? 0
+                        : e.target.value > Math.min(0.15 * totalIncome, 200000)
+                        ? Math.min(0.15 * totalIncome, 200000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("pensionInsurance", e.target.value)}
@@ -581,7 +587,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    spouseNoIncomeLifeInsurance: e.target.value,
+                    spouseNoIncomeLifeInsurance:
+                      e.target.value > 10000 ? 10000 : e.target.value,
                   }))
                 }
                 onBlur={(e) =>
@@ -604,7 +611,10 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    rmf: e.target.value,
+                    rmf:
+                      e.target.value > Math.min(0.3 * totalIncome, 500000)
+                        ? Math.min(0.3 * totalIncome, 500000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("rmf", e.target.value)}
@@ -622,7 +632,10 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    ssf: e.target.value,
+                    ssf:
+                      e.target.value > Math.min(0.3 * totalIncome, 200000)
+                        ? Math.min(0.3 * totalIncome, 200000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("ssf", e.target.value)}
@@ -640,7 +653,10 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    govPensionFund: e.target.value,
+                    govPensionFund:
+                      e.target.value > Math.min(0.3 * totalIncome, 500000)
+                        ? Math.min(0.3 * totalIncome, 500000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("govPensionFund", e.target.value)}
@@ -660,7 +676,10 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    pvd: e.target.value,
+                    pvd:
+                      e.target.value > Math.min(0.15 * totalIncome, 500000)
+                        ? Math.min(0.15 * totalIncome, 500000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("pvd", e.target.value)}
@@ -678,7 +697,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    nationSavingsFund: e.target.value,
+                    nationSavingsFund:
+                      e.target.value > 30000 ? 30000 : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("nationSavingsFund", e.target.value)}
@@ -698,7 +718,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    socialSecurityPremium: e.target.value,
+                    socialSecurityPremium:
+                      e.target.value > 9000 ? 9000 : e.target.value,
                   }))
                 }
                 onBlur={(e) =>
@@ -720,7 +741,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    socialEnterprise: e.target.value,
+                    socialEnterprise:
+                      e.target.value > 100000 ? 100000 : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("socialEnterprise", e.target.value)}
@@ -740,7 +762,10 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    thaiEsg: e.target.value,
+                    thaiEsg:
+                      e.target.value > Math.min(0.3 * totalIncome, 300000)
+                        ? Math.min(0.3 * totalIncome, 300000)
+                        : e.target.value,
                   }))
                 }
                 onBlur={(e) => handleBlur("thaiEsg", e.target.value)}
@@ -777,7 +802,8 @@ export default function TaxDeductionPage() {
                       : parseInt(e.target.value, 10) || 0
                   setDeductionData((prev) => ({
                     ...prev,
-                    generalDonation: val,
+                    generalDonation:
+                      val > 0.1 * baseForDonation ? 0.1 * baseForDonation : val,
                   }))
                 }}
                 onBlur={(e) => handleBlur("generalDonation", e.target.value)}
@@ -803,7 +829,13 @@ export default function TaxDeductionPage() {
                     e.target.value === ""
                       ? ""
                       : parseInt(e.target.value, 10) || 0
-                  setDeductionData((prev) => ({ ...prev, eduDonation: val }))
+                  setDeductionData((prev) => ({
+                    ...prev,
+                    eduDonation:
+                      2 * val > 0.1 * baseForDonation
+                        ? 0.1 * baseForDonation
+                        : val,
+                  }))
                 }}
                 onBlur={(e) => handleBlur("eduDonation", e.target.value)}
                 className="border p-1 w-24 text-right"
@@ -822,7 +854,8 @@ export default function TaxDeductionPage() {
                 onChange={(e) =>
                   setDeductionData((prev) => ({
                     ...prev,
-                    politicalPartyDonation: e.target.value,
+                    politicalPartyDonation:
+                      e.target.value > 10000 ? 10000 : e.target.value,
                   }))
                 }
                 onBlur={(e) =>

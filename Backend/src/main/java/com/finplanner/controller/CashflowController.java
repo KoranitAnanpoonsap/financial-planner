@@ -3,8 +3,6 @@ package com.finplanner.controller;
 import com.finplanner.model.CashflowGoal;
 import com.finplanner.model.CashflowGoalId;
 import com.finplanner.repository.CashflowGoalRepository;
-import com.finplanner.service.CashflowCalculationService;
-import com.finplanner.service.CashflowCalculationService.CashflowResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +15,7 @@ import java.util.List;
 public class CashflowController {
 
     @Autowired
-    private CashflowCalculationService cashflowCalculationService;
-
-    @Autowired
     private CashflowGoalRepository cashflowGoalRepository;
-
-    // Existing endpoint to calculate cashflow
-    @GetMapping("/calculate/{clientId}")
-    public CashflowResult getCashflow(@PathVariable("clientId") Integer clientId) {
-        return cashflowCalculationService.calculateCashflow(clientId);
-    }
 
     // Get all goals for a given clientId
     @GetMapping("/{clientId}")

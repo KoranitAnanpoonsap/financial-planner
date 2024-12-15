@@ -78,11 +78,8 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       totalExpenseDeductions += deduction
     }
   
-    // Sum all tax deductions if td is not null
+    // Sum all tax deductions
     let totalTaxDeductions = 0
-  
-    const valueOrZeroInt = (val) => val == null ? 0 : val
-    const valueOrZeroBD = (val) => val == null ? 0 : val
   
     if (td != null) {
       // Marital status
@@ -94,42 +91,42 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       }
   
       // child = 30,000 each
-      totalTaxDeductions += valueOrZeroInt(td.child) * 30000
+      totalTaxDeductions += td.child * 30000
       // child2561 = 60,000 each
-      totalTaxDeductions += valueOrZeroInt(td.child2561) * 60000
+      totalTaxDeductions += td.child2561 * 60000
       // adopted_child = 30,000 each
-      totalTaxDeductions += valueOrZeroInt(td.adoptedChild) * 30000
+      totalTaxDeductions += td.adoptedChild * 30000
       // parental_care = 30,000 each
-      totalTaxDeductions += valueOrZeroInt(td.parentalCare) * 30000
+      totalTaxDeductions += td.parentalCare * 30000
       // disabled_care = 60,000 each
-      totalTaxDeductions += valueOrZeroInt(td.disabledCare) * 60000
+      totalTaxDeductions += td.disabledCare * 60000
   
       // Add all other fields directly
-      totalTaxDeductions += valueOrZeroBD(td.prenatalCare)
-      totalTaxDeductions += valueOrZeroBD(td.parentHealthInsurance)
-      totalTaxDeductions += valueOrZeroBD(td.lifeInsurance)
-      totalTaxDeductions += valueOrZeroBD(td.healthInsurance)
-      totalTaxDeductions += valueOrZeroBD(td.pensionInsurance)
-      totalTaxDeductions += valueOrZeroBD(td.spouseNoIncomeLifeInsurance)
-      totalTaxDeductions += valueOrZeroBD(td.rmf)
-      totalTaxDeductions += valueOrZeroBD(td.ssf)
-      totalTaxDeductions += valueOrZeroBD(td.govPensionFund)
-      totalTaxDeductions += valueOrZeroBD(td.pvd)
-      totalTaxDeductions += valueOrZeroBD(td.nationSavingsFund)
-      totalTaxDeductions += valueOrZeroBD(td.socialSecurityPremium)
-      totalTaxDeductions += valueOrZeroBD(td.socialEnterprise)
-      totalTaxDeductions += valueOrZeroBD(td.thaiEsg)
-      totalTaxDeductions += valueOrZeroBD(td.generalDonation)
-      totalTaxDeductions += valueOrZeroBD(td.eduDonation)
-      totalTaxDeductions += valueOrZeroBD(td.politicalPartyDonation)
+      totalTaxDeductions += td.prenatalCare
+      totalTaxDeductions += td.parentHealthInsurance
+      totalTaxDeductions += td.lifeInsurance
+      totalTaxDeductions += td.healthInsurance
+      totalTaxDeductions += td.pensionInsurance
+      totalTaxDeductions += td.spouseNoIncomeLifeInsurance
+      totalTaxDeductions += td.rmf
+      totalTaxDeductions += td.ssf
+      totalTaxDeductions += td.govPensionFund
+      totalTaxDeductions += td.pvd
+      totalTaxDeductions += td.nationSavingsFund
+      totalTaxDeductions += td.socialSecurityPremium
+      totalTaxDeductions += td.socialEnterprise
+      totalTaxDeductions += td.thaiEsg
+      totalTaxDeductions += td.generalDonation
+      totalTaxDeductions += td.eduDonation*2
+      totalTaxDeductions += td.politicalPartyDonation
   
       // Check pension group sum limit of 500,000
-      const pensionGroupSum = valueOrZeroBD(td.pensionInsurance) +
-                              valueOrZeroBD(td.rmf) +
-                              valueOrZeroBD(td.ssf) +
-                              valueOrZeroBD(td.govPensionFund) +
-                              valueOrZeroBD(td.pvd) +
-                              valueOrZeroBD(td.nationSavingsFund)
+      const pensionGroupSum = td.pensionInsurance +
+                              td.rmf +
+                              td.ssf +
+                              td.govPensionFund +
+                              td.pvd +
+                              td.nationSavingsFund
   
       if (pensionGroupSum > 500000) {
         const excess = pensionGroupSum - 500000

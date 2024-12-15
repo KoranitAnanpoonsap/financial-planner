@@ -102,7 +102,7 @@ export default function AdminLogin() {
           {/* Login Button */}
           <button
             className="w-full py-4 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white rounded-3xl transition-colors mb-4 font-ibm"
-            onClick={() => navigate("/homepage")} // Placeholder for future DB check
+            onClick={() => navigate("/homepage")}
           >
             เข้าสู่ระบบ
           </button>

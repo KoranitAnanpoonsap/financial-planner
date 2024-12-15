@@ -2,8 +2,6 @@ package com.finplanner.controller;
 
 import com.finplanner.model.GeneralGoal;
 import com.finplanner.repository.GeneralGoalRepository;
-import com.finplanner.service.GeneralGoalCalculationService;
-import com.finplanner.service.GeneralGoalCalculationService.GeneralGoalCalculationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +15,6 @@ public class GeneralGoalController {
 
     @Autowired
     private GeneralGoalRepository generalGoalRepository;
-
-    @Autowired
-    private GeneralGoalCalculationService generalGoalCalculationService;
 
     // Get a GeneralGoal by clientId
     @GetMapping("/{clientId}")
@@ -67,11 +62,5 @@ public class GeneralGoalController {
                     return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Get FV of current investment and general goal annual saving
-    @GetMapping("/calculate/{clientId}")
-    public GeneralGoalCalculationResult calculateGeneralGoalDetails(@PathVariable("clientId") Integer clientId) {
-        return generalGoalCalculationService.calculateForClient(clientId);
     }
 }

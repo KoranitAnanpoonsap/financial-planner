@@ -2,8 +2,6 @@ package com.finplanner.controller;
 
 import com.finplanner.model.RetirementGoal;
 import com.finplanner.repository.RetirementGoalRepository;
-import com.finplanner.service.RetirementGoalCalculationService;
-import com.finplanner.service.RetirementGoalCalculationService.RetirementGoalCalculationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +15,6 @@ public class RetirementGoalController {
 
     @Autowired
     private RetirementGoalRepository retirementGoalRepository;
-
-    @Autowired
-    private RetirementGoalCalculationService retirementGoalCalculationService;
 
     // Get a RetirementGoal by clientId
     @GetMapping("/{clientId}")
@@ -67,11 +62,5 @@ public class RetirementGoalController {
                     return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Get retirement goal calculation
-    @GetMapping("/calculate/{clientId}")
-    public RetirementGoalCalculationResult calculateRetirementGoalDetails(@PathVariable("clientId") Integer clientId) {
-        return retirementGoalCalculationService.calculateForClient(clientId);
     }
 }
