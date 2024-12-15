@@ -65,7 +65,7 @@ public class ClientInfoController {
             dto.setClientGender(client.getClientGender());
             dto.setClientPhoneNumber(client.getClientPhoneNumber());
             dto.setClientDateOfBirth(client.getClientDateOfBirth());
-            dto.setPdpa(client.getPdpa());
+
             return ResponseEntity.ok(dto);
         } else {
             return ResponseEntity.notFound().build();

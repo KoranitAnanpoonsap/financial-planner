@@ -55,9 +55,6 @@ public class ClientInfo {
     @Column(name = "client_date_of_birth", nullable = false)
     private LocalDate clientDateOfBirth;
 
-    @Column(name = "pdpa", nullable = false, length = 100)
-    private String pdpa;
-
     // Getters and Setters for all fields
 
     public Integer getClientId() {
@@ -174,13 +171,5 @@ public class ClientInfo {
 
     public void setClientDateOfBirth(LocalDate clientDateOfBirth) {
         this.clientDateOfBirth = clientDateOfBirth;
-    }
-
-    public String getPdpa() {
-        return pdpa;
-    }
-
-    public void setPdpa(String pdpa) {
-        this.pdpa = pdpa;
     }
 }

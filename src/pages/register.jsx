@@ -1,29 +1,23 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import InputField from "../components/inputField.jsx"
 import RadioButtonGroup from "../components/radioButtonGroup.jsx"
 import DateInput from "../components/dateInput.jsx"
 import FileUpload from "../components/fileUpload.jsx"
 import Footer from "../components/footer.jsx"
 import Header from "../components/headerLogin.jsx"
-import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
 }
 
 const pageTransition = {
-  type: "tween", // Smooth tweening for more fluid motion
-  ease: "easeInOut", // Easing function for a smoother transition
-  duration: 0.3, // Longer duration for a more relaxed effect
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
 }
 
 export default function RegisterPage() {
@@ -38,29 +32,28 @@ export default function RegisterPage() {
   const [gender, setGender] = useState("")
   const [phone, setPhone] = useState("")
   const [birthdate, setBirthdate] = useState("")
-  const [file, setFile] = useState(null)
 
-  // States for password visibility
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  // State for error messages
   const [formError, setFormError] = useState("")
   const [confirmPasswordError, setConfirmPasswordError] = useState("")
 
-  // Back button handler
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
+
   const handleBack = () => {
     navigate("/client-login")
   }
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value)
-    setConfirmPasswordError("") // Reset confirm password error when password changes
+    setConfirmPasswordError("")
   }
 
   const handleConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value)
-    setConfirmPasswordError("") // Reset confirm password error on change
+    setConfirmPasswordError("")
   }
 
   const togglePasswordVisibility = () => {
@@ -71,8 +64,7 @@ export default function RegisterPage() {
     setShowConfirmPassword((prev) => !prev)
   }
 
-  const handleRegister = async () => {
-    // Validate form
+  const validateForm = () => {
     if (
       !email ||
       !password ||
@@ -83,24 +75,33 @@ export default function RegisterPage() {
       !lastName ||
       !gender ||
       !phone ||
-      !birthdate ||
-      !file
+      !birthdate
     ) {
-      setFormError("กรุณากรอกข้อมูลให้ครบถ้วน") // "Please fill in all the information"
-      return
+      setFormError("กรุณากรอกข้อมูลให้ครบถ้วน")
+      return false
     } else {
-      setFormError("") // Clear form error if all fields are filled
+      setFormError("")
     }
 
     if (password !== confirmPassword) {
-      setConfirmPasswordError("รหัสผ่านไม่ตรงกัน") // "Passwords do not match"
-      return
+      setConfirmPasswordError("รหัสผ่านไม่ตรงกัน")
+      return false
     } else {
-      setConfirmPasswordError("") // Clear error if passwords match
+      setConfirmPasswordError("")
     }
+    return true
+  }
 
-    navigate("/client-login")
+  const handleRegisterClick = () => {
+    // Validate first
+    if (validateForm()) {
+      // Show privacy modal
+      setShowPrivacyModal(true)
+    }
+  }
 
+  const handleConfirmPrivacy = async () => {
+    // User confirmed privacy, now proceed with register
     const formData = new FormData()
     formData.append("email", email)
     formData.append("password", password)
@@ -111,7 +112,6 @@ export default function RegisterPage() {
     formData.append("gender", gender)
     formData.append("phoneNumber", phone)
     formData.append("dateOfBirth", birthdate)
-    formData.append("pdpaFile", file)
 
     try {
       const response = await fetch("http://localhost:8080/api/register", {
@@ -123,16 +123,15 @@ export default function RegisterPage() {
         navigate("/client-login")
       } else {
         const errorMessage = await response.text()
-        setFormError(errorMessage) // Handle server error message
+        setFormError(errorMessage)
       }
     } catch (error) {
-      setFormError("เกิดข้อผิดพลาดในการลงทะเบียน") // "An error occurred during registration"
+      setFormError("เกิดข้อผิดพลาดในการลงทะเบียน")
     }
   }
 
   return (
     <div className="relative w-full h-screen">
-      {/* Header */}
       <Header />
       <div className="w-full min-h-screen bg-white flex flex-col items-center overflow-auto">
         <motion.div
@@ -159,7 +158,6 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            {/* Password Input */}
             <div className="relative mb-4">
               <label className="block text-tfpa_blue text-sm font-bold mb-2 font-ibm">
                 รหัสผ่าน
@@ -176,13 +174,12 @@ export default function RegisterPage() {
                 onMouseDown={togglePasswordVisibility}
                 onMouseUp={togglePasswordVisibility}
                 onMouseLeave={() => setShowPassword(false)}
-                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-ibm"
               >
                 {showPassword ? "ซ่อน" : "แสดง"}
               </button>
             </div>
 
-            {/* Confirm Password Input */}
             <div className="relative mb-4">
               <label className="block text-tfpa_blue text-sm font-bold mb-2 font-ibm">
                 ยืนยันรหัสผ่าน
@@ -199,7 +196,7 @@ export default function RegisterPage() {
                 onMouseDown={toggleConfirmPasswordVisibility}
                 onMouseUp={toggleConfirmPasswordVisibility}
                 onMouseLeave={() => setShowConfirmPassword(false)}
-                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-ibm"
               >
                 {showConfirmPassword ? "ซ่อน" : "แสดง"}
               </button>
@@ -262,31 +259,23 @@ export default function RegisterPage() {
               value={birthdate}
               onChange={(e) => setBirthdate(e.target.value)}
             />
-            <FileUpload
-              label="PDPA"
-              onChange={(e) => setFile(e.target.files[0])}
-            />
 
             <button
               className="w-full bg-tfpa_gold hover:bg-tfpa_gold_hover text-white py-2 rounded-md font-bold"
-              onClick={handleRegister}
+              onClick={handleRegisterClick}
             >
               ลงทะเบียน
             </button>
 
-            {/* Display Form Error Message Below the Register Button */}
             {formError && (
               <p className="text-red-500 text-center mt-4">{formError}</p>
             )}
-
-            {/* Confirm Password Error Message Below the Register Button */}
             {confirmPasswordError && (
               <p className="text-red-500 text-center mt-4">
                 {confirmPasswordError}
               </p>
             )}
 
-            {/* Back Button */}
             <div className="flex justify-center mt-4">
               <button
                 onClick={handleBack}
@@ -299,6 +288,78 @@ export default function RegisterPage() {
         </motion.div>
       </div>
       <Footer />
+
+      {/* Privacy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded p-6 max-w-2xl w-full">
+            <h2 className="text-center text-xl font-bold mb-4 font-ibm">
+              ข้อมูลสำคัญ
+              <br />
+              ความเป็นส่วนตัวและคุ้มครองข้อมูลของคุณ
+            </h2>
+            <div className="text-sm text-tfpa_blue mb-4 font-ibm space-y-2 max-h-96 overflow-auto">
+              <p>
+                เราให้ความสำคัญกับความเป็นส่วนตัวและการป้องกันข้อมูลของคุณอย่างจริงจังในกรอบของการปฏิบัติที่มุ่งมั่น
+                ที่จะปกป้องข้อมูลส่วนบุคคลของคุณและปฏิบัติตามกฎหมายที่เกี่ยวข้องที่รวมถึงพรบ.
+                คุ้มครองข้อมูลส่วนบุคคล (PDPA)
+              </p>
+              <p>
+                เราขอขอบคุณให้ความยินยอมในการเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของคุณ
+                ทำไมเราต้องการข้อมูลของคุณ:
+                เราเก็บและประมวลผลข้อมูลส่วนบุคคลของคุณเพื่อวัตถุประสงค์ต่อไปนี้:
+                เพื่อให้บริการการวางแผนการเงินที่ปรับตัวตามคุณ
+              </p>
+              <p>
+                วิธีการป้องกันข้อมูลของคุณ:
+                ข้อมูลส่วนบุคคลของคุณถูกจัดการด้วยความลับและความปลอดภัยสูงสุด
+                เราได้นำมาตรการทางเทคนิคและระบบการจัดการที่เข้มงวดเพื่อป้องกันข้อมูลของคุณจากการเข้าถึงโดยไม่ได้รับ
+                อนุญาต การเปิดเผย การเปลี่ยนแปลง และการทำลาย
+              </p>
+              <p>
+                สิทธิของคุณ: ภายใต้ PDPA และกฎหมายคุ้มครองข้อมูลอื่น ๆ
+                คุณมีสิทธิพิเศษเกี่ยวกับข้อมูลส่วนบุคคลของคุณ
+              </p>
+              <p>
+                สิทธิเหล่านี้รวมถึงสิทธิในการเข้าถึง การแก้ไข การลบ
+                หรือการจำกัดการประมวลผลข้อมูลของคุณ คำขอความยินยอม:
+                โดยการที่คุณยังคงใช้เว็บไซต์และบริการของเราต่อไปนี้
+                คุณยืนยันความยินยอมโดยชัดแจ้งให้เราเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของคุณเพื่อวัตถุประสงค์ที่
+                ระบุและในความเหมาะสมกับนโยบายความเป็นส่วนตัวของเรา
+              </p>
+              <p>การถอนความยินยอม: คุณมีสิทธิในการถอนความยินยอมได้ตลอดเวลา</p>
+              <p>
+                หากคุณต้องการถอนความยินยอมหรือมีคำถามเกี่ยวกับวิธีการจัดการข้อมูลของเรา
+                กรุณาติดต่อเรา
+              </p>
+            </div>
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="font-ibm text-tfpa_blue text-sm">
+                ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขทั้งหมด
+              </span>
+            </div>
+            <div className="flex justify-end">
+              <button
+                disabled={!acceptedPrivacy}
+                onClick={handleConfirmPrivacy}
+                className={`px-4 py-2 rounded font-bold ${
+                  acceptedPrivacy
+                    ? "bg-tfpa_gold text-white"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                ยืนยัน
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
