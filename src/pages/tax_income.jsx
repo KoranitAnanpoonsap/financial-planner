@@ -4,6 +4,25 @@ import Footer from "../components/footer"
 import Header from "../components/header"
 import ClientBluePanel from "../components/clientBluePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+  },
+  in: {
+    opacity: 1,
+  },
+  out: {
+    opacity: 1,
+  },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 export default function TaxIncomePage() {
   const { clientId, cfpId } = useParams()
@@ -99,84 +118,107 @@ export default function TaxIncomePage() {
         <div className="flex-1 p-8 space-y-8">
           {/* Steps */}
           <div className="flex items-center justify-center space-x-8">
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
+            {/* Step 1: รายได้ */}
+            <button
+              onClick={() => navigate(`/${cfpId}/tax-income/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none"
+            >
+              <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
                 1
               </div>
               <span className="font-bold text-tfpa_blue">รายได้</span>
-            </div>
+            </button>
+
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+
+            {/* Step 2: ค่าลดหย่อน */}
+            <button
+              onClick={() => navigate(`/${cfpId}/tax-deduction/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none"
+            >
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">
                 2
               </div>
               <span className="font-bold">ค่าลดหย่อน</span>
-            </div>
+            </button>
+
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+
+            {/* Step 3: ผลการคำนวณ */}
+            <button
+              onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none"
+            >
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">
                 3
               </div>
               <span className="font-bold">ผลการคำนวณ</span>
-            </div>
-          </div>
-
-          {/* Income list */}
-          <div className="space-y-4">
-            {incomeCategories.map((cat, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div className="w-1/2 text-tfpa_blue font-bold">
-                  {cat.code} {cat.desc}
-                </div>
-                <div className="flex items-center space-x-2 w-1/2">
-                  <input
-                    type="text"
-                    value={getIncomeAmount(cat.code).toLocaleString()}
-                    readOnly
-                    className="border border-gray-300 rounded px-2 py-1 text-right w-24"
-                  />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Dotted line */}
-          <hr className="border-dashed border-gray-300" />
-
-          {/* Summary */}
-          <div className="flex flex-col items-start space-y-2 font-bold text-tfpa_blue">
-            <div className="flex space-x-2">
-              <span>รวมเงินได้</span>
-              <span className="text-tfpa_gold">
-                {totalIncome.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-            <div className="flex space-x-2">
-              <span>หักค่าใช้จ่ายได้</span>
-              <span className="text-tfpa_gold">
-                {totalExpense.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-            <div className="flex space-x-2">
-              <span>เงินได้พึงประเมินหลังหักค่าใช้จ่าย</span>
-              <span className="text-tfpa_gold">
-                {incomeAfterExpense.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleNext}
-              className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
-            >
-              ถัดไป
             </button>
           </div>
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            {/* Income list */}
+            <div className="space-y-4">
+              {incomeCategories.map((cat, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <div className="w-1/2 text-tfpa_blue font-bold">
+                    {cat.code} {cat.desc}
+                  </div>
+                  <div className="flex items-center space-x-2 w-1/2">
+                    <input
+                      type="text"
+                      value={getIncomeAmount(cat.code).toLocaleString()}
+                      readOnly
+                      className="border border-gray-300 rounded px-2 py-1 text-right w-24"
+                    />
+                    <span className="text-tfpa_blue font-bold">บาท</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Dotted line */}
+            <hr className="border-dashed mt-4 mb-4 border-gray-300" />
+
+            {/* Summary */}
+            <div className="flex flex-col items-start space-y-2 font-bold text-tfpa_blue">
+              <div className="flex space-x-2">
+                <span>รวมเงินได้</span>
+                <span className="text-tfpa_gold">
+                  {totalIncome.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue"> บาท</span>
+              </div>
+              <div className="flex space-x-2">
+                <span>หักค่าใช้จ่ายได้</span>
+                <span className="text-tfpa_gold">
+                  {totalExpense.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue"> บาท</span>
+              </div>
+              <div className="flex space-x-2">
+                <span>เงินได้พึงประเมินหลังหักค่าใช้จ่าย</span>
+                <span className="text-tfpa_gold">
+                  {incomeAfterExpense.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue"> บาท</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleNext}
+                className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
+              >
+                ถัดไป
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

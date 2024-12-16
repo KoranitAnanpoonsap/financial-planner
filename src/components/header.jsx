@@ -1,6 +1,25 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import logo from "../assets/TFPA_logo.png"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+  },
+  in: {
+    opacity: 1,
+  },
+  out: {
+    opacity: 1,
+  },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 export default function Header() {
   const [cfpFirstName, setCfpFirstName] = useState("")
@@ -51,7 +70,15 @@ export default function Header() {
           onClick={toggleDropdown}
           className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-6 py-2 rounded font-ibm"
         >
-          CFP {cfpFirstName}
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            CFP {cfpFirstName}
+          </motion.div>
         </button>
         {dropdownOpen && (
           <div className="absolute right-0 bg-white shadow-md mt-2 rounded">

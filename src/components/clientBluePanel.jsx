@@ -6,6 +6,25 @@ import personListIcon from "../assets/personlist.png"
 import newIcon from "../assets/new.png"
 import loadingIcon from "../assets/loading.png"
 import checkIcon from "../assets/check.png"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+  },
+  in: {
+    opacity: 1,
+  },
+  out: {
+    opacity: 1,
+  },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 export default function ClientBluePanel() {
   const { clientId } = useParams()
@@ -100,14 +119,22 @@ export default function ClientBluePanel() {
     <div className="bg-tfpa_blue w-60 p-1 flex flex-col text-white">
       <div className="mb-3 mt-3 bg-tfpa_gold rounded-3xl p-2 flex items-center space-x-2">
         <img src={personIcon} alt="Person Icon" className="w-12 h-12" />
-        <div className="flex flex-col">
-          <div className="text-white text-sm mb-1 font-ibm font-bold">
-            {clientFullName}
+        <motion.div
+          initial="initial"
+          animate="in"
+          exit="out"
+          variants={pageVariants}
+          transition={pageTransition}
+        >
+          <div className="flex flex-col">
+            <div className="text-white text-sm mb-1 font-ibm font-bold">
+              {clientFullName}
+            </div>
+            <div className="text-tfpa_blue text-sm font-ibm font-bold">
+              {clientFormatId}
+            </div>
           </div>
-          <div className="text-tfpa_blue text-sm font-ibm font-bold">
-            {clientFormatId}
-          </div>
-        </div>
+        </motion.div>
       </div>
       {/* Menu items */}
       <div className="flex flex-col space-y-2">

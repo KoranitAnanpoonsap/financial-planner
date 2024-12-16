@@ -1,4 +1,4 @@
-export async function fetchAndCalculateTaxForClient(clientId) {
+export async function fetchAndCalculateTaxPlanForClient(clientId, totalPlan) {
     // Fetch incomes
     const incomesRes = await fetch(`http://localhost:8080/api/clientincome/${clientId}`)
     if (!incomesRes.ok) throw new Error("Failed to fetch incomes")
@@ -11,10 +11,10 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       tdData = await tdRes.json()
     }
   
-    return calculateTaxForClient(incomesData, tdData)
+    return calculateTaxPlanForClient(incomesData, tdData, totalPlan)
   }
   
-  export function calculateTaxForClient(incomes, td) {
+  export function calculateTaxPlanForClient(incomes, td, totalPlan) {
     // Adjust incomes to yearly if frequency == "ทุกเดือน"
     const adjustedIncomes = incomes.map(income => {
       if (income.clientIncomeFrequency === "ทุกเดือน") {
@@ -90,12 +90,12 @@ export async function fetchAndCalculateTaxForClient(clientId) {
         totalTaxDeductions += 120000
       }
   
-      // child = 30,000 each
-      totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.child * 60000 : td.child * 30000
-      // child2561 = 60,000 each
-      totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.child2561 * 120000 : td.child2561 * 60000
-      // adopted_child = 30,000 each
-      totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.adoptedChild * 60000 : td.adoptedChild * 30000
+     // child = 30,000 each
+     totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.child * 60000 : td.child * 30000
+     // child2561 = 60,000 each
+     totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.child2561 * 120000 : td.child2561 * 60000
+     // adopted_child = 30,000 each
+     totalTaxDeductions += ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.adoptedChild * 60000 : td.adoptedChild * 30000
       // parental_care = 30,000 each
       totalTaxDeductions += td.parentalCare * 30000
       // disabled_care = 60,000 each
@@ -106,32 +106,15 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       totalTaxDeductions += td.parentHealthInsurance
       totalTaxDeductions += td.lifeInsurance
       totalTaxDeductions += td.healthInsurance
-      totalTaxDeductions += td.pensionInsurance
       totalTaxDeductions += td.spouseNoIncomeLifeInsurance
-      totalTaxDeductions += td.rmf
-      totalTaxDeductions += td.ssf
-      totalTaxDeductions += td.govPensionFund
-      totalTaxDeductions += td.pvd
-      totalTaxDeductions += td.nationSavingsFund
       totalTaxDeductions += td.socialSecurityPremium
       totalTaxDeductions += td.socialEnterprise
       totalTaxDeductions += td.thaiEsg
       totalTaxDeductions += td.generalDonation
       totalTaxDeductions += td.eduDonation*2
       totalTaxDeductions += td.politicalPartyDonation
+      totalTaxDeductions += totalPlan
   
-      // Check pension group sum limit of 500,000
-      const pensionGroupSum = td.pensionInsurance +
-                              td.rmf +
-                              td.ssf +
-                              td.govPensionFund +
-                              td.pvd +
-                              td.nationSavingsFund
-  
-      if (pensionGroupSum > 500000) {
-        const excess = pensionGroupSum - 500000
-        totalTaxDeductions -= excess
-      }
     }
   
     // income after deductions
