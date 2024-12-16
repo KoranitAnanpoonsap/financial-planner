@@ -586,7 +586,7 @@ export default function TaxDeductionPage() {
                 <span className="text-tfpa_gold font-bold">
                   {displayValues.lifeInsuranceDeduction.toLocaleString()}
                 </span>
-                <span className="text-tfpa_gold font-bold"> บาท</span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
               </div>
             </div>
 
