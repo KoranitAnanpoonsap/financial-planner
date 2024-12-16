@@ -148,18 +148,24 @@ export default function TaxIncomePage() {
           <div className="flex flex-col items-start space-y-2 font-bold text-tfpa_blue">
             <div className="flex space-x-2">
               <span>รวมเงินได้</span>
-              <span>{totalIncome.toLocaleString()}</span>
-              <span>บาท</span>
+              <span className="text-tfpa_gold">
+                {totalIncome.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
             <div className="flex space-x-2">
               <span>หักค่าใช้จ่ายได้</span>
-              <span>{totalExpense.toLocaleString()}</span>
-              <span>บาท</span>
+              <span className="text-tfpa_gold">
+                {totalExpense.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
             <div className="flex space-x-2">
               <span>เงินได้พึงประเมินหลังหักค่าใช้จ่าย</span>
-              <span>{incomeAfterExpense.toLocaleString()}</span>
-              <span>บาท</span>
+              <span className="text-tfpa_gold">
+                {incomeAfterExpense.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
           </div>
 

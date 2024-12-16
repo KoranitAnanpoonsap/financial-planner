@@ -74,6 +74,12 @@ export default function TaxDeductionPage() {
     fetchDeduction()
   }, [clientId])
 
+  useEffect(() => {
+    if (exists && totalIncome > 0) {
+      calculateDeductions(deductionData, totalIncome)
+    }
+  }, [deductionData, totalIncome, expenseDeductions, exists])
+
   const fetchDeduction = async () => {
     try {
       const res = await fetch(
@@ -82,11 +88,14 @@ export default function TaxDeductionPage() {
       if (res.ok) {
         const data = await res.json()
         setDeductionData(data)
-        setExists(true)
+        setExists(true) // Mark the state as existing
       } else {
         setExists(false)
       }
-      await refreshCalculations()
+
+      const result = await fetchAndCalculateTaxForClient(clientId)
+      setTotalIncome(result.totalIncome)
+      setExpenseDeductions(result.totalExpenseDeductions)
     } catch (error) {
       console.error(error)
     }
@@ -190,7 +199,7 @@ export default function TaxDeductionPage() {
 
     const ssp = Math.min(data.socialSecurityPremium, 9000)
     const se = Math.min(data.socialEnterprise, 100000)
-    const esg = Math.min(data.thaiEsg, 0.3 * totalInc, 25000)
+    const esg = Math.min(data.thaiEsg, 0.3 * totalInc, 300000)
 
     const beforeDonationSum =
       msDeduct +
@@ -209,16 +218,20 @@ export default function TaxDeductionPage() {
       se +
       esg
 
-    setBaseForDonation(
-      Math.max(0, totalInc - expenseDeductions - beforeDonationSum)
+    const updatedBaseForDonation = Math.max(
+      0,
+      totalInc - expenseDeductions - beforeDonationSum
     )
 
-    const genDon = Math.min(data.generalDonation, baseForDonation * 0.1)
-    const eduDon = Math.min(data.eduDonation * 2, baseForDonation * 0.1)
+    // Calculate donations using the updated baseForDonation
+    const genDon = Math.min(data.generalDonation, updatedBaseForDonation * 0.1)
+    const eduDon = Math.min(data.eduDonation * 2, updatedBaseForDonation * 0.1)
     const polDon = Math.min(data.politicalPartyDonation, 10000)
 
     const donationSum = genDon + eduDon + polDon
     const total = beforeDonationSum + donationSum
+
+    setBaseForDonation(updatedBaseForDonation) // Update state for consistency
 
     setDisplayValues({
       maritalStatusDeduction: msDeduct,
@@ -316,9 +329,10 @@ export default function TaxDeductionPage() {
                 </option>
                 <option value="คู่สมรสไม่มีเงินได้">คู่สมรสไม่มีเงินได้</option>
               </select>
-              <span>
-                {displayValues.maritalStatusDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.maritalStatusDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -347,7 +361,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-16 text-right"
               />
               <span>คน</span>
-              <span>{displayValues.childDeduction.toLocaleString()} บาท</span>
+              <span className="text-tfpa_gold">
+                {displayValues.childDeduction.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -376,9 +393,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-16 text-right"
               />
               <span>คน</span>
-              <span>
-                {displayValues.child2561Deduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.child2561Deduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -403,9 +421,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-16 text-right"
               />
               <span>คน</span>
-              <span>
-                {displayValues.adoptedChildDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.adoptedChildDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -426,9 +445,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-16 text-right"
               />
               <span>คน</span>
-              <span>
-                {displayValues.parentalCareDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.parentalCareDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -446,9 +466,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-16 text-right"
               />
               <span>คน</span>
-              <span>
-                {displayValues.disabledCareDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.disabledCareDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -467,9 +488,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.prenatalCareDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.prenatalCareDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -490,10 +512,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.parentHealthInsuranceDeduction.toLocaleString()}{" "}
-                บาท
+              <span className="text-tfpa_gold">
+                {displayValues.parentHealthInsuranceDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
           </div>
 
@@ -521,9 +543,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.lifeInsuranceDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.lifeInsuranceDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -549,9 +572,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.healthInsuranceDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.healthInsuranceDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -574,9 +598,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.pensionInsuranceDeduction.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.pensionInsuranceDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -597,10 +622,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.spouseNoIncomeLifeInsuranceDeduction.toLocaleString()}{" "}
-                บาท
+              <span className="text-tfpa_gold">
+                {displayValues.spouseNoIncomeLifeInsuranceDeduction.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -621,7 +646,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>{displayValues.rmfDeduction.toLocaleString()} บาท</span>
+              <span className="text-tfpa_gold">
+                {displayValues.rmfDeduction.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -642,7 +670,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>{displayValues.ssfDeduction.toLocaleString()} บาท</span>
+              <span className="text-tfpa_gold">
+                {displayValues.ssfDeduction.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -663,9 +694,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.govPensionFundDeduct.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.govPensionFundDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -686,7 +718,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>{displayValues.pvdDeduct.toLocaleString()} บาท</span>
+              <span className="text-tfpa_gold">
+                {displayValues.pvdDeduct.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -705,9 +740,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.nationSavingsFundDeduct.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.nationSavingsFundDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -728,9 +764,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.socialSecurityPremiumDeduct.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.socialSecurityPremiumDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -749,9 +786,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.socialEnterpriseDeduct.toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.socialEnterpriseDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -772,7 +810,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>{displayValues.thaiEsgDeduct.toLocaleString()} บาท</span>
+              <span className="text-tfpa_gold">
+                {displayValues.thaiEsgDeduct.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
           </div>
 
@@ -780,8 +821,10 @@ export default function TaxDeductionPage() {
           <hr className="border-dashed border-gray-300" />
           <div className="flex justify-end font-bold text-tfpa_blue space-x-2">
             <span>ค่าลดหย่อนภาษีก่อนกลุ่มเงินบริจาค</span>
-            <span>{displayValues.beforeDonationDeduct.toLocaleString()}</span>
-            <span>บาท</span>
+            <span className="text-tfpa_gold">
+              {displayValues.beforeDonationDeduct.toLocaleString()}
+            </span>
+            <span className="text-tfpa_blue"> บาท</span>
           </div>
 
           {/* Third golden box: กลุ่มเงินบริจาค */}
@@ -810,10 +853,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {(displayValues.generalDonationDeduct || 0).toLocaleString()}{" "}
-                บาท
+              <span className="text-tfpa_gold">
+                {displayValues.generalDonationDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -841,9 +884,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {(displayValues.eduDonationDeduct || 0).toLocaleString()} บาท
+              <span className="text-tfpa_gold">
+                {displayValues.eduDonationDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -864,10 +908,10 @@ export default function TaxDeductionPage() {
                 className="border p-1 w-24 text-right"
               />
               <span>บาท</span>
-              <span>
-                {displayValues.politicalPartyDonationDeduct.toLocaleString()}{" "}
-                บาท
+              <span className="text-tfpa_gold">
+                {displayValues.politicalPartyDonationDeduct.toLocaleString()}
               </span>
+              <span className="text-tfpa_blue"> บาท</span>
             </div>
           </div>
 
@@ -877,8 +921,10 @@ export default function TaxDeductionPage() {
           {/* ค่าลดหย่อนภาษี (total) */}
           <div className="flex items-end justify-end font-bold text-tfpa_blue space-x-2">
             <span>ค่าลดหย่อนภาษี</span>
-            <span>{displayValues.totalDeduction.toLocaleString()}</span>
-            <span>บาท</span>
+            <span className="text-tfpa_gold">
+              {displayValues.totalDeduction.toLocaleString()}
+            </span>
+            <span className="text-tfpa_blue"> บาท</span>
           </div>
 
           <div className="flex justify-between">
