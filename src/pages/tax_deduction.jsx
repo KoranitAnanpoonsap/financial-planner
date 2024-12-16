@@ -72,14 +72,12 @@ export default function TaxDeductionPage() {
 
   useEffect(() => {
     fetchDeduction()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId])
 
   useEffect(() => {
     if (exists && totalIncome > 0) {
       calculateDeductions(deductionData, totalIncome)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deductionData, totalIncome, expenseDeductions, exists])
 
   const fetchDeduction = async () => {
@@ -90,7 +88,7 @@ export default function TaxDeductionPage() {
       if (res.ok) {
         const data = await res.json()
         setDeductionData(data)
-        setExists(true) // Mark the state as existing
+        setExists(true)
       } else {
         setExists(false)
       }
