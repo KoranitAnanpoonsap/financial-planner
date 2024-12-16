@@ -91,7 +91,7 @@ export default function CFPClientAssetPage() {
 
     await res.json()
 
-    // Refresh lists
+    // Refresh list
     await fetchAssets()
 
     // Reset fields
