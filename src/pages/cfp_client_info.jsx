@@ -95,7 +95,7 @@ export default function CFPClientInfoPage() {
 
           {/* Personal Info Section */}
           <h3 className="text-tfpa_blue font-bold text-lg">1. ข้อมูลส่วนตัว</h3>
-          <div className="grid grid-cols-2 gap-8">
+          <div className="mx-80 grid grid-cols-2">
             <div className="text-tfpa_blue font-bold space-y-4">
               <div>เลขประจำตัวประชาชน</div>
               <div>คำนำหน้าชื่อ</div>
