@@ -42,6 +42,29 @@ export default function TaxCalculationPage() {
         <ClientBluePanel />
         <div className="flex-1 p-4 space-y-8">
           {/* Display final calculation similar to image */}
+          {/* Steps */}
+          <div className="flex items-center justify-center space-x-8">
+            <div className="flex flex-col items-center text-gray-400">
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+                1
+              </div>
+              <span className="font-bold">รายได้</span>
+            </div>
+            <div className="h-px bg-gray-300 w-24"></div>
+            <div className="flex flex-col items-center text-gray-400">
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+                2
+              </div>
+              <span className="font-bold">ค่าลดหย่อน</span>
+            </div>
+            <div className="h-px bg-gray-300 w-24"></div>
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
+                3
+              </div>
+              <span className="font-bold text-tfpa_blue">ผลการคำนวณ</span>
+            </div>
+          </div>
           <h2 className="text-xl font-bold text-tfpa_blue">ผลการคำนวณภาษี</h2>
           <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
             <div className="flex items-center space-x-2 text-xl">

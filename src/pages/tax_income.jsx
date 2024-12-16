@@ -58,7 +58,7 @@ export default function TaxIncomePage() {
     Object.entries(typeToCodeMap).map(([thaiType, code]) => [code, thaiType])
   )
 
-  // Income categories as per the image (codes fixed)
+  // Income categories
   const incomeCategories = [
     { code: "40(1)", desc: "เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส บำนาญ ฯลฯ" },
     {

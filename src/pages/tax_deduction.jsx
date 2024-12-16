@@ -72,12 +72,14 @@ export default function TaxDeductionPage() {
 
   useEffect(() => {
     fetchDeduction()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId])
 
   useEffect(() => {
     if (exists && totalIncome > 0) {
       calculateDeductions(deductionData, totalIncome)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deductionData, totalIncome, expenseDeductions, exists])
 
   const fetchDeduction = async () => {
@@ -102,7 +104,6 @@ export default function TaxDeductionPage() {
   }
 
   const refreshCalculations = async (newData = deductionData) => {
-    // Re-fetch totalIncome and expenseDeductions
     try {
       const result = await fetchAndCalculateTaxForClient(clientId)
       setTotalIncome(result.totalIncome)
@@ -302,631 +303,767 @@ export default function TaxDeductionPage() {
 
           {/* First golden box: personal and family */}
           <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
-            <h3 className="font-bold">ค่าลดหย่อนภาษีส่วนตัวและครอบครัว</h3>
+            <h3>ค่าลดหย่อนภาษีส่วนตัวและครอบครัว</h3>
           </div>
 
-          <div className="text-tfpa_blue font-bold">
-            <div>
-              <span>สถานภาพสมรส</span>
-              <select
-                value={deductionData.maritalStatus}
-                onChange={(e) => {
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    maritalStatus: e.target.value,
-                  }))
-                }}
-                onBlur={(e) => handleUpdate("maritalStatus", e.target.value)}
-                className="border p-1 ml-2 mr-2"
-              >
-                <option value="">เลือก</option>
-                <option value="โสด">โสด</option>
-                <option value="คู่สมรสมีเงินได้แยกยื่นแบบ">
-                  คู่สมรสมีเงินได้แยกยื่นแบบ
-                </option>
-                <option value="คู่สมรสมีเงินได้ยื่นรวม">
-                  คู่สมรสมีเงินได้ยื่นรวม
-                </option>
-                <option value="คู่สมรสไม่มีเงินได้">คู่สมรสไม่มีเงินได้</option>
-              </select>
-              <span className="text-tfpa_gold">
-                {displayValues.maritalStatusDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span>บุตร</span>
-              <span>จำนวน</span>
-              <input
-                type="number"
-                value={deductionData.child}
-                onChange={(e) => {
-                  const value = Math.max(0, Number(e.target.value))
-                  setDeductionData((prev) => {
-                    const totalChildren =
-                      value + prev.child2561 + prev.adoptedChild
-                    return {
+          {/* Personal and Family Deductions */}
+          <div className="space-y-4">
+            {/* Marital Status */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">สถานภาพสมรส</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <select
+                  value={deductionData.maritalStatus}
+                  onChange={(e) => {
+                    setDeductionData((prev) => ({
                       ...prev,
-                      child: e.target.value,
-                      child2561: value > 0 ? prev.child2561 : 0,
-                      adoptedChild:
-                        totalChildren > 3
-                          ? Math.max(0, 3 - value - prev.child2561)
-                          : prev.adoptedChild,
-                    }
-                  })
-                }}
-                onBlur={(e) => handleBlur("child", e.target.value)}
-                className="border p-1 w-16 text-right"
-              />
-              <span>คน</span>
-              <span className="text-tfpa_gold">
-                {displayValues.childDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
+                      maritalStatus: e.target.value,
+                    }))
+                  }}
+                  onBlur={(e) => handleUpdate("maritalStatus", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-64"
+                >
+                  <option value="">เลือก</option>
+                  <option value="โสด">โสด</option>
+                  <option value="คู่สมรสมีเงินได้แยกยื่นแบบ">
+                    คู่สมรสมีเงินได้แยกยื่นแบบ
+                  </option>
+                  <option value="คู่สมรสมีเงินได้ยื่นรวม">
+                    คู่สมรสมีเงินได้ยื่นรวม
+                  </option>
+                  <option value="คู่สมรสไม่มีเงินได้">
+                    คู่สมรสไม่มีเงินได้
+                  </option>
+                </select>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.maritalStatusDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>
-                บุตรตั้งแต่คนที่ 2 เป็นต้นไปที่เกิดในหรือหลังปี พ.ศ. 2561
-              </span>
-              <span>จำนวน</span>
-              <input
-                type="number"
-                value={deductionData.child2561}
-                onChange={(e) => {
-                  const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
-                  setDeductionData((prev) => {
-                    const totalChildren = prev.child + value + prev.adoptedChild
-                    return {
-                      ...prev,
-                      child2561: prev.child > 0 ? e.target.value : 0,
-                      adoptedChild:
-                        totalChildren > 3
-                          ? Math.max(0, 3 - prev.child - value) // Adjust adopted children
-                          : prev.adoptedChild,
-                    }
-                  })
-                }}
-                onBlur={(e) => handleBlur("child2561", e.target.value)}
-                className="border p-1 w-16 text-right"
-              />
-              <span>คน</span>
-              <span className="text-tfpa_gold">
-                {displayValues.child2561Deduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
+            {/* Child */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">บุตร จำนวน</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.child}
+                  onChange={(e) => {
+                    const value = Math.max(0, Number(e.target.value))
+                    setDeductionData((prev) => {
+                      const totalChildren =
+                        value + prev.child2561 + prev.adoptedChild
+                      return {
+                        ...prev,
+                        child: value,
+                        child2561: value > 0 ? prev.child2561 : 0,
+                        adoptedChild:
+                          totalChildren > 3
+                            ? Math.max(0, 3 - value - prev.child2561)
+                            : prev.adoptedChild,
+                      }
+                    })
+                  }}
+                  onBlur={(e) => handleBlur("child", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">คน</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.childDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>บุตรบุญธรรม จำนวน</span>
-              <input
-                type="number"
-                value={deductionData.adoptedChild}
-                onChange={(e) => {
-                  const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
-                  setDeductionData((prev) => {
-                    const totalChildren = prev.child + prev.child2561 + value
-                    return {
-                      ...prev,
-                      adoptedChild:
-                        totalChildren > 3
-                          ? Math.max(0, 3 - prev.child - prev.child2561) // Adjust adopted children
-                          : e.target.value,
-                    }
-                  })
-                }}
-                onBlur={(e) => handleBlur("adoptedChild", e.target.value)}
-                className="border p-1 w-16 text-right"
-              />
-              <span>คน</span>
-              <span className="text-tfpa_gold">
-                {displayValues.adoptedChildDeduction.toLocaleString()}
+            {/* Child2561 */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                บุตรตั้งแต่คนที่ 2 เป็นต้นไปที่เกิดในหรือหลังปี พ.ศ. 2561 จำนวน
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.child2561}
+                  onChange={(e) => {
+                    const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                    setDeductionData((prev) => {
+                      const totalChildren =
+                        prev.child + value + prev.adoptedChild
+                      return {
+                        ...prev,
+                        child2561: prev.child > 0 ? value : 0,
+                        adoptedChild:
+                          totalChildren > 3
+                            ? Math.max(0, 3 - prev.child - value) // Adjust adopted children
+                            : prev.adoptedChild,
+                      }
+                    })
+                  }}
+                  onBlur={(e) => handleBlur("child2561", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">คน</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.child2561Deduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>
+            {/* Adopted Child */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                บุตรบุญธรรม จำนวน
+              </span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.adoptedChild}
+                  onChange={(e) => {
+                    const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                    setDeductionData((prev) => {
+                      const totalChildren = prev.child + prev.child2561 + value
+                      return {
+                        ...prev,
+                        adoptedChild:
+                          totalChildren > 3
+                            ? Math.max(0, 3 - prev.child - prev.child2561) // Adjust adopted children
+                            : value,
+                      }
+                    })
+                  }}
+                  onBlur={(e) => handleBlur("adoptedChild", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">คน</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.adoptedChildDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+
+            {/* Parental Care */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
                 ค่าอุปการะเลี้ยงดูบิดามารดา อายุเกิน60ปี รายได้ไม่เกิน30,000
                 จำนวน
               </span>
-              <input
-                type="number"
-                value={deductionData.parentalCare}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    parentalCare: e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("parentalCare", e.target.value)}
-                className="border p-1 w-16 text-right"
-              />
-              <span>คน</span>
-              <span className="text-tfpa_gold">
-                {displayValues.parentalCareDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span>อุปการะเลี้ยงดูคนพิการหรือทุพพลภาพ จำนวน</span>
-              <input
-                type="number"
-                value={deductionData.disabledCare}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    disabledCare: e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("disabledCare", e.target.value)}
-                className="border p-1 w-16 text-right"
-              />
-              <span>คน</span>
-              <span className="text-tfpa_gold">
-                {displayValues.disabledCareDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span>ค่าฝากครรภ์และค่าคลอดบุตร</span>
-              <input
-                type="number"
-                value={deductionData.prenatalCare}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    prenatalCare:
-                      e.target.value > 60000 ? 60000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("prenatalCare", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.prenatalCareDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span>ประกันสุขภาพบิดามารดา</span>
-              <input
-                type="number"
-                value={deductionData.parentHealthInsurance}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    parentHealthInsurance:
-                      e.target.value > 15000 ? 15000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) =>
-                  handleBlur("parentHealthInsurance", e.target.value)
-                }
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.parentHealthInsuranceDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-          </div>
-
-          {/* Second golden box: ประกัน เงินออม และการลงทุน */}
-          <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
-            <h3 className="font-bold">
-              ค่าลดหย่อนภาษีกลุ่มประกัน เงินออม และการลงทุน
-            </h3>
-          </div>
-
-          <div className="text-tfpa_blue font-bold">
-            <div className="flex items-center space-x-2">
-              <span>เบี้ยประกันชีวิต</span>
-              <input
-                type="number"
-                value={deductionData.lifeInsurance}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    lifeInsurance:
-                      e.target.value > 100000 ? 100000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("lifeInsurance", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.lifeInsuranceDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <span>เบี้ยประกันสุขภาพ</span>
-              <input
-                type="number"
-                value={deductionData.healthInsurance}
-                onChange={(e) => {
-                  const inputValue = Math.max(0, Number(e.target.value)) // Ensure value is not negative
-                  setDeductionData((prev) => {
-                    let healthIns = Math.min(inputValue, 25000) // Limit healthInsurance to 25,000
-                    const lifeIns = prev.lifeInsurance || 0 // Get the current value of lifeInsurance
-                    if (lifeIns + healthIns > 100000) {
-                      healthIns -= lifeIns + healthIns - 100000 // Adjust healthInsurance to ensure total does not exceed 100,000
-                    }
-                    return {
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.parentalCare}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
                       ...prev,
-                      healthInsurance: healthIns, // Set the adjusted healthInsurance value
-                    }
-                  })
-                }}
-                onBlur={(e) => handleBlur("healthInsurance", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.healthInsuranceDeduction.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
+                      parentalCare: Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("parentalCare", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">คน</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.parentalCareDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>เบี้ยประกันชีวิตแบบบำนาญ</span>
-              <input
-                type="number"
-                value={deductionData.pensionInsurance}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    pensionInsurance:
-                      prev.lifeInsurance + prev.healthInsurance < 100000
-                        ? 0
-                        : e.target.value > Math.min(0.15 * totalIncome, 200000)
-                        ? Math.min(0.15 * totalIncome, 200000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("pensionInsurance", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.pensionInsuranceDeduction.toLocaleString()}
+            {/* Disabled Care */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                อุปการะเลี้ยงดูคนพิการหรือทุพพลภาพ จำนวน
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.disabledCare}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      disabledCare: Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("disabledCare", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">คน</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.disabledCareDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>เบี้ยประกันชีวิต คู่สมรสไม่มีรายได้</span>
-              <input
-                type="number"
-                value={deductionData.spouseNoIncomeLifeInsurance}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    spouseNoIncomeLifeInsurance:
-                      e.target.value > 10000 ? 10000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) =>
-                  handleBlur("spouseNoIncomeLifeInsurance", e.target.value)
-                }
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.spouseNoIncomeLifeInsuranceDeduction.toLocaleString()}
+            {/* Prenatal Care */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                ค่าฝากครรภ์และค่าคลอดบุตร
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.prenatalCare}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      prenatalCare:
+                        Number(e.target.value) > 60000
+                          ? 60000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("prenatalCare", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.prenatalCareDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนรวมเพื่อการเลี้ยงชีพ (RMF)</span>
-              <input
-                type="number"
-                value={deductionData.rmf}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    rmf:
-                      e.target.value > Math.min(0.3 * totalIncome, 500000)
-                        ? Math.min(0.3 * totalIncome, 500000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("rmf", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.rmfDeduction.toLocaleString()}
+            {/* Parent Health Insurance */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                ประกันสุขภาพบิดามารดา
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.parentHealthInsurance}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      parentHealthInsurance:
+                        Number(e.target.value) > 15000
+                          ? 15000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) =>
+                    handleBlur("parentHealthInsurance", e.target.value)
+                  }
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.parentHealthInsuranceDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Second golden box: Insurance, Savings, and Investments */}
+          <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
+            <h3>ค่าลดหย่อนภาษีกลุ่มประกัน เงินออม และการลงทุน</h3>
+          </div>
+
+          {/* Insurance, Savings, and Investments Deductions */}
+          <div className="space-y-4">
+            {/* Life Insurance */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">เบี้ยประกันชีวิต</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.lifeInsurance}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      lifeInsurance:
+                        Number(e.target.value) > 100000
+                          ? 100000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("lifeInsurance", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.lifeInsuranceDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_gold font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนรวมเพื่อการออม (SSF)</span>
-              <input
-                type="number"
-                value={deductionData.ssf}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    ssf:
-                      e.target.value > Math.min(0.3 * totalIncome, 200000)
-                        ? Math.min(0.3 * totalIncome, 200000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("ssf", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.ssfDeduction.toLocaleString()}
+            {/* Health Insurance */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เบี้ยประกันสุขภาพ
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.healthInsurance}
+                  onChange={(e) => {
+                    const inputValue = Math.max(0, Number(e.target.value)) // Ensure value is not negative
+                    setDeductionData((prev) => {
+                      let healthIns = Math.min(inputValue, 25000) // Limit healthInsurance to 25,000
+                      const lifeIns = prev.lifeInsurance || 0 // Get the current value of lifeInsurance
+                      if (lifeIns + healthIns > 100000) {
+                        healthIns -= lifeIns + healthIns - 100000 // Adjust healthInsurance to ensure total does not exceed 100,000
+                      }
+                      return {
+                        ...prev,
+                        healthInsurance: healthIns, // Set the adjusted healthInsurance value
+                      }
+                    })
+                  }}
+                  onBlur={(e) => handleBlur("healthInsurance", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.healthInsuranceDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนบำเหน็จบำนาญราชการ (กบข.)</span>
-              <input
-                type="number"
-                value={deductionData.govPensionFund}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    govPensionFund:
-                      e.target.value > Math.min(0.3 * totalIncome, 500000)
-                        ? Math.min(0.3 * totalIncome, 500000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("govPensionFund", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.govPensionFundDeduct.toLocaleString()}
+            {/* Pension Insurance */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เบี้ยประกันชีวิตแบบบำนาญ
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.pensionInsurance}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      pensionInsurance:
+                        prev.lifeInsurance + prev.healthInsurance < 100000
+                          ? 0
+                          : Number(e.target.value) >
+                            Math.min(0.15 * totalIncome, 200000)
+                          ? Math.min(0.15 * totalIncome, 200000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("pensionInsurance", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.pensionInsuranceDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนสำรองเลี้ยงชีพ (PVD)</span>
-              <input
-                type="number"
-                value={deductionData.pvd}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    pvd:
-                      e.target.value > Math.min(0.15 * totalIncome, 500000)
-                        ? Math.min(0.15 * totalIncome, 500000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("pvd", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.pvdDeduct.toLocaleString()}
+            {/* Spouse No Income Life Insurance */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เบี้ยประกันชีวิต คู่สมรสไม่มีรายได้
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.spouseNoIncomeLifeInsurance}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      spouseNoIncomeLifeInsurance:
+                        Number(e.target.value) > 10000
+                          ? 10000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) =>
+                    handleBlur("spouseNoIncomeLifeInsurance", e.target.value)
+                  }
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.spouseNoIncomeLifeInsuranceDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนการออมแห่งชาติ (กอช.)</span>
-              <input
-                type="number"
-                value={deductionData.nationSavingsFund}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    nationSavingsFund:
-                      e.target.value > 30000 ? 30000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("nationSavingsFund", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.nationSavingsFundDeduct.toLocaleString()}
+            {/* RMF */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนรวมเพื่อการเลี้ยงชีพ (RMF)
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.rmf}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      rmf:
+                        Number(e.target.value) >
+                        Math.min(0.3 * totalIncome, 500000)
+                          ? Math.min(0.3 * totalIncome, 500000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("rmf", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.rmfDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>เบี้ยประกันสังคม</span>
-              <input
-                type="number"
-                value={deductionData.socialSecurityPremium}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    socialSecurityPremium:
-                      e.target.value > 9000 ? 9000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) =>
-                  handleBlur("socialSecurityPremium", e.target.value)
-                }
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.socialSecurityPremiumDeduct.toLocaleString()}
+            {/* SSF */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนรวมเพื่อการออม (SSF)
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.ssf}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      ssf:
+                        Number(e.target.value) >
+                        Math.min(0.3 * totalIncome, 200000)
+                          ? Math.min(0.3 * totalIncome, 200000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("ssf", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.ssfDeduction.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>เงินลงทุนธุรกิจ social enterprise</span>
-              <input
-                type="number"
-                value={deductionData.socialEnterprise}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    socialEnterprise:
-                      e.target.value > 100000 ? 100000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("socialEnterprise", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.socialEnterpriseDeduct.toLocaleString()}
+            {/* Government Pension Fund */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนบำเหน็จบำนาญราชการ (กบข.)
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.govPensionFund}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      govPensionFund:
+                        Number(e.target.value) >
+                        Math.min(0.3 * totalIncome, 500000)
+                          ? Math.min(0.3 * totalIncome, 500000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("govPensionFund", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.govPensionFundDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>กองทุนรวมไทยเพื่อความยั่งยืน (Thai ESG)</span>
-              <input
-                type="number"
-                value={deductionData.thaiEsg}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    thaiEsg:
-                      e.target.value > Math.min(0.3 * totalIncome, 300000)
-                        ? Math.min(0.3 * totalIncome, 300000)
-                        : e.target.value,
-                  }))
-                }
-                onBlur={(e) => handleBlur("thaiEsg", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.thaiEsgDeduct.toLocaleString()}
+            {/* PVD */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนสำรองเลี้ยงชีพ (PVD)
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.pvd}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      pvd:
+                        Number(e.target.value) >
+                        Math.min(0.15 * totalIncome, 500000)
+                          ? Math.min(0.15 * totalIncome, 500000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("pvd", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.pvdDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+
+            {/* Nation Savings Fund */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนการออมแห่งชาติ (กอช.)
+              </span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.nationSavingsFund}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      nationSavingsFund:
+                        Number(e.target.value) > 30000
+                          ? 30000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) =>
+                    handleBlur("nationSavingsFund", e.target.value)
+                  }
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.nationSavingsFundDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+
+            {/* Social Security Premium */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">เบี้ยประกันสังคม</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.socialSecurityPremium}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      socialSecurityPremium:
+                        Number(e.target.value) > 9000
+                          ? 9000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) =>
+                    handleBlur("socialSecurityPremium", e.target.value)
+                  }
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.socialSecurityPremiumDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+
+            {/* Social Enterprise */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เงินลงทุนธุรกิจ social enterprise
+              </span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.socialEnterprise}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      socialEnterprise:
+                        Number(e.target.value) > 100000
+                          ? 100000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("socialEnterprise", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.socialEnterpriseDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
+            </div>
+
+            {/* Thai ESG */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                กองทุนรวมไทยเพื่อความยั่งยืน (Thai ESG)
+              </span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.thaiEsg}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      thaiEsg:
+                        Number(e.target.value) >
+                        Math.min(0.3 * totalIncome, 300000)
+                          ? Math.min(0.3 * totalIncome, 300000)
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) => handleBlur("thaiEsg", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.thaiEsgDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
           </div>
 
           {/* Dotted line */}
           <hr className="border-dashed border-gray-300" />
-          <div className="flex justify-end font-bold text-tfpa_blue space-x-2">
-            <span>ค่าลดหย่อนภาษีก่อนกลุ่มเงินบริจาค</span>
-            <span className="text-tfpa_gold">
-              {displayValues.beforeDonationDeduct.toLocaleString()}
-            </span>
-            <span className="text-tfpa_blue"> บาท</span>
-          </div>
 
-          {/* Third golden box: กลุ่มเงินบริจาค */}
-          <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
-            <h3 className="font-bold">ค่าลดหย่อนภาษีกลุ่มเงินบริจาค</h3>
-          </div>
-
-          <div className="text-tfpa_blue font-bold">
-            <div className="flex items-center space-x-2">
-              <span>เงินบริจาคทั่วไป</span>
-              <input
-                type="number"
-                value={deductionData.generalDonation}
-                onChange={(e) => {
-                  const val =
-                    e.target.value === ""
-                      ? ""
-                      : parseInt(e.target.value, 10) || 0
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    generalDonation:
-                      val > 0.1 * baseForDonation ? 0.1 * baseForDonation : val,
-                  }))
-                }}
-                onBlur={(e) => handleBlur("generalDonation", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.generalDonationDeduct.toLocaleString()}
+          {/* Summary Before Donations */}
+          <div className="flex justify-end font-bold text-tfpa_blue">
+            <div className="flex space-x-2 items-center">
+              <span className="text-tfpa_blue font-bold">
+                ค่าลดหย่อนภาษีก่อนกลุ่มเงินบริจาค
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <span className="text-tfpa_gold font-bold">
+                {displayValues.beforeDonationDeduct.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue font-bold"> บาท</span>
+            </div>
+          </div>
+
+          {/* Third golden box: Donations */}
+          <div className="bg-tfpa_gold p-4 rounded space-y-4 text-tfpa_blue font-bold">
+            <h3>ค่าลดหย่อนภาษีกลุ่มเงินบริจาค</h3>
+          </div>
+
+          {/* Donations Deductions */}
+          <div className="space-y-4">
+            {/* General Donation */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">เงินบริจาคทั่วไป</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.generalDonation}
+                  onChange={(e) => {
+                    const val =
+                      e.target.value === ""
+                        ? ""
+                        : parseInt(e.target.value, 10) || 0
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      generalDonation:
+                        Number(val) > 0.1 * baseForDonation
+                          ? 0.1 * baseForDonation
+                          : val,
+                    }))
+                  }}
+                  onBlur={(e) => handleBlur("generalDonation", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.generalDonationDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>
-                งินบริจาคเพื่อการศึกษา การกีฬา การพัฒนาสังคม
+            {/* Educational Donation */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เงินบริจาคเพื่อการศึกษา การกีฬา การพัฒนาสังคม
                 เพื่อประโยชน์สาธารณะ และรพ.รัฐ
               </span>
-              <input
-                type="number"
-                value={deductionData.eduDonation}
-                onChange={(e) => {
-                  const val =
-                    e.target.value === ""
-                      ? ""
-                      : parseInt(e.target.value, 10) || 0
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    eduDonation:
-                      2 * val > 0.1 * baseForDonation
-                        ? 0.1 * baseForDonation
-                        : val,
-                  }))
-                }}
-                onBlur={(e) => handleBlur("eduDonation", e.target.value)}
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.eduDonationDeduct.toLocaleString()}
-              </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.eduDonation}
+                  onChange={(e) => {
+                    const val =
+                      e.target.value === ""
+                        ? ""
+                        : parseInt(e.target.value, 10) || 0
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      eduDonation:
+                        2 * Number(val) > 0.1 * baseForDonation
+                          ? 0.1 * baseForDonation
+                          : Number(val),
+                    }))
+                  }}
+                  onBlur={(e) => handleBlur("eduDonation", e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.eduDonationDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span>เงินบริจาคให้พรรคการเมือง</span>
-              <input
-                type="number"
-                value={deductionData.politicalPartyDonation}
-                onChange={(e) =>
-                  setDeductionData((prev) => ({
-                    ...prev,
-                    politicalPartyDonation:
-                      e.target.value > 10000 ? 10000 : e.target.value,
-                  }))
-                }
-                onBlur={(e) =>
-                  handleBlur("politicalPartyDonation", e.target.value)
-                }
-                className="border p-1 w-24 text-right"
-              />
-              <span>บาท</span>
-              <span className="text-tfpa_gold">
-                {displayValues.politicalPartyDonationDeduct.toLocaleString()}
+            {/* Political Party Donation */}
+            <div className="flex items-center justify-between">
+              <span className="text-tfpa_blue font-bold">
+                เงินบริจาคให้พรรคการเมือง
               </span>
-              <span className="text-tfpa_blue"> บาท</span>
+              <div className="flex items-center space-x-4 w-1/2">
+                <input
+                  type="number"
+                  value={deductionData.politicalPartyDonation}
+                  onChange={(e) =>
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      politicalPartyDonation:
+                        Number(e.target.value) > 10000
+                          ? 10000
+                          : Math.max(0, Number(e.target.value)),
+                    }))
+                  }
+                  onBlur={(e) =>
+                    handleBlur("politicalPartyDonation", e.target.value)
+                  }
+                  className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                />
+                <span className="text-tfpa_blue font-bold">บาท</span>
+                <span className="text-tfpa_gold font-bold">
+                  {displayValues.politicalPartyDonationDeduct.toLocaleString()}
+                </span>
+                <span className="text-tfpa_blue font-bold"> บาท</span>
+              </div>
             </div>
           </div>
 
           {/* Dotted line */}
           <hr className="border-dashed border-gray-300" />
 
-          {/* ค่าลดหย่อนภาษี (total) */}
-          <div className="flex items-end justify-end font-bold text-tfpa_blue space-x-2">
-            <span>ค่าลดหย่อนภาษี</span>
-            <span className="text-tfpa_gold">
-              {displayValues.totalDeduction.toLocaleString()}
-            </span>
-            <span className="text-tfpa_blue"> บาท</span>
+          {/* Total Deductions */}
+          <div className="flex justify-end font-bold text-tfpa_blue">
+            <div className="flex space-x-2 items-center">
+              <span className="text-tfpa_blue font-bold">ค่าลดหย่อนภาษี</span>
+              <span className="text-tfpa_gold font-bold">
+                {displayValues.totalDeduction.toLocaleString()}
+              </span>
+              <span className="text-tfpa_blue font-bold"> บาท</span>
+            </div>
           </div>
 
+          {/* Navigation Buttons */}
           <div className="flex justify-between">
             <button
               onClick={handleBack}
