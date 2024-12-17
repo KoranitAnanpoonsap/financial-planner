@@ -106,13 +106,7 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       totalTaxDeductions += td.parentHealthInsurance
       totalTaxDeductions += td.lifeInsurance
       totalTaxDeductions += td.healthInsurance
-      totalTaxDeductions += td.pensionInsurance
       totalTaxDeductions += td.spouseNoIncomeLifeInsurance
-      totalTaxDeductions += td.rmf
-      totalTaxDeductions += td.ssf
-      totalTaxDeductions += td.govPensionFund
-      totalTaxDeductions += td.pvd
-      totalTaxDeductions += td.nationSavingsFund
       totalTaxDeductions += td.socialSecurityPremium
       totalTaxDeductions += td.socialEnterprise
       totalTaxDeductions += td.thaiEsg
@@ -121,17 +115,13 @@ export async function fetchAndCalculateTaxForClient(clientId) {
       totalTaxDeductions += td.politicalPartyDonation
   
       // Check pension group sum limit of 500,000
-      const pensionGroupSum = td.pensionInsurance +
+      const pensionGroupSum = Math.min(td.pensionInsurance +
                               td.rmf +
                               td.ssf +
                               td.govPensionFund +
                               td.pvd +
-                              td.nationSavingsFund
-  
-      if (pensionGroupSum > 500000) {
-        const excess = pensionGroupSum - 500000
-        totalTaxDeductions -= excess
-      }
+                              td.nationSavingsFund,500000)
+      totalTaxDeductions += pensionGroupSum
     }
   
     // income after deductions

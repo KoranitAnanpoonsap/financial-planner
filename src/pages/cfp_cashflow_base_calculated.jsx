@@ -224,7 +224,7 @@ export default function CFPCashflowBaseCalculated() {
                 {/* Net Income */}
                 <tr className="border-t-2">
                   <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_gold">
-                    กระแสนเงินสดสุทธิ
+                    กระแสเงินสดสุทธิ
                   </td>
                   {calculationResults.map((r, i) => (
                     <td
@@ -262,7 +262,7 @@ export default function CFPCashflowBaseCalculated() {
                 {/* Net Income After Goals */}
                 <tr className="border-t-2">
                   <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
-                    กระแสนเงินสดสุทธิหลังเป้าหมาย
+                    กระแสเงินสดสุทธิหลังเป้าหมาย
                   </td>
                   {calculationResults.map((r, i) => {
                     const style = {}

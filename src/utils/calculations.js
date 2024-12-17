@@ -86,7 +86,7 @@ export function calculateGeneralGoal(generalGoal, totalInvestAmount, portReturn)
   const netIncomeGrowth = generalGoal.clientNetIncomeGrowth
 
   const fvOfCurrentInvestment = totalInvestAmount * Math.pow(1 + portReturn, period)
-  // newGeneralGoalValue = goalValue - fvOfCurrentInvestment
+ 
   const newGeneralGoalValue = goalValue - fvOfCurrentInvestment
 
   const numerator = portReturn - netIncomeGrowth
@@ -105,31 +105,20 @@ export function calculateGeneralGoal(generalGoal, totalInvestAmount, portReturn)
 
 export function calculateRetirementGoal(retirementGoalInfo, retiredExpensePortion) {
   const { clientCurrentAge, clientRetirementAge, clientLifeExpectancy, clientCurrentYearlyExpense, clientExpectedRetiredPortReturn, inflationRate } = retirementGoalInfo
-  const currentAge = clientCurrentAge
-  const retirementAge = clientRetirementAge
-  const lifeExpectancy = clientLifeExpectancy
-  const currentYearlyExpense = clientCurrentYearlyExpense
-  const expectedRetPortReturn = clientExpectedRetiredPortReturn
-  const inflation = inflationRate
 
-  const yearsToRetirement = retirementAge - currentAge
-
-  const bdCurrentExpense = currentYearlyExpense
-  const bdInflationRate = inflation
-  const bdExpectedRetPortReturn = expectedRetPortReturn
-  const bdProportion = retiredExpensePortion
+  const yearsToRetirement = clientRetirementAge - clientCurrentAge
 
   // fvCurrentExpense = currentExpense * (1+inflation)^yearsToRetirement
-  const fvCurrentExpense = bdCurrentExpense * Math.pow(1+bdInflationRate, yearsToRetirement)
+  const fvCurrentExpense = clientCurrentYearlyExpense * Math.pow(1+inflationRate, yearsToRetirement)
 
   // discount_rate = ((1+expectedRetPortReturn)/(1+inflation)) - 1
-  const discountRate = ((1+bdExpectedRetPortReturn)/(1+bdInflationRate))-1
+  const discountRate = ((1+clientExpectedRetiredPortReturn)/(1+inflationRate))-1
 
   // newFvCurrentExpense = fvCurrentExpense * proportion
-  const newFvCurrentExpense = fvCurrentExpense * bdProportion
+  const newFvCurrentExpense = fvCurrentExpense * retiredExpensePortion
 
   // retirementDuration = lifeExpectancy - retirementAge
-  const retirementDuration = lifeExpectancy - retirementAge
+  const retirementDuration = clientLifeExpectancy - clientRetirementAge
   const onePlusDiscount = 1 + discountRate
 
   let retirementGoal

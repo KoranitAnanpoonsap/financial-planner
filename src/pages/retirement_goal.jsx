@@ -19,7 +19,6 @@ export default function RetirementGoalPage() {
     useState("")
   const [inflationRate, setInflationRate] = useState("")
 
-  // bla bla bla
   useEffect(() => {
     fetchRetirementGoal()
   }, [clientId])

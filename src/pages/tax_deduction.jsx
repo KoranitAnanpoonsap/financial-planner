@@ -91,14 +91,12 @@ export default function TaxDeductionPage() {
 
   useEffect(() => {
     fetchDeduction()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId])
 
   useEffect(() => {
     if (exists && totalIncome > 0) {
       calculateDeductions(deductionData, totalIncome)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deductionData, totalIncome, expenseDeductions, exists])
 
   const fetchDeduction = async () => {
