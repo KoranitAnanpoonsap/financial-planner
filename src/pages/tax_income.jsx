@@ -7,15 +7,9 @@ import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { motion } from "framer-motion"
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
 }
 
 const pageTransition = {
@@ -43,8 +37,17 @@ export default function TaxIncomePage() {
       )
       if (!incomesRes.ok) throw new Error("Failed to fetch incomes")
       const incomesData = await incomesRes.json()
-      setIncomes(incomesData)
 
+      // Adjust income amounts for frequency
+      const adjustedIncomes = incomesData.map((inc) => {
+        if (inc.clientIncomeFrequency === "ทุกเดือน") {
+          inc.clientIncomeAmount = inc.clientIncomeAmount * 12
+        }
+        return inc
+      })
+      setIncomes(adjustedIncomes)
+
+      // Calculate total income and expense
       const result = await fetchAndCalculateTaxForClient(clientId)
       setTotalIncome(result.totalIncome)
       setTotalExpense(result.totalExpenseDeductions)
@@ -53,14 +56,20 @@ export default function TaxIncomePage() {
     }
   }
 
+  // Group incomes by type
+  const incomeByType = incomes.reduce((map, inc) => {
+    const type = inc.clientIncomeType
+    if (!map[type]) map[type] = 0
+    map[type] += inc.clientIncomeAmount
+    return map
+  }, {})
+
   const handleNext = () => {
     navigate(`/${cfpId}/tax-deduction/${clientId}`)
   }
 
-  // Compute expense deduction = totalIncome - incomeAfterDeductions
   const incomeAfterExpense = totalIncome - totalExpense
 
-  // Mapping from Thai type to 40(x) code
   const typeToCodeMap = {
     เงินเดือน: "40(1)",
     รับจ้างทำงาน: "40(2)",
@@ -72,12 +81,10 @@ export default function TaxIncomePage() {
     รายได้อื่นๆ: "40(8)",
   }
 
-  // Reverse map from code to Thai type
   const codeToTypeMap = Object.fromEntries(
     Object.entries(typeToCodeMap).map(([thaiType, code]) => [code, thaiType])
   )
 
-  // Income categories
   const incomeCategories = [
     { code: "40(1)", desc: "เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส บำนาญ ฯลฯ" },
     {
@@ -95,19 +102,9 @@ export default function TaxIncomePage() {
     { code: "40(8)", desc: "เงินได้อื่นๆ" },
   ]
 
-  // Create a map from Thai income type to amount
-  const incomeMap = {}
-  for (const inc of incomes) {
-    if (!incomeMap[inc.clientIncomeType]) incomeMap[inc.clientIncomeType] = 0
-    if ((inc.clientIncomeFrequency = "ทุกเดือน"))
-      incomeMap[inc.clientIncomeType] += inc.clientIncomeAmount * 12
-    else incomeMap[inc.clientIncomeType] += inc.clientIncomeAmount
-  }
-
-  // getIncomeAmount: given a code like "40(1)", find the Thai type and return the amount
   const getIncomeAmount = (code) => {
     const thaiType = codeToTypeMap[code]
-    return thaiType ? incomeMap[thaiType] || 0 : 0
+    return thaiType ? incomeByType[thaiType] || 0 : 0
   }
 
   return (
@@ -116,9 +113,7 @@ export default function TaxIncomePage() {
       <div className="flex flex-1">
         <ClientBluePanel />
         <div className="flex-1 p-8 space-y-8">
-          {/* Steps */}
           <div className="flex items-center justify-center space-x-8">
-            {/* Step 1: รายได้ */}
             <button
               onClick={() => navigate(`/${cfpId}/tax-income/${clientId}`)}
               className="flex flex-col items-center focus:outline-none"
@@ -128,10 +123,7 @@ export default function TaxIncomePage() {
               </div>
               <span className="font-bold text-tfpa_blue">รายได้</span>
             </button>
-
             <div className="h-px bg-gray-300 w-24"></div>
-
-            {/* Step 2: ค่าลดหย่อน */}
             <button
               onClick={() => navigate(`/${cfpId}/tax-deduction/${clientId}`)}
               className="flex flex-col items-center focus:outline-none"
@@ -141,10 +133,7 @@ export default function TaxIncomePage() {
               </div>
               <span className="font-bold">ค่าลดหย่อน</span>
             </button>
-
             <div className="h-px bg-gray-300 w-24"></div>
-
-            {/* Step 3: ผลการคำนวณ */}
             <button
               onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
               className="flex flex-col items-center focus:outline-none"
@@ -155,6 +144,7 @@ export default function TaxIncomePage() {
               <span className="font-bold">ผลการคำนวณ</span>
             </button>
           </div>
+
           <motion.div
             initial="initial"
             animate="in"
@@ -162,7 +152,6 @@ export default function TaxIncomePage() {
             variants={pageVariants}
             transition={pageTransition}
           >
-            {/* Income list */}
             <div className="space-y-4">
               {incomeCategories.map((cat, index) => (
                 <div key={index} className="flex items-center space-x-4">
@@ -182,10 +171,7 @@ export default function TaxIncomePage() {
               ))}
             </div>
 
-            {/* Dotted line */}
             <hr className="border-dashed mt-4 mb-4 border-gray-300" />
-
-            {/* Summary */}
             <div className="flex flex-col items-start space-y-2 font-bold text-tfpa_blue">
               <div className="flex space-x-2">
                 <span>รวมเงินได้</span>
