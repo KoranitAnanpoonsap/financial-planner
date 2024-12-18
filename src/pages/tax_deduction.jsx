@@ -381,7 +381,7 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleUpdate("maritalStatus", e.target.value)
                     }
-                    className="border border-gray-300 rounded px-2 py-1 w-64"
+                    className="border border-gray-300 rounded px-2 py-1 w-64 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   >
                     <option value="">เลือก</option>
                     <option value="โสด">โสด</option>
