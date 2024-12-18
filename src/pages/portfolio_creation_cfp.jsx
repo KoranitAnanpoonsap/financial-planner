@@ -5,6 +5,19 @@ import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
 import { calculatePortfolioSummary } from "../utils/calculations.js"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 export default function PortfolioCreationCFP() {
   const { clientId } = useParams()
@@ -48,28 +61,37 @@ export default function PortfolioCreationCFP() {
       <div className="flex flex-1">
         <ClientBluePanel />
         <div className="flex-1 p-4">
-          <div className="flex justify-center mb-4">
-            <PortfolioPieChart assets={assets} width={500} height={500} />
-          </div>
-          <div className="flex justify-center mb-4">
-            <p className="text-lg font-ibm font-bold text-tfpa_blue">
-              เงินรวมปัจจุบันในการลงทุน: {totalInvestment.toLocaleString()} บาท
-            </p>
-          </div>
-          <div className="flex justify-center mb-4">
-            <p className="text-lg font-ibm font-bold text-tfpa_blue">
-              ผลตอบแทนต่อปีของพอร์ตที่ลงทุนปัจจุบัน:{" "}
-              {(portfolioReturn * 100).toFixed(2)} %
-            </p>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={handleEditPortfolio}
-              className="bg-red-500 text-white px-4 py-2 rounded font-ibm"
-            >
-              แก้ไขพอร์ต
-            </button>
-          </div>
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <div className="flex justify-center mb-4">
+              <PortfolioPieChart assets={assets} width={500} height={500} />
+            </div>
+            <div className="flex justify-center mb-4">
+              <p className="text-lg font-ibm font-bold text-tfpa_blue">
+                เงินรวมปัจจุบันในการลงทุน: {totalInvestment.toLocaleString()}{" "}
+                บาท
+              </p>
+            </div>
+            <div className="flex justify-center mb-4">
+              <p className="text-lg font-ibm font-bold text-tfpa_blue">
+                ผลตอบแทนต่อปีของพอร์ตที่ลงทุนปัจจุบัน:{" "}
+                {(portfolioReturn * 100).toFixed(2)} %
+              </p>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleEditPortfolio}
+                className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded font-ibm"
+              >
+                แก้ไขพอร์ต
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

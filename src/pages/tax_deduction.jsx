@@ -344,7 +344,7 @@ export default function TaxDeductionPage() {
             {/* Step 3: ผลการคำนวณ */}
             <button
               onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
-              className="flex flex-col items-center focus:outline-none"
+              className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">
                 3

@@ -3,6 +3,19 @@ import { useNavigate, useParams } from "react-router-dom"
 import Header from "../components/header"
 import Footer from "../components/footer"
 import ClientBluePanel from "../components/clientBluePanel"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 export default function CFPClientDebtPage() {
   const { clientId, cfpId } = useParams()
@@ -151,243 +164,271 @@ export default function CFPClientDebtPage() {
         <div className="flex-1 p-8 space-y-8">
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/${cfpId}/client-info/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
               <span className="font-bold">ข้อมูลส่วนตัว</span>
-            </div>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/${cfpId}/client-income/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
               <span className="font-bold">รายได้</span>
-            </div>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/${cfpId}/client-expense/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
               <span className="font-bold">รายจ่าย</span>
-            </div>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/${cfpId}/client-asset/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
               <span className="font-bold">สินทรัพย์</span>
-            </div>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
+            <button
+              onClick={() => navigate(`/${cfpId}/client-debt/${clientId}`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
+              <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 5
               </div>
               <span className="font-bold text-tfpa_blue">หนี้สิน</span>
-            </div>
-          </div>
-
-          <h3 className="text-tfpa_blue font-bold text-lg">5. หนี้สิน</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                ประเภทหนี้สิน
-              </label>
-              <select
-                value={debtType}
-                onChange={(e) => setDebtType(e.target.value)}
-                className="border rounded p-2 w-full"
-              >
-                <option value="เลือก">เลือก</option>
-                {debtTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                ชื่อหนี้สิน
-              </label>
-              <input
-                type="text"
-                value={debtName}
-                onChange={(e) => setDebtName(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div className="mb-2 text-tfpa_blue font-bold">ประเภทหนี้สิน</div>
-            <div className="flex space-x-4">
-              {debtTerms.map((dt) => (
-                <div key={dt.value} className="flex items-center space-x-2">
-                  <div
-                    className={`w-4 h-4 rounded-full ${
-                      debtTerm === dt.value
-                        ? "bg-tfpa_blue"
-                        : "border border-tfpa_blue"
-                    } cursor-pointer`}
-                    onClick={() => setDebtTerm(dt.value)}
-                  ></div>
-                  <span>{dt.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                จำนวน (บาท)
-              </label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                ดอกเบี้ยต่อปี (%)
-              </label>
-              <input
-                type="number"
-                value={interest}
-                onChange={(e) => setInterest(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                วันที่เริ่มต้นของหนี้สิน (YYYY-MM-DD)
-              </label>
-              <input
-                type="text"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                จำนวนปีของหนี้สิน (ปี)
-              </label>
-              <input
-                type="number"
-                value={years}
-                onChange={(e) => setYears(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                เงินต้น (บาท)
-              </label>
-              <input
-                type="number"
-                value={principal}
-                onChange={(e) => setPrincipal(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <div className="flex space-x-4 mt-4">
-              {editMode ? (
-                <>
-                  <button
-                    onClick={handleCreateOrUpdateDebt}
-                    className="bg-red-500 text-white px-4 py-2 rounded font-ibm font-bold"
-                  >
-                    แก้ไข
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
-                  >
-                    ยกเลิก
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleCreateOrUpdateDebt}
-                  className="bg-green-500 text-white px-4 py-2 rounded font-ibm font-bold"
-                >
-                  เพิ่ม
-                </button>
-              )}
-            </div>
-          </div>
-
-          <h3 className="text-tfpa_blue font-bold text-lg">หนี้สินที่มีอยู่</h3>
-          <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ประเภทหนี้สิน
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ชื่อหนี้สิน
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ประเภท (ระยะสั้น/ยาว)
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  จำนวน (บาท)
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ดอกเบี้ยต่อปี (%)
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  จัดการ
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {debts.map((dbt) => (
-                <tr key={`${dbt.id.clientId}-${dbt.id.clientDebtName}`}>
-                  <td className="py-2 px-4 border">{dbt.clientDebtType}</td>
-                  <td className="py-2 px-4 border">{dbt.id.clientDebtName}</td>
-                  <td className="py-2 px-4 border">{dbt.clientDebtTerm}</td>
-                  <td className="py-2 px-4 border text-right">
-                    {dbt.clientDebtAmount.toLocaleString()}
-                  </td>
-                  <td className="py-2 px-4 border text-right">
-                    {(dbt.clientDebtAnnualInterest * 100).toFixed(2)}%
-                  </td>
-                  <td className="py-2 px-4 border">
-                    <div className="flex space-x-4">
-                      <button
-                        onClick={() => handleEdit(dbt)}
-                        className="bg-blue-500 text-white px-4 py-1 rounded font-ibm"
-                      >
-                        แก้ไข
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDebt(dbt)}
-                        className="bg-red-500 text-white px-4 py-1 rounded font-ibm"
-                      >
-                        ลบ
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex justify-start">
-            <button
-              onClick={handleBack}
-              className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
-            >
-              กลับ
             </button>
           </div>
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h3 className="text-tfpa_blue font-bold text-lg mb-4">
+              5. หนี้สิน
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  ประเภทหนี้สิน
+                </label>
+                <select
+                  value={debtType}
+                  onChange={(e) => setDebtType(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                >
+                  <option value="เลือก">เลือก</option>
+                  {debtTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  ชื่อหนี้สิน
+                </label>
+                <input
+                  type="text"
+                  value={debtName}
+                  onChange={(e) => setDebtName(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div className="mb-2 text-tfpa_blue font-bold">ประเภทหนี้สิน</div>
+              <div className="flex space-x-4">
+                {debtTerms.map((dt) => (
+                  <div key={dt.value} className="flex items-center space-x-2">
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        debtTerm === dt.value
+                          ? "bg-tfpa_blue"
+                          : "border border-tfpa_blue"
+                      } cursor-pointer`}
+                      onClick={() => setDebtTerm(dt.value)}
+                    ></div>
+                    <span>{dt.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  จำนวน (บาท)
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  ดอกเบี้ยต่อปี (%)
+                </label>
+                <input
+                  type="number"
+                  value={interest}
+                  onChange={(e) => setInterest(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  วันที่เริ่มต้นของหนี้สิน (YYYY-MM-DD)
+                </label>
+                <input
+                  type="text"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  จำนวนปีของหนี้สิน (ปี)
+                </label>
+                <input
+                  type="number"
+                  value={years}
+                  onChange={(e) => setYears(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  เงินต้น (บาท)
+                </label>
+                <input
+                  type="number"
+                  value={principal}
+                  onChange={(e) => setPrincipal(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                />
+              </div>
+
+              <div className="flex space-x-4 mt-4">
+                {editMode ? (
+                  <>
+                    <button
+                      onClick={handleCreateOrUpdateDebt}
+                      className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded font-ibm font-bold"
+                    >
+                      แก้ไข
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+                    >
+                      ยกเลิก
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleCreateOrUpdateDebt}
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-ibm font-bold"
+                  >
+                    เพิ่ม
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <h3 className="text-tfpa_blue font-bold text-lg mt-4">
+              หนี้สินที่มีอยู่
+            </h3>
+            <table className="min-w-full bg-white border border-gray-300 mt-4 mb-4">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ประเภทหนี้สิน
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ชื่อหนี้สิน
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ประเภท (ระยะสั้น/ยาว)
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    จำนวน (บาท)
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ดอกเบี้ยต่อปี (%)
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    จัดการ
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {debts.map((dbt) => (
+                  <tr key={`${dbt.id.clientId}-${dbt.id.clientDebtName}`}>
+                    <td className="py-2 px-4 border">{dbt.clientDebtType}</td>
+                    <td className="py-2 px-4 border">
+                      {dbt.id.clientDebtName}
+                    </td>
+                    <td className="py-2 px-4 border">{dbt.clientDebtTerm}</td>
+                    <td className="py-2 px-4 border text-right">
+                      {dbt.clientDebtAmount.toLocaleString()}
+                    </td>
+                    <td className="py-2 px-4 border text-right">
+                      {(dbt.clientDebtAnnualInterest * 100).toFixed(2)}%
+                    </td>
+                    <td className="py-2 px-4 border">
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => handleEdit(dbt)}
+                          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-1 rounded font-ibm"
+                        >
+                          แก้ไข
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDebt(dbt)}
+                          className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded font-ibm"
+                        >
+                          ลบ
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="flex justify-start">
+              <button
+                onClick={handleBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+              >
+                กลับ
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

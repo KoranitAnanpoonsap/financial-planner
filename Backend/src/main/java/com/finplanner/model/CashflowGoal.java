@@ -12,9 +12,6 @@ public class CashflowGoal {
     @Column(name = "client_goal_period", nullable = false)
     private Integer clientGoalPeriod;
 
-    @Column(name = "client_saving_growth", nullable = false)
-    private Float clientSavingGrowth;
-
     @Column(name = "client_goal_value", nullable = false)
     private Integer clientGoalValue;
 
@@ -34,14 +31,6 @@ public class CashflowGoal {
 
     public void setClientGoalPeriod(Integer clientGoalPeriod) {
         this.clientGoalPeriod = clientGoalPeriod;
-    }
-
-    public Float getClientSavingGrowth() {
-        return clientSavingGrowth;
-    }
-
-    public void setClientSavingGrowth(Float clientSavingGrowth) {
-        this.clientSavingGrowth = clientSavingGrowth;
     }
 
     public Integer getClientGoalValue() {

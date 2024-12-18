@@ -50,7 +50,6 @@ public class CashflowController {
                 .map(existingGoal -> {
                     // Update the fields as needed. Assuming the PUT request provides all fields:
                     existingGoal.setClientGoalPeriod(updatedGoal.getClientGoalPeriod());
-                    existingGoal.setClientSavingGrowth(updatedGoal.getClientSavingGrowth());
                     existingGoal.setClientGoalValue(updatedGoal.getClientGoalValue());
                     // Save the updated entity
                     CashflowGoal savedGoal = cashflowGoalRepository.save(existingGoal);

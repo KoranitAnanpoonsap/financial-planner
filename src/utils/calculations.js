@@ -25,12 +25,21 @@ export function calculateYearlyIncome(incomes, year) {
   const details = []
   for (const income of incomes) {
     let amount = income.clientIncomeAmount
+
     if (income.clientIncomeFrequency === "ทุกเดือน") {
       amount *= 12
+    } else if (income.clientIncomeFrequency === "ได้เป็นก้อน") {
+      // If frequency is lump-sum, only year 1 has the income; other years are 0
+      amount = year === 1 ? amount : 0
     }
-    for (let y = 1; y < year; y++) {
-      amount = amount * (1 + income.clientIncomeAnnualGrowthRate)
+
+    // Apply annual growth rate for years beyond the first year
+    if (year > 1 && income.clientIncomeFrequency !== "ได้เป็นก้อน") {
+      for (let y = 1; y < year; y++) {
+        amount *= (1 + income.clientIncomeAnnualGrowthRate)
+      }
     }
+
     details.push({ [income.id.clientIncomeName]: amount.toFixed(2) })
   }
   return details
@@ -40,23 +49,36 @@ export function calculateYearlyExpense(expenses, year) {
   const details = []
   for (const expense of expenses) {
     let amount = expense.clientExpenseAmount
+
     if (expense.clientExpenseFrequency === "ทุกเดือน") {
       amount *= 12
+    } else if (expense.clientExpenseFrequency === "จ่ายเป็นก้อน") {
+      // If frequency is lump-sum, only year 1 has the expense; other years are 0
+      amount = year === 1 ? amount : 0
     }
-    for (let y = 1; y < year; y++) {
-      amount = amount * (1 + expense.clientExpenseAnnualGrowthRate)
+
+    // Apply annual growth rate for years beyond the first year
+    if (year > 1 && expense.clientExpenseFrequency !== "จ่ายเป็นก้อน") {
+      for (let y = 1; y < year; y++) {
+        amount *= (1 + expense.clientExpenseAnnualGrowthRate)
+      }
     }
+
     details.push({ [expense.id.clientExpenseName]: amount.toFixed(2) })
   }
   return details
 }
 
-export function calculateGoalPayments(goals, portfolioReturn, year) {
+export function calculateGoalPayments(goals, portfolioReturn, expenses, year) {
   const payments = []
   let anyPayment = false
+
+  // Find the annual growth rate from expenses where clientExpenseType is "รายจ่ายเพื่อการออม"
+  const savingExpense = expenses.find(exp => exp.clientExpenseType === "รายจ่ายเพื่อการออม")
+  const clientSavingGrowth = savingExpense ? savingExpense.clientExpenseAnnualGrowthRate : 0
+
   for (const goal of goals) {
     const clientGoalValue = goal.clientGoalValue
-    const clientSavingGrowth = goal.clientSavingGrowth
     const clientGoalPeriod = goal.clientGoalPeriod
 
     let payment = 0
@@ -74,11 +96,12 @@ export function calculateGoalPayments(goals, portfolioReturn, year) {
   }
 
   if (!anyPayment && goals.length === 0) {
-    // if no goals at all
+    // If no goals at all
     payments.push({ "No Payments": "0.00" })
   }
   return payments
 }
+
 
 export function calculateGeneralGoal(generalGoal, totalInvestAmount, portReturn) {
   const period = generalGoal.clientGeneralGoalPeriod

@@ -4,6 +4,19 @@ import Header from "../components/header"
 import Footer from "../components/footer"
 import ClientBluePanel from "../components/clientBluePanel"
 import { computeVariables, computeRatios } from "../utils/calculations"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
 
 function FractionDisplay({ topLabel, bottomLabel }) {
   // If value is numeric zero, we show "-" else show the formatted number
@@ -244,69 +257,74 @@ export default function CFPFinancialHealthCheck() {
       <div className="flex flex-1">
         <ClientBluePanel />
         <div className="flex-1 p-8 space-y-8">
-          <h2 className="text-xl font-bold text-tfpa_blue">
-            ตรวจสุขภาพทางการเงิน
-          </h2>
-          <table
-            className="min-w-full border-collapse font-bold"
-            style={{ borderCollapse: "collapse" }}
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
           >
-            <thead>
-              <tr className="text-tfpa_blue font-bold text-2xl">
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  อัตราส่วน
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  วิธีการคำนวณ
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  การคำนวณ
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  ผลลัพธ์
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
-                  มาตรฐาน
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => {
-                const colorClass = getResultColor(r.result, r.check)
-                return (
-                  <tr key={i} className="text-tfpa_blue">
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      {r.name}
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      <FractionDisplay
-                        topLabel={r.calcTop}
-                        bottomLabel={r.calcBottom}
-                      />
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      <FractionDisplay
-                        topLabel={
-                          r.valTop === 0 ? 0 : r.valTop.toLocaleString()
-                        }
-                        bottomLabel={
-                          r.valBottom === 0 ? 0 : r.valBottom.toLocaleString()
-                        }
-                      />
-                    </td>
-                    <td
-                      className={`border-dotted border-b border-gray-300 p-2 ${colorClass}`}
-                    >
-                      {r.result.toFixed(2)} {r.unit}
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
-                      {r.standard}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+            <table
+              className="min-w-full border-collapse font-bold"
+              style={{ borderCollapse: "collapse" }}
+            >
+              <thead>
+                <tr className="text-tfpa_blue font-bold text-2xl">
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    อัตราส่วน
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    วิธีการคำนวณ
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    การคำนวณ
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    ผลลัพธ์
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
+                    มาตรฐาน
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => {
+                  const colorClass = getResultColor(r.result, r.check)
+                  return (
+                    <tr key={i} className="text-tfpa_blue">
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        {r.name}
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        <FractionDisplay
+                          topLabel={r.calcTop}
+                          bottomLabel={r.calcBottom}
+                        />
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        <FractionDisplay
+                          topLabel={
+                            r.valTop === 0 ? 0 : r.valTop.toLocaleString()
+                          }
+                          bottomLabel={
+                            r.valBottom === 0 ? 0 : r.valBottom.toLocaleString()
+                          }
+                        />
+                      </td>
+                      <td
+                        className={`border-dotted border-b border-gray-300 p-2 ${colorClass}`}
+                      >
+                        {r.result.toFixed(2)} {r.unit}
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
+                        {r.standard}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </motion.div>
         </div>
       </div>
       <Footer />
