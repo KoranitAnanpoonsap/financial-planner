@@ -125,7 +125,7 @@ export default function CFPCashflowBaseCalculated() {
             variants={pageVariants}
             transition={pageTransition}
           >
-            <div className="overflow-x-auto mt-9">
+            <div className="overflow-x-auto mt-4">
               <table className="min-w-full bg-white border border-gray-300 text-sm">
                 <thead>
                   <tr>
