@@ -9,8 +9,10 @@ import com.finplanner.service.ClientInfoService;
 import java.util.Map;
 import java.util.Optional;
 import java.util.List;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,18 @@ public class ClientInfoController {
     @Autowired
     public ClientInfoController(ClientInfoRepository clientInfoRepository) {
         this.clientInfoRepository = clientInfoRepository;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+        Optional<ClientInfo> clientInfo = clientInfoService.authenticateClient(email, password);
+        if (clientInfo.isPresent()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("clientId", clientInfo.get().getClientId());
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+        }
     }
 
     @GetMapping("/cfp/{cfpId}")
@@ -45,7 +59,6 @@ public class ClientInfoController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // New GET endpoint that returns all client info except password
     @GetMapping("/info/{clientId}")
     public ResponseEntity<ClientInfoDTO> getClientInfoNoPassword(@PathVariable Integer clientId) {
         Optional<ClientInfo> clientOpt = clientInfoRepository.findById(clientId);
@@ -90,7 +103,6 @@ public class ClientInfoController {
                     existing.setClientDateOfBirth(updatedClient.getClientDateOfBirth());
                     existing.setClientPhoneNumber(updatedClient.getClientPhoneNumber());
                     existing.setClientEmail(updatedClient.getClientEmail());
-                    // Add other fields to update as needed
                     ClientInfo saved = clientInfoRepository.save(existing);
                     return ResponseEntity.ok(saved);
                 })
