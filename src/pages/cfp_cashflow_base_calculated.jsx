@@ -157,7 +157,7 @@ export default function CFPCashflowBaseCalculated() {
                   </tr>
                   {incomes.map((inc) => (
                     <tr key={inc.id.clientIncomeName}>
-                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue">
+                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
                         {inc.id.clientIncomeName}
                       </td>
                       {calculationResults.map((r, i) => {
@@ -171,7 +171,7 @@ export default function CFPCashflowBaseCalculated() {
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
+                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue_panel_select"
                           >
                             {parseFloat(val).toLocaleString()}
                           </td>
@@ -209,7 +209,7 @@ export default function CFPCashflowBaseCalculated() {
                   </tr>
                   {expenses.map((exp) => (
                     <tr key={exp.id.clientExpenseName}>
-                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue">
+                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
                         {exp.id.clientExpenseName}
                       </td>
                       {calculationResults.map((r, i) => {
@@ -222,7 +222,7 @@ export default function CFPCashflowBaseCalculated() {
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
+                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue_panel_select"
                           >
                             {parseFloat(val).toLocaleString()}
                           </td>
@@ -248,13 +248,13 @@ export default function CFPCashflowBaseCalculated() {
 
                   {/* Net Income */}
                   <tr className="border-t-2">
-                    <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_gold">
+                    <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
                       กระแสเงินสดสุทธิ
                     </td>
                     {calculationResults.map((r, i) => (
                       <td
                         key={i}
-                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
+                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
                       >
                         {r.netIncome.toLocaleString()}
                       </td>
