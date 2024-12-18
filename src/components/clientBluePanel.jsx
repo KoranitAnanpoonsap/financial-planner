@@ -32,8 +32,12 @@ export default function ClientBluePanel() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [clientFullName, setClientFullName] = useState("")
-  const [clientFormatId, setClientFormatId] = useState("")
+  const [clientFullName, setClientFullName] = useState(
+    localStorage.getItem("clientFullName") || ""
+  )
+  const [clientFormatId, setClientFormatId] = useState(
+    localStorage.getItem("clientFormatId") || ""
+  )
 
   useEffect(() => {
     const fetchClientDetails = async () => {
@@ -45,24 +49,29 @@ export default function ClientBluePanel() {
           throw new Error("Network response was not ok")
         }
         const clientData = await response.json()
-        setClientFullName(
-          `${clientData.clientFirstName} ${clientData.clientLastName}`
-        )
-        setClientFormatId(clientData.clientFormatId)
+        const fullName = `${clientData.clientFirstName} ${clientData.clientLastName}`
+        const formatId = clientData.clientFormatId
+
+        setClientFullName(fullName)
+        setClientFormatId(formatId)
+
+        // Update localStorage
+        localStorage.setItem("clientFullName", fullName)
+        localStorage.setItem("clientFormatId", formatId)
       } catch (error) {
         console.error("Error fetching client details:", error)
       }
     }
 
     fetchClientDetails()
-  }, [clientId])
+  }, [clientId]) // Only re-run the effect when clientId changes
 
-  // Define menu items with multiple routes per item if needed
+  const currentPath = location.pathname
+
   const menuItems = [
     {
       label: "ข้อมูลลูกค้า",
       icon: personListIcon,
-      // Suppose these pages also count as "client-info" pages
       routes: [
         `/${cfpId}/client-info/${clientId}`,
         `/${cfpId}/client-income/${clientId}`,
@@ -76,7 +85,7 @@ export default function ClientBluePanel() {
       icon: newIcon,
       routes: [
         `/${cfpId}/portfolio-selection/${clientId}`,
-        `/${cfpId}/portfolio-chart/${clientId}`, // highlight also on chart page
+        `/${cfpId}/portfolio-chart/${clientId}`,
       ],
     },
     {
@@ -94,7 +103,7 @@ export default function ClientBluePanel() {
       icon: checkIcon,
       routes: [
         `/${cfpId}/cashflow-base/${clientId}`,
-        `/${cfpId}/cashflow-base-calculated/${clientId}`, // also highlight on calculated page
+        `/${cfpId}/cashflow-base-calculated/${clientId}`,
       ],
     },
     {
@@ -113,40 +122,28 @@ export default function ClientBluePanel() {
     },
   ]
 
-  const currentPath = location.pathname
-
   return (
     <div className="bg-tfpa_blue w-60 p-1 flex flex-col text-white">
       <div className="mb-3 mt-3 bg-tfpa_gold rounded-3xl p-2 flex items-center space-x-2">
         <img src={personIcon} alt="Person Icon" className="w-12 h-12" />
-        <motion.div
-          initial="initial"
-          animate="in"
-          exit="out"
-          variants={pageVariants}
-          transition={pageTransition}
-        >
-          <div className="flex flex-col">
-            <div className="text-white text-sm mb-1 font-ibm font-bold">
-              {clientFullName}
-            </div>
-            <div className="text-tfpa_blue text-sm font-ibm font-bold">
-              {clientFormatId}
-            </div>
+        <div className="flex flex-col">
+          <div className="text-white text-sm mb-1 font-ibm font-bold">
+            {clientFullName}
           </div>
-        </motion.div>
+          <div className="text-tfpa_blue text-sm font-ibm font-bold">
+            {clientFormatId}
+          </div>
+        </div>
       </div>
-      {/* Menu items */}
       <div className="flex flex-col space-y-2">
         {menuItems.map((item) => {
-          // Check if currentPath starts with or includes any route in item.routes
           const isActive = item.routes.some((route) =>
             currentPath.startsWith(route)
           )
           return (
             <button
               key={item.label}
-              onClick={() => navigate(item.routes[0])} // navigate to the first route in the array
+              onClick={() => navigate(item.routes[0])}
               className={`flex items-center space-x-2 px-2 py-2 rounded-2xl ${
                 isActive
                   ? "bg-tfpa_blue_panel_select"

@@ -1,50 +1,36 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import logo from "../assets/TFPA_logo.png"
-import { motion } from "framer-motion"
-
-const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
-}
-
-const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.3,
-}
 
 export default function Header() {
-  const [cfpFirstName, setCfpFirstName] = useState("")
+  const [cfpFirstName, setCfpFirstName] = useState(
+    localStorage.getItem("cfpFirstName") || ""
+  )
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const { cfpId } = useParams()
   const navigate = useNavigate()
 
-  // Fetch CFP first name based on cfpId
+  // Fetch CFP first name based on cfpId only if not already stored
   useEffect(() => {
     const fetchCfpInfo = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/api/cfp/${cfpId}`)
-        if (!response.ok) {
-          throw new Error("Error fetching CFP information")
-        }
+      if (!cfpFirstName) {
+        try {
+          const response = await fetch(`http://localhost:8080/api/cfp/${cfpId}`)
+          if (!response.ok) {
+            throw new Error("Error fetching CFP information")
+          }
 
-        const firstName = await response.text()
-        setCfpFirstName(firstName)
-      } catch (error) {
-        console.error("Error fetching CFP info:", error)
+          const firstName = await response.text()
+          setCfpFirstName(firstName)
+          localStorage.setItem("cfpFirstName", firstName) // Store in localStorage
+        } catch (error) {
+          console.error("Error fetching CFP info:", error)
+        }
       }
     }
 
     fetchCfpInfo()
-  }, [cfpId])
+  }, [cfpId, cfpFirstName])
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen)
@@ -55,7 +41,9 @@ export default function Header() {
   }
 
   const handleLogout = () => {
-    // Implement logout logic if needed (e.g., clear tokens)
+    // Clear data on logout
+    localStorage.removeItem("cfpFirstName")
+    setCfpFirstName("")
     navigate("/")
   }
 
@@ -70,15 +58,7 @@ export default function Header() {
           onClick={toggleDropdown}
           className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-6 py-2 rounded font-ibm"
         >
-          <motion.div
-            initial="initial"
-            animate="in"
-            exit="out"
-            variants={pageVariants}
-            transition={pageTransition}
-          >
-            CFP {cfpFirstName}
-          </motion.div>
+          CFP {cfpFirstName}
         </button>
         {dropdownOpen && (
           <div className="absolute right-0 bg-white shadow-md mt-2 rounded">
