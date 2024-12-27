@@ -66,6 +66,14 @@ export default function ClientLogin() {
     navigate("/")
   }
 
+  const handleRegister = () => {
+    navigate("/register")
+  }
+
+  const handleHomePage = () => {
+    navigate("/homepage")
+  }
+
   return (
     <LoginTemplate>
       <motion.div
@@ -134,6 +142,24 @@ export default function ClientLogin() {
           >
             เข้าสู่ระบบ
           </button>
+
+          {/* Links replaced with buttons */}
+          <div className="flex justify-center">
+            <div className="flex justify-between text-sm text-tfpa_blue w-full max-w-md">
+              <button
+                onClick={handleRegister}
+                className="hover:underline flex-grow text-sm font-ibm bg-white rounded py-1 transition-colors duration-300 mx-1"
+              >
+                ลงทะเบียนผู้ใช้ใหม่
+              </button>
+              <button
+                onClick={handleHomePage}
+                className="hover:underline flex-grow text-sm font-ibm bg-white rounded py-1 transition-colors duration-300 mx-1"
+              >
+                เข้าสู่ระบบโดยไม่ลงทะเบียน
+              </button>
+            </div>
+          </div>
 
           <button
             onClick={handleBack}
