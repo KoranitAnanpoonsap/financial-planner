@@ -55,7 +55,8 @@ export default function PlannerLogin() {
       if (response.ok) {
         const data = await response.json()
         const cfpId = data.cfpId
-        navigate(`/cfp-homepage/${cfpId}`)
+        localStorage.setItem("cfpId", cfpId)
+        navigate(`/cfp-homepage/`)
       } else {
         const errorMessage = await response.text()
         console.error("Error during login:", errorMessage)

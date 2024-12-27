@@ -18,8 +18,8 @@ const pageTransition = {
 }
 
 export default function PortfolioSelectionCFP() {
-  const { clientId } = useParams()
-  const { cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const [assets, setAssets] = useState([])
   const [investType, setInvestType] = useState("เลือก")
   const [investName, setInvestName] = useState("")
@@ -196,7 +196,7 @@ export default function PortfolioSelectionCFP() {
   }
 
   const handleNavigateToChart = () => {
-    navigate(`/${cfpId}/portfolio-chart/${clientId}`)
+    navigate(`/portfolio-chart/`)
   }
 
   return (

@@ -26,7 +26,8 @@ import {
 } from "../utils/calculations.js"
 
 export default function CFPCashflowBaseCalculated() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
@@ -109,7 +110,7 @@ export default function CFPCashflowBaseCalculated() {
 
   const handleDashboard = () => {
     // Navigate to a dashboard page
-    navigate(`/${cfpId}/dashboard`)
+    navigate(`/dashboard`)
   }
 
   return (

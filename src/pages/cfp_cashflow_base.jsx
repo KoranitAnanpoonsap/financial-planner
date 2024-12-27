@@ -20,7 +20,8 @@ const pageTransition = {
 }
 
 export default function CFPCashflowBase() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
@@ -209,7 +210,7 @@ export default function CFPCashflowBase() {
   }
 
   const handleCalculate = () => {
-    navigate(`/${cfpId}/cashflow-base-calculated/${clientId}`)
+    navigate(`/cashflow-base-calculated/`)
   }
 
   return (

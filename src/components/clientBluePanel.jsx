@@ -73,52 +73,42 @@ export default function ClientBluePanel() {
       label: "ข้อมูลลูกค้า",
       icon: personListIcon,
       routes: [
-        `/${cfpId}/client-info/${clientId}`,
-        `/${cfpId}/client-income/${clientId}`,
-        `/${cfpId}/client-expense/${clientId}`,
-        `/${cfpId}/client-asset/${clientId}`,
-        `/${cfpId}/client-debt/${clientId}`,
+        `/client-info/`,
+        `/client-income/`,
+        `/client-expense/`,
+        `/client-asset/`,
+        `/client-debt/`,
       ],
     },
     {
       label: "พอร์ตการลงทุน",
       icon: newIcon,
-      routes: [
-        `/${cfpId}/portfolio-selection/${clientId}`,
-        `/${cfpId}/portfolio-chart/${clientId}`,
-      ],
+      routes: [`/portfolio-selection/`, `/portfolio-chart/`],
     },
     {
       label: "การวางแผนเป้าหมายเดียว",
       icon: loadingIcon,
       routes: [
-        `/${cfpId}/goal-base/${clientId}`,
-        `/${cfpId}/goal-base-calculated/${clientId}`,
-        `/${cfpId}/retirement-goal/${clientId}`,
-        `/${cfpId}/retirement-goal-calculated/${clientId}`,
+        `/goal-base/`,
+        `/goal-base-calculated/`,
+        `/retirement-goal/`,
+        `/retirement-goal-calculated/`,
       ],
     },
     {
       label: "การวางแผนหลายเป้าหมาย",
       icon: checkIcon,
-      routes: [
-        `/${cfpId}/cashflow-base/${clientId}`,
-        `/${cfpId}/cashflow-base-calculated/${clientId}`,
-      ],
+      routes: [`/cashflow-base/`, `/cashflow-base-calculated/`],
     },
     {
       label: "ตรวจสุขภาพทางการเงิน",
       icon: checkIcon,
-      routes: [`/${cfpId}/financial-healthcheck/${clientId}`],
+      routes: [`/financial-healthcheck/`],
     },
     {
       label: "การคำนวณภาษี",
       icon: checkIcon,
-      routes: [
-        `/${cfpId}/tax-income/${clientId}`,
-        `/${cfpId}/tax-deduction/${clientId}`,
-        `/${cfpId}/tax-calculation/${clientId}`,
-      ],
+      routes: [`/tax-income/`, `/tax-deduction/`, `/tax-calculation/`],
     },
   ]
 

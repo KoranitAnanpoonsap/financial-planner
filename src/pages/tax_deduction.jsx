@@ -25,7 +25,8 @@ const pageTransition = {
 }
 
 export default function TaxDeductionPage() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
   const [baseForDonation, setBaseForDonation] = useState(0)
 
@@ -300,11 +301,11 @@ export default function TaxDeductionPage() {
   }
 
   const handleBack = () => {
-    navigate(`/${cfpId}/tax-income/${clientId}`)
+    navigate(`/tax-income/`)
   }
 
   const handleNext = () => {
-    navigate(`/${cfpId}/tax-calculation/${clientId}`)
+    navigate(`/tax-calculation/`)
   }
 
   return (
@@ -317,7 +318,7 @@ export default function TaxDeductionPage() {
           <div className="flex items-center justify-center space-x-8">
             {/* Step 1: รายได้ */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-income/${clientId}`)}
+              onClick={() => navigate(`/tax-income/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
@@ -330,7 +331,7 @@ export default function TaxDeductionPage() {
 
             {/* Step 2: ค่าลดหย่อน */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-deduction/${clientId}`)}
+              onClick={() => navigate(`/tax-deduction/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
@@ -343,7 +344,7 @@ export default function TaxDeductionPage() {
 
             {/* Step 3: ผลการคำนวณ */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
+              onClick={() => navigate(`/tax-calculation/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">

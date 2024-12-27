@@ -31,7 +31,8 @@ function FractionDisplay({ topLabel, bottomLabel }) {
 }
 
 export default function CFPFinancialHealthCheck() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
 
   const [ratios, setRatios] = useState({
     liquidity: 0,

@@ -9,7 +9,7 @@ export default function ClientsPage() {
   const [clientsPerPage] = useState(10)
   const [searchQuery, setSearchQuery] = useState("")
   const navigate = useNavigate()
-  const { cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
 
   const fetchClients = async () => {
     if (!cfpId) {
@@ -48,7 +48,8 @@ export default function ClientsPage() {
   }
 
   const handleClientInfo = (clientId) => {
-    navigate(`/${cfpId}/client-info/${clientId}`)
+    localStorage.setItem("clientId", clientId)
+    navigate(`/client-info/`)
   }
 
   return (

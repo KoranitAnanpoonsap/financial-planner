@@ -26,7 +26,8 @@ const pageTransition = {
 }
 
 export default function TaxCalculationPage() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   // Tax Calculation States
@@ -373,7 +374,7 @@ export default function TaxCalculationPage() {
   }, [investments, alreadyUsedDeductions, totalIncome])
 
   const handleBack = () => {
-    navigate(`/${cfpId}/tax-deduction/${clientId}`)
+    navigate(`/tax-deduction/`)
   }
 
   // Function to auto-highlight input content on focus
@@ -391,7 +392,7 @@ export default function TaxCalculationPage() {
           <div className="flex items-center justify-center space-x-8">
             {/* Step 1: รายได้ */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-income/${clientId}`)}
+              onClick={() => navigate(`/tax-income/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
@@ -404,7 +405,7 @@ export default function TaxCalculationPage() {
 
             {/* Step 2: ค่าลดหย่อน */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-deduction/${clientId}`)}
+              onClick={() => navigate(`/tax-deduction/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
@@ -417,7 +418,7 @@ export default function TaxCalculationPage() {
 
             {/* Step 3: ผลการคำนวณ */}
             <button
-              onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
+              onClick={() => navigate(`/tax-calculation/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">

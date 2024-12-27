@@ -19,7 +19,8 @@ const pageTransition = {
 }
 
 export default function TaxIncomePage() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
@@ -65,7 +66,7 @@ export default function TaxIncomePage() {
   }, {})
 
   const handleNext = () => {
-    navigate(`/${cfpId}/tax-deduction/${clientId}`)
+    navigate(`/tax-deduction/`)
   }
 
   const incomeAfterExpense = totalIncome - totalExpense
@@ -115,7 +116,7 @@ export default function TaxIncomePage() {
         <div className="flex-1 p-8 space-y-8">
           <div className="flex items-center justify-center space-x-8">
             <button
-              onClick={() => navigate(`/${cfpId}/tax-income/${clientId}`)}
+              onClick={() => navigate(`/tax-income/`)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
@@ -125,7 +126,7 @@ export default function TaxIncomePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/tax-deduction/${clientId}`)}
+              onClick={() => navigate(`/tax-deduction/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">
@@ -135,7 +136,7 @@ export default function TaxIncomePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/tax-calculation/${clientId}`)}
+              onClick={() => navigate(`/tax-calculation/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold cursor-pointer">

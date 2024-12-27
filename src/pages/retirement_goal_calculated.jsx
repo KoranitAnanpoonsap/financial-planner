@@ -19,7 +19,8 @@ const pageTransition = {
 }
 
 export default function RetirementGoalCalculated() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [retirementGoal, setRetirementGoal] = useState(null)
@@ -122,15 +123,15 @@ export default function RetirementGoalCalculated() {
   }
 
   const handleNavigateGeneralGoal = () => {
-    navigate(`/${cfpId}/goal-base/${clientId}`)
+    navigate(`/goal-base/`)
   }
 
   const handleNavigateRetirement = () => {
-    navigate(`/${cfpId}/retirement-goal/${clientId}`)
+    navigate(`/retirement-goal/`)
   }
 
   const handleDashboard = () => {
-    navigate(`/${cfpId}/dashboard`)
+    navigate(`/dashboard`)
   }
 
   // Format numbers with appropriate decimal places and locale

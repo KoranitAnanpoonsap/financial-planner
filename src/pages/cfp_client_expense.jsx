@@ -18,7 +18,8 @@ const pageTransition = {
 }
 
 export default function CFPClientExpensePage() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [expenses, setExpenses] = useState([])
@@ -151,12 +152,12 @@ export default function CFPClientExpensePage() {
   }
 
   const handleBack = () => {
-    navigate(`/${cfpId}/client-income/${clientId}`)
+    navigate(`/client-income/`)
   }
 
   const handleNext = () => {
     // Navigate to next page (e.g. cfp client asset page)
-    navigate(`/${cfpId}/client-asset/${clientId}`)
+    navigate(`/client-asset/`)
   }
 
   const handleTypeChange = (newType) => {
@@ -194,7 +195,7 @@ export default function CFPClientExpensePage() {
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
             <button
-              onClick={() => navigate(`/${cfpId}/client-info/${clientId}`)}
+              onClick={() => navigate(`/client-info/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -204,7 +205,7 @@ export default function CFPClientExpensePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-income/${clientId}`)}
+              onClick={() => navigate(`/client-income/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -214,7 +215,7 @@ export default function CFPClientExpensePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-expense/${clientId}`)}
+              onClick={() => navigate(`/client-expense/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
@@ -224,7 +225,7 @@ export default function CFPClientExpensePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-asset/${clientId}`)}
+              onClick={() => navigate(`/client-asset/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -234,7 +235,7 @@ export default function CFPClientExpensePage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-debt/${clientId}`)}
+              onClick={() => navigate(`/client-debt/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">

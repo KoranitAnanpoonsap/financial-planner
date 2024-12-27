@@ -33,72 +33,39 @@ function App() {
         <Route path="/planner-login" element={<PlannerLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/cfp-homepage/:cfpId" element={<CfpHomepage />} />
+        <Route path="/cfp-homepage/" element={<CfpHomepage />} />
         <Route
-          path="/:cfpId/portfolio-selection/:clientId"
+          path="/portfolio-selection/"
           element={<PortfolioSelectionCFP />}
         />
+        <Route path="/portfolio-chart/" element={<PortfolioCreationCFP />} />
+        <Route path="/cashflow-base/" element={<CFPCashflowBase />} />
         <Route
-          path="/:cfpId/portfolio-chart/:clientId"
-          element={<PortfolioCreationCFP />}
-        />
-        <Route
-          path="/:cfpId/cashflow-base/:clientId"
-          element={<CFPCashflowBase />}
-        />
-        <Route
-          path="/:cfpId/cashflow-base-calculated/:clientId"
+          path="/cashflow-base-calculated/"
           element={<CFPCashflowBaseCalculated />}
         />
-        <Route path="/:cfpId/goal-base/:clientId" element={<CFPGoalBase />} />
+        <Route path="/goal-base/" element={<CFPGoalBase />} />
         <Route
-          path="/:cfpId/goal-base-calculated/:clientId"
+          path="/goal-base-calculated/"
           element={<CFPGoalBaseCalculated />}
         />
+        <Route path="/retirement-goal/" element={<RetirementGoalPage />} />
         <Route
-          path="/:cfpId/retirement-goal/:clientId"
-          element={<RetirementGoalPage />}
-        />
-        <Route
-          path="/:cfpId/retirement-goal-calculated/:clientId"
+          path="/retirement-goal-calculated/"
           element={<RetirementGoalCalculated />}
         />
+        <Route path="/tax-income/" element={<TaxIncomePage />} />
+        <Route path="/tax-deduction/" element={<TaxDeductionPage />} />
+        <Route path="/tax-calculation/" element={<TaxCalculationPage />} />
         <Route
-          path="/:cfpId/tax-income/:clientId"
-          element={<TaxIncomePage />}
-        />
-        <Route
-          path="/:cfpId/tax-deduction/:clientId"
-          element={<TaxDeductionPage />}
-        />
-        <Route
-          path="/:cfpId/tax-calculation/:clientId"
-          element={<TaxCalculationPage />}
-        />
-        <Route
-          path="/:cfpId/financial-healthcheck/:clientId"
+          path="/financial-healthcheck/"
           element={<CFPFinancialHealthCheck />}
         />
-        <Route
-          path="/:cfpId/client-info/:clientId"
-          element={<CFPClientInfoPage />}
-        />
-        <Route
-          path="/:cfpId/client-income/:clientId"
-          element={<CFPClientIncomePage />}
-        />
-        <Route
-          path="/:cfpId/client-expense/:clientId"
-          element={<CFPClientExpensePage />}
-        />
-        <Route
-          path="/:cfpId/client-asset/:clientId"
-          element={<CFPClientAssetPage />}
-        />
-        <Route
-          path="/:cfpId/client-debt/:clientId"
-          element={<CFPClientDebtPage />}
-        />
+        <Route path="/client-info/" element={<CFPClientInfoPage />} />
+        <Route path="/client-income/" element={<CFPClientIncomePage />} />
+        <Route path="/client-expense/" element={<CFPClientExpensePage />} />
+        <Route path="/client-asset/" element={<CFPClientAssetPage />} />
+        <Route path="/client-debt/" element={<CFPClientDebtPage />} />
       </Routes>
     </Router>
   )

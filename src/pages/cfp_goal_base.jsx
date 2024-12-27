@@ -20,7 +20,8 @@ const pageTransition = {
 }
 
 export default function CFPGoalBase() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
@@ -161,11 +162,11 @@ export default function CFPGoalBase() {
   const handleCalculate = () => {
     // Navigate to calculation result page
     // Adjust the route as desired
-    navigate(`/${cfpId}/goal-base-calculated/${clientId}`)
+    navigate(`/goal-base-calculated/`)
   }
 
   const handleNavigateRetirement = () => {
-    navigate(`/${cfpId}/retirement-goal/${clientId}`)
+    navigate(`/retirement-goal/`)
   }
 
   return (

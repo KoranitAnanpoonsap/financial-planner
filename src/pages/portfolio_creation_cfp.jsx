@@ -20,8 +20,8 @@ const pageTransition = {
 }
 
 export default function PortfolioCreationCFP() {
-  const { clientId } = useParams()
-  const { cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const [totalInvestment, setTotalInvestment] = useState(0)
   const [portfolioReturn, setPortfolioReturn] = useState(0)
   const [assets, setAssets] = useState([])
@@ -52,7 +52,7 @@ export default function PortfolioCreationCFP() {
   }, [clientId])
 
   const handleEditPortfolio = () => {
-    navigate(`/${cfpId}/portfolio-selection/${clientId}`) // Navigate back to PortfolioSelectionCFP
+    navigate(`/portfolio-selection/`) // Navigate back to PortfolioSelectionCFP
   }
 
   return (

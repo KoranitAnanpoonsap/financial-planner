@@ -18,7 +18,8 @@ const pageTransition = {
 }
 
 export default function CFPClientInfoPage() {
-  const { clientId, cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [clientInfo, setClientInfo] = useState(null)
@@ -40,7 +41,7 @@ export default function CFPClientInfoPage() {
   }
 
   const handleNext = () => {
-    navigate(`/${cfpId}/client-income/${clientId}`)
+    navigate(`/client-income/`)
   }
 
   // Helper to format date of birth
@@ -71,7 +72,7 @@ export default function CFPClientInfoPage() {
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
             <button
-              onClick={() => navigate(`/${cfpId}/client-info/${clientId}`)}
+              onClick={() => navigate(`/client-info/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
@@ -81,7 +82,7 @@ export default function CFPClientInfoPage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-income/${clientId}`)}
+              onClick={() => navigate(`/client-income/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -91,7 +92,7 @@ export default function CFPClientInfoPage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-expense/${clientId}`)}
+              onClick={() => navigate(`/client-expense/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -101,7 +102,7 @@ export default function CFPClientInfoPage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-asset/${clientId}`)}
+              onClick={() => navigate(`/client-asset/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
@@ -111,7 +112,7 @@ export default function CFPClientInfoPage() {
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
-              onClick={() => navigate(`/${cfpId}/client-debt/${clientId}`)}
+              onClick={() => navigate(`/client-debt/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
