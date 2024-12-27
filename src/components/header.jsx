@@ -7,7 +7,7 @@ export default function Header() {
     localStorage.getItem("cfpFirstName") || ""
   )
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const { cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
   const navigate = useNavigate()
 
   // Fetch CFP first name based on cfpId only if not already stored
