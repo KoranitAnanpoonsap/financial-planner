@@ -37,7 +37,7 @@ export default function Header() {
   }
 
   const handleHomePage = () => {
-    navigate(`/cfp-homepage/${cfpId}`)
+    navigate(`/cfp-homepage/`)
   }
 
   const handleLogout = () => {
