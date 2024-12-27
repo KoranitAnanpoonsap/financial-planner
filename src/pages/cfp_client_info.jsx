@@ -17,6 +17,7 @@ const pageTransition = {
   duration: 0.3,
 }
 
+//lns;eklfbhskejfn;seklnkl;jsenfkl;snf;ksnk;f
 export default function CFPClientInfoPage() {
   const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
   const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
