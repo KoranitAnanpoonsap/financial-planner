@@ -182,13 +182,7 @@ export default function TaxCalculationPage() {
     const govPensionMax = Math.min(0.3 * totalIncome, 500000)
     const pvdMax = Math.min(0.15 * totalIncome, 500000)
     const nationSavingsMax = 30000
-
-    // ประกันบำนาญ (pensionInsurance) max 15% of total income not exceeding 200000
-    // But max will be 0 if sum of life and health insurance is not 100000
-    let pensionInsuranceMax = 0
-    if (insuranceSum === 100000) {
-      pensionInsuranceMax = Math.min(0.15 * totalIncome, 200000)
-    }
+    const pensionInsuranceMax = Math.min(0.15 * totalIncome, 200000)
 
     // The overall total is capped at 500,000 as per specifications
     // However, individual deductions are already capped
@@ -226,20 +220,42 @@ export default function TaxCalculationPage() {
       }
     }
 
+    let portion_pensionIns = 0
+    if (
+      taxDeductionsData.lifeInsurance + taxDeductionsData.healthInsurance <
+      100000
+    ) {
+      if (
+        100000 -
+          (taxDeductionsData.lifeInsurance +
+            taxDeductionsData.healthInsurance) >
+        taxDeductionsData.pensionInsurance
+      ) {
+        portion_pensionIns = taxDeductionsData.pensionInsurance
+      } else {
+        portion_pensionIns =
+          100000 -
+          (taxDeductionsData.lifeInsurance + taxDeductionsData.healthInsurance)
+      }
+    } else {
+      portion_pensionIns = 0
+    }
+
     const used = {
       rmf: taxDeductionsData.rmf || 0,
       ssf: taxDeductionsData.ssf || 0,
       govPensionFund: taxDeductionsData.govPensionFund || 0,
       pvd: taxDeductionsData.pvd || 0,
       nationSavingsFund: taxDeductionsData.nationSavingsFund || 0,
-      pensionInsurance: taxDeductionsData.pensionInsurance || 0,
+      pensionInsurance:
+        taxDeductionsData.pensionInsurance - portion_pensionIns || 0,
       total:
         (taxDeductionsData.rmf || 0) +
         (taxDeductionsData.ssf || 0) +
         (taxDeductionsData.govPensionFund || 0) +
         (taxDeductionsData.pvd || 0) +
         (taxDeductionsData.nationSavingsFund || 0) +
-        (taxDeductionsData.pensionInsurance || 0),
+        (taxDeductionsData.pensionInsurance - portion_pensionIns || 0),
     }
 
     return used

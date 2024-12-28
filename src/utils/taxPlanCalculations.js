@@ -141,6 +141,19 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
     totalTaxDeductions += td.eduDonation * 2
     totalTaxDeductions += td.politicalPartyDonation
     totalTaxDeductions += totalPlan
+
+    let portion_pensionIns = 0
+    if (td.lifeInsurance + td.healthInsurance < 100000) {
+      if (100000 - (td.lifeInsurance + td.healthInsurance) > td.pensionInsurance) {
+        portion_pensionIns = td.pensionInsurance
+      } else {
+        portion_pensionIns = 100000 - (td.lifeInsurance + td.healthInsurance)
+      }
+    } else {
+      portion_pensionIns = 0
+    }
+
+    totalTaxDeductions += portion_pensionIns
   }
 
   // income after deductions

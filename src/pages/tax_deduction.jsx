@@ -70,6 +70,7 @@ export default function TaxDeductionPage() {
     parentHealthInsuranceDeduction: 0,
     lifeInsuranceDeduction: 0,
     healthInsuranceDeduction: 0,
+    portionPensionInsuranceDeduction: 0,
     pensionInsuranceDeduction: 0,
     spouseNoIncomeLifeInsuranceDeduction: 0,
     rmfDeduction: 0,
@@ -219,10 +220,23 @@ export default function TaxDeductionPage() {
       healthIns -= lifeIns + healthIns - 100000
     }
 
-    let pensionIns = Math.min(data.pensionInsurance, 0.15 * totalInc, 200000)
+    let portion_pensionIns = 0
     if (lifeIns + healthIns < 100000) {
-      pensionIns = 0
+      if (100000 - (lifeIns + healthIns) > data.pensionInsurance) {
+        portion_pensionIns = data.pensionInsurance
+      } else {
+        portion_pensionIns = 100000 - (lifeIns + healthIns)
+      }
+    } else {
+      portion_pensionIns = 0
     }
+
+    let pensionIns = Math.min(
+      data.pensionInsurance - portion_pensionIns,
+      0.15 * totalInc,
+      200000
+    )
+
     const spouseNoIncome = Math.min(data.spouseNoIncomeLifeInsurance, 10000)
 
     const rmf = Math.min(data.rmf, 0.3 * totalInc, 500000)
@@ -249,6 +263,7 @@ export default function TaxDeductionPage() {
       prenatalDeduct +
       parentHealth +
       lifeIns +
+      portion_pensionIns +
       healthIns +
       pensionGroup +
       spouseNoIncome +
@@ -282,6 +297,7 @@ export default function TaxDeductionPage() {
       parentHealthInsuranceDeduction: parentHealth,
       lifeInsuranceDeduction: lifeIns,
       healthInsuranceDeduction: healthIns,
+      portionPensionInsuranceDeduction: portion_pensionIns,
       pensionInsuranceDeduction: pensionIns,
       spouseNoIncomeLifeInsuranceDeduction: spouseNoIncome,
       rmfDeduction: rmf,
@@ -665,6 +681,21 @@ export default function TaxDeductionPage() {
                 </div>
               </div>
 
+              {/* add portion of Pension Insurance */}
+              <div className="flex items-center justify-between">
+                <span className="text-tfpa_blue">
+                  -เพิ่มส่วน เบี้ยประกันชีวิตแบบบำนาญ
+                </span>
+                <div className="flex items-center space-x-4 w-1/2">
+                  <div className="w-28" />
+                  <span className="w-3"></span>
+                  <span className="text-tfpa_gold font-bold">
+                    {displayValues.portionPensionInsuranceDeduction.toLocaleString()}
+                  </span>
+                  <span className="text-tfpa_blue font-bold"> บาท</span>
+                </div>
+              </div>
+
               {/* Health Insurance */}
               <div className="flex items-center justify-between">
                 <span className="text-tfpa_blue font-bold">
@@ -715,11 +746,8 @@ export default function TaxDeductionPage() {
                       setDeductionData((prev) => ({
                         ...prev,
                         pensionInsurance:
-                          prev.lifeInsurance + prev.healthInsurance < 100000
-                            ? 0
-                            : Number(e.target.value) >
-                              Math.min(0.15 * totalIncome, 200000)
-                            ? Math.min(0.15 * totalIncome, 200000)
+                          Number(e.target.value) > 300000
+                            ? 300000
                             : Math.max(0, Number(e.target.value)),
                       }))
                     }

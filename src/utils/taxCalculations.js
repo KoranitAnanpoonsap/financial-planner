@@ -124,9 +124,28 @@ export function calculateTaxForClient(incomes, td) {
     totalTaxDeductions += td.eduDonation * 2
     totalTaxDeductions += td.politicalPartyDonation
 
+    let portion_pensionIns = 0
+    if (td.lifeInsurance + td.healthInsurance < 100000) {
+      if (100000 - (td.lifeInsurance + td.healthInsurance) > td.pensionInsurance) {
+        portion_pensionIns = td.pensionInsurance
+      } else {
+        portion_pensionIns = 100000 - (td.lifeInsurance + td.healthInsurance)
+      }
+    } else {
+      portion_pensionIns = 0
+    }
+
+    totalTaxDeductions += portion_pensionIns
+
+    let newPensionIns = Math.min(
+      td.pensionInsurance - portion_pensionIns,
+      0.15 * totalIncome,
+      200000
+    )
+
     // Check pension group sum limit of 500,000
     const pensionGroupSum = Math.min(
-      td.pensionInsurance +
+      newPensionIns +
       td.rmf +
       td.ssf +
       td.govPensionFund +
