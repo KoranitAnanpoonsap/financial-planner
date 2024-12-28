@@ -27,8 +27,8 @@ const pageTransition = {
 }
 
 export default function ClientBluePanel() {
-  const { clientId } = useParams()
-  const { cfpId } = useParams()
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
   const location = useLocation()
 
