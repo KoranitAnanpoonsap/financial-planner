@@ -12,6 +12,7 @@ import CFPCashflowBase from "./pages/cfp_cashflow_base"
 import CFPCashflowBaseCalculated from "./pages/cfp_cashflow_base_calculated"
 import CFPGoalBase from "./pages/cfp_goal_base"
 import CFPGoalBaseCalculated from "./pages/cfp_goal_base_calculated"
+import CFPGoalBaseDashboard from "./pages/cfp_goal_base_dashboard.jsx";
 import RetirementGoalPage from "./pages/retirement_goal"
 import RetirementGoalCalculated from "./pages/retirement_goal_calculated"
 import TaxIncomePage from "./pages/tax_income"
@@ -48,6 +49,10 @@ function App() {
         <Route
           path="/goal-base-calculated/"
           element={<CFPGoalBaseCalculated />}
+        />
+        <Route
+          path="/goal-base-dashboard/"
+          element={<CFPGoalBaseDashboard />}
         />
         <Route path="/retirement-goal/" element={<RetirementGoalPage />} />
         <Route
