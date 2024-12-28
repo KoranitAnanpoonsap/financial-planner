@@ -15,7 +15,8 @@ export default {
         tfpa_gold_pale: '#E4C794',
         tfpa_gold_hover: '#855D19',
         tfpa_blue_hover: '#002957',
-        tfpa_blue_panel_select: '#1C57A4'
+        tfpa_blue_panel_select: '#1C57A4',
+        tfpa_light_blue: '#86EAE9',
       },
     },
   },
