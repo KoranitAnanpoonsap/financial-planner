@@ -86,7 +86,7 @@ export default function CFPGoalBaseCalculated() {
   }
 
   const handleDashboard = () => {
-    navigate(`/dashboard`)
+    navigate(`/goal-base-dashboard`)
   }
 
   const isSufficient = generalGoalAnnualSaving <= 0
