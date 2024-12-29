@@ -19,76 +19,111 @@ export async function fetchAndCalculateTaxPlanForClient(clientId, totalPlan) {
 }
 
 export function calculateTaxPlanForClient(incomes, td, totalPlan) {
-  // Adjust incomes to yearly if frequency == "ทุกเดือน"
-  const adjustedIncomes = incomes.map((income) => {
-    if (income.clientIncomeFrequency === "ทุกเดือน") {
-      income.clientIncomeAmount = income.clientIncomeAmount * 12
+  // 1) Adjust incomes to yearly if frequency == "ทุกเดือน".
+  const adjustedIncomes = incomes.map((inc) => {
+    if (inc.clientIncomeFrequency === "ทุกเดือน") {
+      inc.clientIncomeAmount = inc.clientIncomeAmount * 12
     }
-    return income
+    return inc
   })
 
-  // Calculate total income
+  // 2) Calculate total income
   const totalIncome = adjustedIncomes.reduce(
     (sum, inc) => sum + inc.clientIncomeAmount,
     0
   )
 
-  // Group by type
-  const incomeByType = adjustedIncomes.reduce((map, inc) => {
-    const type = inc.clientIncomeType
-    if (!map[type]) map[type] = 0
-    map[type] += inc.clientIncomeAmount
-    return map
-  }, {})
-
-  // Calculate Expense Deductions based on rules
+  // 3) Calculate expense deductions (per record), because 40(5) & 40(6) need subtypes.
   let totalExpenseDeductions = 0
 
-  // Handle "เงินเดือน" and "รับจ้างทำงาน" together
-  const salaryTypes = ["เงินเดือน", "รับจ้างทำงาน"]
+  // We'll combine 40(1) & 40(2) first, because they share a 50%-capped-at-100k rule.
   let combinedSalaryAmount = 0
-  salaryTypes.forEach((type) => {
-    if (incomeByType[type]) {
-      combinedSalaryAmount += incomeByType[type]
-      delete incomeByType[type] // Remove from incomeByType to prevent double processing
+  const otherIncomes = []
+
+  for (const inc of adjustedIncomes) {
+    if (
+      inc.clientIncomeType === "40(1) เงินเดือน" ||
+      inc.clientIncomeType === "40(2) รับจ้างทำงาน"
+    ) {
+      // We'll accumulate these amounts, then apply a single 50% capped rule at the end.
+      combinedSalaryAmount += inc.clientIncomeAmount
+    } else {
+      // We'll handle all other records individually (including 40(3)...40(8))
+      otherIncomes.push(inc)
     }
-  })
+  }
+
+  // Now handle 40(1) & 40(2) combined
   if (combinedSalaryAmount > 0) {
     let deduction = combinedSalaryAmount * 0.5
     if (deduction > 100000) deduction = 100000
     totalExpenseDeductions += deduction
   }
 
-  // Now process the remaining income types
-  for (const [type, sumAmount] of Object.entries(incomeByType)) {
-    let deduction
-    switch (type) {
-      case "ค่าลิขสิทธิ์ สิทธิบัตร":
+  // Now handle each of the "other" incomes individually
+  for (const inc of otherIncomes) {
+    let deduction = 0
+    switch (inc.clientIncomeType) {
+      case "40(3) ค่าลิขสิทธิ์ สิทธิบัตร":
         // 50% capped at 100,000
-        deduction = sumAmount * 0.5
+        deduction = inc.clientIncomeAmount * 0.5
         if (deduction > 100000) deduction = 100000
         break
-      case "ดอกเบี้ย เงินปันผล":
+
+      case "40(4) ดอกเบี้ย เงินปันผล":
         // 0%
         deduction = 0
         break
-      case "ค่าเช่าทรัพย์สิน":
-        // 20%
-        deduction = sumAmount * 0.2
+
+      case "40(5) ค่าเช่าทรัพย์สิน":
+        // Use clientIncome405Type to decide the rate:
+        switch (inc.clientIncome405Type) {
+          case "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ":
+            deduction = inc.clientIncomeAmount * 0.3
+            break
+          case "ที่ดินที่ใช้ในการเกษตร":
+            deduction = inc.clientIncomeAmount * 0.2
+            break
+          case "ที่ดินที่มิได้ใช้ในการเกษตร":
+            deduction = inc.clientIncomeAmount * 0.15
+            break
+          case "ทรัพย์สินอื่นๆ":
+            deduction = inc.clientIncomeAmount * 0.1
+            break
+          default:
+            // If no subtype or unrecognized, treat as 0 or handle as needed
+            deduction = 0
+            break
+        }
         break
-      case "วิชาชีพอิสระ":
-        // 45%
-        deduction = sumAmount * 0.45
+
+      case "40(6) วิชาชีพอิสระ":
+        // Use clientIncome406Type to decide the rate:
+        switch (inc.clientIncome406Type) {
+          case "การประกอบโรคศิลปะ":
+            deduction = inc.clientIncomeAmount * 0.6
+            break
+          case "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม":
+            deduction = inc.clientIncomeAmount * 0.3
+            break
+          default:
+            deduction = 0
+            break
+        }
         break
-      case "รับเหมาก่อสร้าง":
+
+      case "40(7) รับเหมาก่อสร้าง":
         // 60%
-        deduction = sumAmount * 0.6
+        deduction = inc.clientIncomeAmount * 0.6
         break
-      case "รายได้อื่นๆ":
+
+      case "40(8) รายได้อื่นๆ":
         // 60%
-        deduction = sumAmount * 0.6
+        deduction = inc.clientIncomeAmount * 0.6
         break
+
       default:
+        // Unrecognized or empty
         deduction = 0
         break
     }
@@ -165,11 +200,14 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
 
   const method1Tax = calculateMethod1Tax(incomeAfterDeductions)
 
-  const incomeSalary = incomeByType["เงินเดือน"] || 0
-  const incomeNonSalary = totalIncome - incomeSalary
+  const salary = adjustedIncomes
+    .filter((i) => i.clientIncomeType === "40(1) เงินเดือน")
+    .reduce((sum, i) => sum + i.clientIncomeAmount, 0)
+  const incomeNonSalary = totalIncome - salary
+
   let method2Tax = 0
   if (incomeNonSalary > 1000000) {
-    method2Tax = incomeNonSalary * 0.005 // 0.5%
+    method2Tax = incomeNonSalary * 0.005
   }
 
   let finalTax = method1Tax

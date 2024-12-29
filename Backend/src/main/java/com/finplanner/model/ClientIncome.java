@@ -21,6 +21,12 @@ public class ClientIncome {
     @Column(name = "client_income_annual_growth_rate", nullable = false)
     private Float clientIncomeAnnualGrowthRate;
 
+    @Column(name = "client_income_405_type", length = 100, nullable = true)
+    private String clientIncome405Type;
+
+    @Column(name = "client_income_406_type", length = 100, nullable = true)
+    private String clientIncome406Type;
+
     // Getters and Setters for all fields
 
     public ClientIncomeId getId() {
@@ -61,5 +67,21 @@ public class ClientIncome {
 
     public void setClientIncomeAnnualGrowthRate(Float clientIncomeAnnualGrowthRate) {
         this.clientIncomeAnnualGrowthRate = clientIncomeAnnualGrowthRate;
+    }
+
+    public String getClientIncome405Type() {
+        return clientIncome405Type;
+    }
+
+    public void setClientIncome405Type(String clientIncome405Type) {
+        this.clientIncome405Type = clientIncome405Type;
+    }
+
+    public String getClientIncome406Type() {
+        return clientIncome406Type;
+    }
+
+    public void setClientIncome406Type(String clientIncome406Type) {
+        this.clientIncome406Type = clientIncome406Type;
     }
 }
