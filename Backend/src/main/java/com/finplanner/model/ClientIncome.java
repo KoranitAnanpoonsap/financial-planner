@@ -27,6 +27,12 @@ public class ClientIncome {
     @Column(name = "client_income_406_type", length = 100, nullable = true)
     private String clientIncome406Type;
 
+    @Column(name = "client_income_408_type", length = 100, nullable = true)
+    private String clientIncome408Type;
+
+    @Column(name = "client_income_408_type_other_expense_deduction", nullable = true)
+    private Integer clientIncome408TypeOtherExpenseDeduction;
+
     // Getters and Setters for all fields
 
     public ClientIncomeId getId() {
@@ -83,5 +89,21 @@ public class ClientIncome {
 
     public void setClientIncome406Type(String clientIncome406Type) {
         this.clientIncome406Type = clientIncome406Type;
+    }
+
+    public String getClientIncome408Type() {
+        return clientIncome408Type;
+    }
+
+    public void setClientIncome408Type(String clientIncome408Type) {
+        this.clientIncome408Type = clientIncome408Type;
+    }
+
+    public Integer getClientIncome408TypeOtherExpenseDeduction() {
+        return clientIncome408TypeOtherExpenseDeduction;
+    }
+
+    public void setClientIncome408TypeOtherExpenseDeduction(Integer clientIncome408TypeOtherExpenseDeduction) {
+        this.clientIncome408TypeOtherExpenseDeduction = clientIncome408TypeOtherExpenseDeduction;
     }
 }

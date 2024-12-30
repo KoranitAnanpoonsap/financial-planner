@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import Header from "../components/header"
 import Footer from "../components/footer"
+import Header from "../components/header"
 import ClientBluePanel from "../components/clientBluePanel"
 import { motion } from "framer-motion"
 
@@ -34,6 +34,10 @@ export default function CFPClientIncomePage() {
   const [growthRate, setGrowthRate] = useState("")
   const [income405Type, setIncome405Type] = useState("") // For 40(5)
   const [income406Type, setIncome406Type] = useState("") // For 40(6)
+  const [income408Type, setIncome408Type] = useState("") // For 40(8)
+
+  // For showing/hiding the 40(8) details modal
+  const [show408Details, setShow408Details] = useState(false)
 
   // Income types
   const incomeTypes = [
@@ -59,6 +63,14 @@ export default function CFPClientIncomePage() {
   const income406SubTypes = [
     "การประกอบโรคศิลปะ",
     "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม",
+  ]
+
+  // 40(8) subtypes
+  const income408SubTypes = [
+    "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)",
+    "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)",
+    "ประเภทที่ (2) ถึง (43)",
+    "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)",
   ]
 
   const frequencies = [
@@ -98,19 +110,20 @@ export default function CFPClientIncomePage() {
       clientIncomeAmount: parseFloat(amount),
       clientIncomeAnnualGrowthRate: parseFloat(growthRate) / 100,
 
-      // Provide the sub-type:
+      // Provide the sub-type if 40(5), 40(6), or 40(8):
       clientIncome405Type: "",
       clientIncome406Type: "",
+      clientIncome408Type: "",
     }
 
-    // If user picks 40(5), set clientIncome405Type
     if (type.startsWith("40(5)")) {
       newIncome.clientIncome405Type = income405Type || ""
     }
-
-    // If user picks 40(6), set clientIncome406Type
     if (type.startsWith("40(6)")) {
       newIncome.clientIncome406Type = income406Type || ""
+    }
+    if (type.startsWith("40(8)")) {
+      newIncome.clientIncome408Type = income408Type || ""
     }
 
     let url = `http://localhost:8080/api/clientincome`
@@ -122,7 +135,7 @@ export default function CFPClientIncomePage() {
 
     try {
       const res = await fetch(url, {
-        method: method,
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newIncome),
       })
@@ -145,6 +158,7 @@ export default function CFPClientIncomePage() {
       setGrowthRate("")
       setIncome405Type("")
       setIncome406Type("")
+      setIncome408Type("")
       setEditMode(false)
       setEditingIncome(null)
     } catch (error) {
@@ -179,10 +193,9 @@ export default function CFPClientIncomePage() {
     setAmount(inc.clientIncomeAmount.toString())
     setGrowthRate((inc.clientIncomeAnnualGrowthRate * 100).toString())
 
-    // If the user previously set a 40(5) subtype or 40(6) subtype,
-    // we load them for editing:
     setIncome405Type(inc.clientIncome405Type || "")
     setIncome406Type(inc.clientIncome406Type || "")
+    setIncome408Type(inc.clientIncome408Type || "")
   }
 
   const handleCancelEdit = () => {
@@ -195,6 +208,7 @@ export default function CFPClientIncomePage() {
     setGrowthRate("")
     setIncome405Type("")
     setIncome406Type("")
+    setIncome408Type("")
   }
 
   const handleBack = () => {
@@ -293,12 +307,15 @@ export default function CFPClientIncomePage() {
                   value={type}
                   onChange={(e) => {
                     setType(e.target.value)
-                    // Reset any sub-type if not 40(5) or 40(6)
+                    // Reset any sub-type if not 40(5), 40(6), or 40(8)
                     if (!e.target.value.startsWith("40(5)")) {
                       setIncome405Type("")
                     }
                     if (!e.target.value.startsWith("40(6)")) {
                       setIncome406Type("")
+                    }
+                    if (!e.target.value.startsWith("40(8)")) {
+                      setIncome408Type("")
                     }
                   }}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
@@ -350,6 +367,42 @@ export default function CFPClientIncomePage() {
                         {sub}
                       </option>
                     ))}
+                  </select>
+                </div>
+              )}
+
+              {/* 40(8) subtype dropdown + details button (beside the label) */}
+              {type.startsWith("40(8)") && (
+                <div>
+                  {/* "ประเภท 40(8)" label and a details button just a small space apart */}
+                  <label className="text-tfpa_blue font-bold mb-2 inline-flex items-center">
+                    ประเภท 40(8)
+                    <button
+                      type="button"
+                      onClick={() => setShow408Details(true)}
+                      className="ml-2 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-2 py-1 text-xs rounded-xl font-ibm"
+                    >
+                      รายละเอียด
+                    </button>
+                  </label>
+                  <select
+                    value={income408Type}
+                    onChange={(e) => setIncome408Type(e.target.value)}
+                    className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                  >
+                    <option value="">เลือก</option>
+                    <option value="ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)">
+                      ประเภทที่ (1) เงินได้ไม่เกิน 300,000
+                    </option>
+                    <option value="ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)">
+                      ประเภทที่ (1) เงินได้เกิน 300,000
+                    </option>
+                    <option value="ประเภทที่ (2) ถึง (43)">
+                      ประเภทที่ (2) ถึง (43)
+                    </option>
+                    <option value="เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)">
+                      เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)
+                    </option>
                   </select>
                 </div>
               )}
@@ -472,11 +525,12 @@ export default function CFPClientIncomePage() {
                   <tr key={`${inc.id.clientId}-${inc.id.clientIncomeName}`}>
                     <td className="py-2 px-4 border">{inc.clientIncomeType}</td>
                     <td className="py-2 px-4 border">
-                      {/* If 40(5), show inc.clientIncome405Type, if 40(6), show inc.clientIncome406Type */}
                       {inc.clientIncomeType.startsWith("40(5)")
                         ? inc.clientIncome405Type
                         : inc.clientIncomeType.startsWith("40(6)")
                         ? inc.clientIncome406Type
+                        : inc.clientIncomeType.startsWith("40(8)")
+                        ? inc.clientIncome408Type
                         : "-"}
                     </td>
                     <td className="py-2 px-4 border">
@@ -530,6 +584,185 @@ export default function CFPClientIncomePage() {
         </div>
       </div>
       <Footer />
+
+      {/* 40(8) Details Modal */}
+      {show408Details && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white w-11/12 md:w-3/4 lg:w-1/2 p-6 rounded shadow-lg overflow-auto max-h-[80vh]">
+            <h2 className="text-xl font-bold text-tfpa_blue mb-4">
+              รายละเอียดเงินได้พึงประเมิน 40(8) และ
+              อัตราการหักค่าใช้จ่ายเป็นการเหมาสำหรับภาษี
+            </h2>
+            <p className="text-sm text-gray-700 mb-4 leading-6">
+              <strong>ประเภทที่ (1)</strong> – การแสดงของนักแสดงละคร ภาพยนตร์
+              วิทยุหรือโทรทัศน์ นักร้อง นักดนตรี นักกีฬาอาชีพ
+              หรือนักแสดงเพื่อความบันเทิงใด ๆ
+              <br />
+              &emsp;– (ก) สำหรับเงินได้ส่วนที่ไม่เกิน 300,000 บาท หักค่าใช้จ่าย
+              60%
+              <br />
+              &emsp;– (ข) สำหรับเงินได้ส่วนที่เกิน 300,000 บาท หักค่าใช้จ่าย 40%
+              <br />
+              &emsp;โดยการหักค่าใช้จ่ายตาม (ก) และ (ข) รวมกันต้องไม่เกิน 600,000
+              บาท
+              <br />
+              <strong>ประเภทที่ (2)</strong> –
+              การขายที่ดินเงินผ่อนหรือให้เช่าซื้อที่ดิน &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (3)</strong> – การเก็บค่าต๋ง
+              หรือค่าเกมจากการพนัน การแข่งขันหรือการเล่นต่าง ๆ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (4)</strong> – การถ่าย ล้าง อัด
+              หรือขยายรูปภาพยนตร์ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (5)</strong> – การทำกิจการคานเรือ อู่เรือ
+              หรือซ่อมเรือที่มิใช่ซ่อมเครื่องจักร เครื่องกล &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (6)</strong> – การทำรองเท้า
+              และเครื่องหนังแท้หรือหนังเทียม รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (7)</strong> – การตัด เย็บ ถัก ปักเสื้อผ้า
+              หรือสิ่งอื่น ๆ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (8)</strong> – การทำ ตกแต่ง
+              หรือซ่อมแซมเครื่องเรือน รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (9)</strong> – การทำกิจการโรงแรม หรือภัตตาคาร
+              หรือการปรุงอาหารหรือเครื่องดื่มจำหน่าย &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (10)</strong> – การดัด ตัด แต่งผม
+              หรือตกแต่งร่างกาย &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (11)</strong> – การทำสบู่ แชมพู หรือเครื่องสำอาง
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (12)</strong> – การทำวรรณกรรม
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (13)</strong> – การค้าเครื่องเงิน ทอง นาก เพชร
+              พลอย หรืออัญมณีอื่น ๆ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (14)</strong> – การทำกิจการสถานพยาบาล
+              ตามกฎหมายว่าด้วยสถานพยาบาลเฉพาะ ที่มีเตียงรับผู้ป่วยค้างคืน
+              รวมทั้งการรักษาพยาบาลและการจำหน่ายยา &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (15)</strong> – การโม่หรือย่อยหิน
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (16)</strong> – การทำป่าไม้ สวนยาง หรือไม้ยืนต้น
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (17)</strong> – การขนส่ง หรือรับจ้างด้วยยานพาหนะ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (18)</strong> – การทำบล็อก และตรา
+              การรับพิมพ์หนังสือเย็บเล่มจด เอกสาร รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (19)</strong> – การทำเหมืองแร่
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (20)</strong> –
+              การทำเครื่องดื่มตามกฎหมายว่าด้วยภาษีสรรพสามิต &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (21)</strong> – การทำเครื่องกระเบื้อง
+              เครื่องเคลือบ เครื่องซีเมนต์ หรือดินเผา &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (22)</strong> – การทำหรือจำหน่ายกระแสไฟฟ้า
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (23)</strong> – การทำน้ำแข็ง &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (24)</strong> – การทำกาว แป้งเปียก
+              หรือสิ่งที่มีลักษณะทำนองเดียวกัน &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (25)</strong> – การทำลูกโป่ง เครื่องแก้ว
+              เครื่องพลาสติก หรือเครื่องยางสำเร็จรูป &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (26)</strong> – การซักรีด หรือย้อมสี
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (27)</strong> –
+              การขายของนอกจากที่ระบุไว้ในข้ออื่น ซึ่งผู้ขายมิได้เป็นผู้ผลิต
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (28)</strong> –
+              รางวัลที่เจ้าของม้าได้จากการส่งม้าเข้าแข่ง &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (29)</strong> – การรับสินไถ่ทรัพย์สินที่ขายฝาก
+              หรือการได้กรรมสิทธิ์ในทรัพย์สินโดยเด็ดขาดจากการขายฝาก
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (30)</strong> – การรมยาง การทำยางแผ่น
+              หรือยางอย่างอื่นที่มิใช่ยางสำเร็จรูป &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (31)</strong> – การฟอกหนัง &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (32)</strong> – การทำน้ำตาล
+              หรือน้ำเหลืองของน้ำตาล &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (33)</strong> – การจับสัตว์น้ำ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (34)</strong> – การทำกิจการโรงเลื่อย
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (35)</strong> – การกลั่น หรือหีบน้ำมัน
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (36)</strong> – การให้เช่าซื้อสังหาริมทรัพย์
+              ที่ไม่เข้าลักษณะตามมาตรา 40 (5) แห่งประมวลรัษฎากร
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (37)</strong> – การทำกิจการโรงสีข้าว
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (38)</strong> –
+              การทำเกษตรกรรมประเภทไม้ล้มลุกและธัญชาติ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (39)</strong> – การอบหรือบ่มใบยาสูบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (40)</strong> – การเลี้ยงสัตว์ทุกชนิด
+              รวมทั้งการขายวัตถุพลอยได้ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (41)</strong> – การฆ่าสัตว์จำหน่าย
+              รวมทั้งการขายวัตถุพลอยได้ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (42)</strong> – การทำนาเกลือ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (43)</strong> –
+              การขายเรือกำปั่นหรือเรือมีระวางตั้งแต่ 6 ตันขึ้นไป เรือกลไฟ
+              หรือเรือยนต์มีระวางตั้งแต่ 5 ตันขึ้นไป หรือแพ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>
+                – เงินได้ประเภทที่ไม่ได้ระบุ ให้หักค่าใช้จ่ายจริง
+                ตามความจำเป็นและสมควร
+              </strong>
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded-xl"
+                onClick={() => setShow408Details(false)}
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

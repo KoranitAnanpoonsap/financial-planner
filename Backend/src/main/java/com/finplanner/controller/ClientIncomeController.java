@@ -41,19 +41,25 @@ public class ClientIncomeController {
 
     // Update an existing income by clientId and clientIncomeName
     @PutMapping("/{clientId}/{clientIncomeName}")
-    public ResponseEntity<ClientIncome> updateIncome(@PathVariable("clientId") Integer clientId,
+    public ResponseEntity<ClientIncome> updateIncome(
+            @PathVariable("clientId") Integer clientId,
             @PathVariable("clientIncomeName") String clientIncomeName,
             @RequestBody ClientIncome updatedIncome) {
         ClientIncomeId id = new ClientIncomeId(clientIncomeName, clientId);
 
         return clientIncomeRepository.findById(id)
                 .map(existingIncome -> {
-                    // Update the fields as needed
                     existingIncome.setClientIncomeType(updatedIncome.getClientIncomeType());
                     existingIncome.setClientIncomeFrequency(updatedIncome.getClientIncomeFrequency());
                     existingIncome.setClientIncomeAmount(updatedIncome.getClientIncomeAmount());
                     existingIncome.setClientIncomeAnnualGrowthRate(updatedIncome.getClientIncomeAnnualGrowthRate());
+                    existingIncome.setClientIncome405Type(updatedIncome.getClientIncome405Type());
+                    existingIncome.setClientIncome406Type(updatedIncome.getClientIncome406Type());
+                    existingIncome.setClientIncome408Type(updatedIncome.getClientIncome408Type());
+                    existingIncome.setClientIncome408TypeOtherExpenseDeduction(
+                            updatedIncome.getClientIncome408TypeOtherExpenseDeduction());
 
+                    // Then save:
                     ClientIncome savedIncome = clientIncomeRepository.save(existingIncome);
                     return ResponseEntity.ok(savedIncome);
                 })

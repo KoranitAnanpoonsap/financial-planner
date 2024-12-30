@@ -23,50 +23,114 @@ export default function TaxIncomePage() {
   const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
-  // States
+  // We'll store incomes in a state that includes both the original & displayed amounts.
   const [incomes, setIncomes] = useState([])
   const [totalIncome, setTotalIncome] = useState(0)
   const [totalExpense, setTotalExpense] = useState(0)
 
-  // On mount or whenever clientId changes
+  // For showing/hiding the 40(8) details modal
+  const [show408Details, setShow408Details] = useState(false)
+
   useEffect(() => {
     if (!clientId) return
     fetchData()
   }, [clientId])
 
-  // Fetch data
-  const fetchData = async () => {
+  async function fetchData() {
     try {
-      const incomesRes = await fetch(
+      // 1) Fetch all client incomes from your API
+      const res = await fetch(
         `http://localhost:8080/api/clientincome/${clientId}`
       )
-      if (!incomesRes.ok) throw new Error("Failed to fetch incomes")
-      const incomesData = await incomesRes.json()
+      if (!res.ok) throw new Error("Failed to fetch incomes")
+      const data = await res.json()
 
-      // Adjust annual amounts if frequency is monthly, etc.
-      const adjustedIncomes = incomesData.map((inc) => {
-        let amount = inc.clientIncomeAmount
+      // For UI display, add displayIncomeAmount
+      // but keep original clientIncomeAmount for DB updates.
+      const adjusted = data.map((inc) => {
+        let displayIncomeAmount = inc.clientIncomeAmount
         if (inc.clientIncomeFrequency === "ทุกเดือน") {
-          amount = amount * 12
+          displayIncomeAmount *= 12
         }
         return {
           ...inc,
-          clientIncomeAmount: amount,
+          displayIncomeAmount,
         }
       })
-      setIncomes(adjustedIncomes)
+      setIncomes(adjusted)
 
-      // Also fetch totalIncome, totalExpense from your tax logic
+      // 2) Compute totalIncome & totalExpense from your tax logic
       const result = await fetchAndCalculateTaxForClient(clientId)
       setTotalIncome(result.totalIncome)
       setTotalExpense(result.totalExpenseDeductions)
     } catch (error) {
-      console.error(error)
+      console.error("Error fetching tax income data:", error)
     }
   }
 
-  // We separate data by main type (40(1) ... 40(8))
-  // and for 40(5) and 40(6), further separate by subtypes
+  /**
+   * Update ONLY the 40(8) "otherExpense" field in local state & DB.
+   * item is the *entire* record from the DB (with displayIncomeAmount added for UI).
+   */
+  const handleUpdateOtherExpense = async (item, newVal) => {
+    const newDeduction = parseInt(newVal, 10) || 0
+
+    // 1) Update local state so input won't revert
+    setIncomes((prevIncomes) =>
+      prevIncomes.map((inc) => {
+        if (
+          inc.id.clientId === item.id.clientId &&
+          inc.id.clientIncomeName === item.id.clientIncomeName
+        ) {
+          return {
+            ...inc,
+            clientIncome408TypeOtherExpenseDeduction: newDeduction,
+          }
+        }
+        return inc
+      })
+    )
+
+    // 2) Build an updated object for the PUT with all necessary fields.
+    //    The server expects a complete record (non-null fields).
+    //    Notice we do *not* use inc.displayIncomeAmount for the DB:
+    const updatedIncome = {
+      id: item.id, // the composite key
+      clientIncomeType: item.clientIncomeType,
+      clientIncomeFrequency: item.clientIncomeFrequency,
+      clientIncomeAmount: item.clientIncomeAmount, // keep the original amount
+      clientIncomeAnnualGrowthRate: item.clientIncomeAnnualGrowthRate,
+      clientIncome405Type: item.clientIncome405Type,
+      clientIncome406Type: item.clientIncome406Type,
+      clientIncome408Type: item.clientIncome408Type,
+      // Overwrite only the 408 deduction
+      clientIncome408TypeOtherExpenseDeduction: newDeduction,
+    }
+
+    // 3) Send PUT request
+    try {
+      // Make sure we encode the income name if your endpoint requires it.
+      const putUrl = `http://localhost:8080/api/clientincome/${clientId}/${encodeURIComponent(
+        item.id.clientIncomeName
+      )}`
+
+      const res = await fetch(putUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedIncome),
+      })
+      if (!res.ok) {
+        console.error("Failed to update otherExpenseDeduction in DB")
+      } else {
+        // Optionally re-fetch or trust local state
+        // fetchData()
+      }
+    } catch (err) {
+      console.error("Error updating 40(8) other expense:", err)
+    }
+  }
+
+  // Prepare categories structure
   const categories = {
     "40(1) เงินเดือน": {
       code: "40(1)",
@@ -92,7 +156,6 @@ export default function TaxIncomePage() {
       code: "40(5)",
       label: "เงินได้จากการให้เช่าทรัพย์สิน",
       amount: 0,
-      // Subtypes from your specification
       subtypes: {
         "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ": 0,
         ที่ดินที่ใช้ในการเกษตร: 0,
@@ -104,7 +167,6 @@ export default function TaxIncomePage() {
       code: "40(6)",
       label: "เงินได้จากวิชาชีพอิสระ",
       amount: 0,
-      // Subtypes from your specification
       subtypes: {
         การประกอบโรคศิลปะ: 0,
         "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม": 0,
@@ -119,40 +181,57 @@ export default function TaxIncomePage() {
       code: "40(8)",
       label: "เงินได้อื่นๆ",
       amount: 0,
+      subtypes: {
+        "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)": 0,
+        "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)": 0,
+        "ประเภทที่ (2) ถึง (43)": 0,
+        "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)": {
+          total: 0,
+          items: [], // will store entire inc objects: { ...inc, displayIncomeAmount }
+        },
+      },
     },
   }
 
-  // Tally amounts in categories
+  // Tally incomes for UI display
   incomes.forEach((inc) => {
-    const mainType = inc.clientIncomeType // e.g. "40(5) ค่าเช่าทรัพย์สิน"
+    const mainType = inc.clientIncomeType
     if (!categories[mainType]) return
 
-    // Increase total for the main type
-    categories[mainType].amount += inc.clientIncomeAmount
+    // Add inc.displayIncomeAmount to the category's total
+    categories[mainType].amount += inc.displayIncomeAmount || 0
 
-    // Check subtypes only if 40(5) or 40(6):
     if (mainType === "40(5) ค่าเช่าทรัพย์สิน") {
-      // inc.clientIncome405Type might be one of:
-      // "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ", "ที่ดินที่ใช้ในการเกษตร", etc.
-      const subtype = inc.clientIncome405Type
-      if (categories[mainType].subtypes[subtype] !== undefined) {
-        categories[mainType].subtypes[subtype] += inc.clientIncomeAmount
+      const sub405 = inc.clientIncome405Type
+      if (categories[mainType].subtypes[sub405] !== undefined) {
+        categories[mainType].subtypes[sub405] += inc.displayIncomeAmount || 0
       }
     } else if (mainType === "40(6) วิชาชีพอิสระ") {
-      // inc.clientIncome406Type might be one of:
-      // "การประกอบโรคศิลปะ", "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม"
-      const subtype = inc.clientIncome406Type
-      if (categories[mainType].subtypes[subtype] !== undefined) {
-        categories[mainType].subtypes[subtype] += inc.clientIncomeAmount
+      const sub406 = inc.clientIncome406Type
+      if (categories[mainType].subtypes[sub406] !== undefined) {
+        categories[mainType].subtypes[sub406] += inc.displayIncomeAmount || 0
+      }
+    } else if (mainType === "40(8) รายได้อื่นๆ") {
+      const sub408 = inc.clientIncome408Type
+      if (sub408 === "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)") {
+        const rec = categories[mainType].subtypes[sub408]
+        rec.total += inc.displayIncomeAmount || 0
+        // push entire inc
+        rec.items.push(inc)
+      } else if (
+        categories[mainType].subtypes[sub408] !== undefined &&
+        typeof categories[mainType].subtypes[sub408] === "number"
+      ) {
+        categories[mainType].subtypes[sub408] += inc.displayIncomeAmount || 0
       }
     }
   })
 
-  const incomeAfterExpense = totalIncome - totalExpense
-
-  const handleNext = () => {
+  function handleNext() {
     navigate(`/tax-deduction/`)
   }
+
+  const incomeAfterExpense = totalIncome - totalExpense
 
   return (
     <div className="flex flex-col min-h-screen font-ibm">
@@ -160,7 +239,7 @@ export default function TaxIncomePage() {
       <div className="flex flex-1">
         <ClientBluePanel />
         <div className="flex-1 p-8 space-y-8">
-          {/* Steps bar */}
+          {/* Steps Bar */}
           <div className="flex items-center justify-center space-x-8">
             <button
               onClick={() => navigate(`/tax-income/`)}
@@ -200,70 +279,208 @@ export default function TaxIncomePage() {
             variants={pageVariants}
             transition={pageTransition}
           >
+            {/* Show each category & subtypes */}
             <div className="space-y-4">
-              {/* Render each category */}
-              {Object.entries(categories).map(([key, cat]) => (
-                <div key={key}>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-1/2 text-tfpa_blue font-bold">
-                      {cat.code} {cat.label}
+              {Object.entries(categories).map(([key, cat]) => {
+                const is408 = cat.code === "40(8)"
+                return (
+                  <div key={key}>
+                    {/* Main row for the category */}
+                    <div className="flex items-center space-x-4">
+                      <div className="w-1/2 text-tfpa_blue font-bold flex items-center">
+                        {cat.code} {cat.label}
+                        {/* If 40(8), show detail button */}
+                        {is408 && (
+                          <button
+                            onClick={() => setShow408Details(true)}
+                            className="ml-2 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-2 py-1 text-xs rounded-xl font-ibm"
+                          >
+                            รายละเอียด
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 w-1/2">
+                        <input
+                          type="text"
+                          // Sum of displayIncomeAmount
+                          value={cat.amount.toLocaleString()}
+                          readOnly
+                          className="text-tfpa_gold font-bold rounded px-2 py-1 text-right w-24"
+                        />
+                        <span className="text-tfpa_blue font-bold">บาท</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2 w-1/2">
-                      <input
-                        type="text"
-                        value={cat.amount.toLocaleString()}
-                        readOnly
-                        className="border border-gray-300 rounded px-2 py-1 text-right w-24"
-                      />
-                      <span className="text-tfpa_blue font-bold">บาท</span>
-                    </div>
-                  </div>
 
-                  {/* If 40(5) or 40(6), show subtypes */}
-                  {cat.code === "40(5)" && cat.subtypes && (
-                    <div className="ml-6 mt-2 space-y-1">
-                      {Object.entries(cat.subtypes).map(([subKey, subVal]) => (
-                        <div
-                          key={subKey}
-                          className="flex items-center space-x-4"
-                        >
-                          <div className="w-1/2 text-tfpa_blue">┗ {subKey}</div>
-                          <div className="flex items-center space-x-2 w-1/2">
-                            <input
-                              type="text"
-                              value={subVal.toLocaleString()}
-                              readOnly
-                              className="px-2 py-1 text-right w-24"
-                            />
-                            <span className="text-tfpa_blue">บาท</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {cat.code === "40(6)" && cat.subtypes && (
-                    <div className="ml-6 mt-2 space-y-1">
-                      {Object.entries(cat.subtypes).map(([subKey, subVal]) => (
-                        <div
-                          key={subKey}
-                          className="flex items-center space-x-4"
-                        >
-                          <div className="w-1/2 text-tfpa_blue">┗ {subKey}</div>
-                          <div className="flex items-center space-x-2 w-1/2">
-                            <input
-                              type="text"
-                              value={subVal.toLocaleString()}
-                              readOnly
-                              className="px-2 py-1 text-right w-24"
-                            />
-                            <span className="text-tfpa_blue">บาท</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {/* 40(5) subtypes */}
+                    {cat.code === "40(5)" && cat.subtypes && (
+                      <div className="ml-6 mt-2 space-y-1">
+                        {Object.entries(cat.subtypes).map(
+                          ([subKey, subVal]) => (
+                            <div
+                              key={subKey}
+                              className="flex items-center space-x-4"
+                            >
+                              <div className="w-1/2 text-tfpa_blue">
+                                ┗ {subKey}
+                              </div>
+                              <div className="flex items-center space-x-2 w-1/2">
+                                <input
+                                  type="text"
+                                  value={subVal.toLocaleString()}
+                                  readOnly
+                                  className="text-tfpa_blue px-2 py-1 text-right w-24 rounded"
+                                />
+                                <span className="text-tfpa_blue">บาท</span>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+
+                    {/* 40(6) subtypes */}
+                    {cat.code === "40(6)" && cat.subtypes && (
+                      <div className="ml-6 mt-2 space-y-1">
+                        {Object.entries(cat.subtypes).map(
+                          ([subKey, subVal]) => (
+                            <div
+                              key={subKey}
+                              className="flex items-center space-x-4"
+                            >
+                              <div className="w-1/2 text-tfpa_blue">
+                                ┗ {subKey}
+                              </div>
+                              <div className="flex items-center space-x-2 w-1/2">
+                                <input
+                                  type="text"
+                                  value={subVal.toLocaleString()}
+                                  readOnly
+                                  className="text-tfpa_blue px-2 py-1 text-right w-24 rounded"
+                                />
+                                <span className="text-tfpa_blue">บาท</span>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+
+                    {/* 40(8) subtypes */}
+                    {cat.code === "40(8)" && cat.subtypes && (
+                      <div className="ml-6 mt-2 space-y-1">
+                        {Object.entries(cat.subtypes).map(
+                          ([subKey, subVal]) => {
+                            if (
+                              subKey ===
+                              "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)"
+                            ) {
+                              // subVal is { total, items[] }
+                              return (
+                                <div key={subKey}>
+                                  <div className="flex items-center space-x-4">
+                                    <div className="w-1/2 text-tfpa_blue">
+                                      ┗ {subKey}
+                                    </div>
+                                    <div className="flex items-center space-x-2 w-1/2">
+                                      <input
+                                        type="text"
+                                        value={subVal.total.toLocaleString()}
+                                        readOnly
+                                        className="text-tfpa_blue px-2 py-1 text-right w-24 rounded"
+                                      />
+                                      <span className="text-tfpa_blue">
+                                        บาท
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {/* If any "items" exist */}
+                                  {subVal.items && subVal.items.length > 0 && (
+                                    <div className="ml-8 mt-1 space-y-2">
+                                      {subVal.items.map((item, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex items-center space-x-4"
+                                        >
+                                          <div className="w-1/2 text-tfpa_blue">
+                                            ┗ {item.id.clientIncomeName}
+                                          </div>
+                                          <div className="flex-1 flex flex-wrap items-center space-x-2">
+                                            {/* Amount displayed (12x if monthly) */}
+                                            <input
+                                              type="text"
+                                              value={
+                                                item.displayIncomeAmount?.toLocaleString() ||
+                                                "0"
+                                              }
+                                              readOnly
+                                              className="text-tfpa_blue_hover px-2 py-1 text-right w-24 rounded"
+                                            />
+                                            <span className="text-tfpa_blue">
+                                              บาท
+                                            </span>
+
+                                            {/* Editable otherExpenseDeduction */}
+                                            <label className="text-tfpa_blue whitespace-nowrap">
+                                              หักค่าใช้จ่ายจริงตามความจำเป็นฯ
+                                            </label>
+                                            <input
+                                              type="number"
+                                              value={
+                                                item.clientIncome408TypeOtherExpenseDeduction ||
+                                                0
+                                              }
+                                              onFocus={(e) => e.target.select()}
+                                              onChange={(e) =>
+                                                handleUpdateOtherExpense(
+                                                  item,
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
+                                            />
+                                            <span className="text-tfpa_blue">
+                                              บาท
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            } else {
+                              // It's one of the other 3 subKey
+                              return (
+                                <div
+                                  key={subKey}
+                                  className="flex items-center space-x-4"
+                                >
+                                  <div className="w-1/2 text-tfpa_blue">
+                                    ┗ {subKey}
+                                  </div>
+                                  <div className="flex items-center space-x-2 w-1/2">
+                                    <input
+                                      type="text"
+                                      value={
+                                        subVal.toLocaleString
+                                          ? subVal.toLocaleString()
+                                          : subVal
+                                      }
+                                      readOnly
+                                      className="text-tfpa_blue px-2 py-1 text-right w-24 rounded"
+                                    />
+                                    <span className="text-tfpa_blue">บาท</span>
+                                  </div>
+                                </div>
+                              )
+                            }
+                          }
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
 
             <hr className="border-dashed mt-4 mb-4 border-gray-300" />
@@ -274,28 +491,28 @@ export default function TaxIncomePage() {
                 <span className="text-tfpa_gold">
                   {totalIncome.toLocaleString()}
                 </span>
-                <span className="text-tfpa_blue">บาท</span>
+                <span>บาท</span>
               </div>
               <div className="flex space-x-2">
                 <span>หักค่าใช้จ่ายได้</span>
                 <span className="text-tfpa_gold">
                   {totalExpense.toLocaleString()}
                 </span>
-                <span className="text-tfpa_blue">บาท</span>
+                <span>บาท</span>
               </div>
               <div className="flex space-x-2">
                 <span>เงินได้พึงประเมินหลังหักค่าใช้จ่าย</span>
                 <span className="text-tfpa_gold">
                   {(totalIncome - totalExpense).toLocaleString()}
                 </span>
-                <span className="text-tfpa_blue">บาท</span>
+                <span>บาท</span>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end mt-4">
               <button
                 onClick={handleNext}
-                className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
+                className="bg-tfpa_gold hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-bold"
               >
                 ถัดไป
               </button>
@@ -304,6 +521,185 @@ export default function TaxIncomePage() {
         </div>
       </div>
       <Footer />
+
+      {/* 40(8) Details Modal */}
+      {show408Details && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white w-11/12 md:w-3/4 lg:w-1/2 p-6 rounded shadow-lg overflow-auto max-h-[80vh]">
+            <h2 className="text-xl font-bold text-tfpa_blue mb-4">
+              รายละเอียดเงินได้พึงประเมิน 40(8) และ
+              อัตราการหักค่าใช้จ่ายเป็นการเหมาสำหรับภาษี
+            </h2>
+            <p className="text-sm text-gray-700 mb-4 leading-6">
+              <strong>ประเภทที่ (1)</strong> – การแสดงของนักแสดงละคร ภาพยนตร์
+              วิทยุหรือโทรทัศน์ นักร้อง นักดนตรี นักกีฬาอาชีพ
+              หรือนักแสดงเพื่อความบันเทิงใด ๆ
+              <br />
+              &emsp;– (ก) สำหรับเงินได้ส่วนที่ไม่เกิน 300,000 บาท หักค่าใช้จ่าย
+              60%
+              <br />
+              &emsp;– (ข) สำหรับเงินได้ส่วนที่เกิน 300,000 บาท หักค่าใช้จ่าย 40%
+              <br />
+              &emsp;โดยการหักค่าใช้จ่ายตาม (ก) และ (ข) รวมกันต้องไม่เกิน 600,000
+              บาท
+              <br />
+              <strong>ประเภทที่ (2)</strong> –
+              การขายที่ดินเงินผ่อนหรือให้เช่าซื้อที่ดิน &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (3)</strong> – การเก็บค่าต๋ง
+              หรือค่าเกมจากการพนัน การแข่งขันหรือการเล่นต่าง ๆ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (4)</strong> – การถ่าย ล้าง อัด
+              หรือขยายรูปภาพยนตร์ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (5)</strong> – การทำกิจการคานเรือ อู่เรือ
+              หรือซ่อมเรือที่มิใช่ซ่อมเครื่องจักร เครื่องกล &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (6)</strong> – การทำรองเท้า
+              และเครื่องหนังแท้หรือหนังเทียม รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (7)</strong> – การตัด เย็บ ถัก ปักเสื้อผ้า
+              หรือสิ่งอื่น ๆ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (8)</strong> – การทำ ตกแต่ง
+              หรือซ่อมแซมเครื่องเรือน รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (9)</strong> – การทำกิจการโรงแรม หรือภัตตาคาร
+              หรือการปรุงอาหารหรือเครื่องดื่มจำหน่าย &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (10)</strong> – การดัด ตัด แต่งผม
+              หรือตกแต่งร่างกาย &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (11)</strong> – การทำสบู่ แชมพู หรือเครื่องสำอาง
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (12)</strong> – การทำวรรณกรรม
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (13)</strong> – การค้าเครื่องเงิน ทอง นาก เพชร
+              พลอย หรืออัญมณีอื่น ๆ รวมทั้งการขายส่วนประกอบ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (14)</strong> – การทำกิจการสถานพยาบาล
+              ตามกฎหมายว่าด้วยสถานพยาบาลเฉพาะ ที่มีเตียงรับผู้ป่วยค้างคืน
+              รวมทั้งการรักษาพยาบาลและการจำหน่ายยา &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (15)</strong> – การโม่หรือย่อยหิน
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (16)</strong> – การทำป่าไม้ สวนยาง หรือไม้ยืนต้น
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (17)</strong> – การขนส่ง หรือรับจ้างด้วยยานพาหนะ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (18)</strong> – การทำบล็อก และตรา
+              การรับพิมพ์หนังสือเย็บเล่มจด เอกสาร รวมทั้งการขายส่วนประกอบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (19)</strong> – การทำเหมืองแร่
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (20)</strong> –
+              การทำเครื่องดื่มตามกฎหมายว่าด้วยภาษีสรรพสามิต &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (21)</strong> – การทำเครื่องกระเบื้อง
+              เครื่องเคลือบ เครื่องซีเมนต์ หรือดินเผา &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (22)</strong> – การทำหรือจำหน่ายกระแสไฟฟ้า
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (23)</strong> – การทำน้ำแข็ง &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (24)</strong> – การทำกาว แป้งเปียก
+              หรือสิ่งที่มีลักษณะทำนองเดียวกัน &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (25)</strong> – การทำลูกโป่ง เครื่องแก้ว
+              เครื่องพลาสติก หรือเครื่องยางสำเร็จรูป &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (26)</strong> – การซักรีด หรือย้อมสี
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (27)</strong> –
+              การขายของนอกจากที่ระบุไว้ในข้ออื่น ซึ่งผู้ขายมิได้เป็นผู้ผลิต
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (28)</strong> –
+              รางวัลที่เจ้าของม้าได้จากการส่งม้าเข้าแข่ง &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (29)</strong> – การรับสินไถ่ทรัพย์สินที่ขายฝาก
+              หรือการได้กรรมสิทธิ์ในทรัพย์สินโดยเด็ดขาดจากการขายฝาก
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (30)</strong> – การรมยาง การทำยางแผ่น
+              หรือยางอย่างอื่นที่มิใช่ยางสำเร็จรูป &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (31)</strong> – การฟอกหนัง &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (32)</strong> – การทำน้ำตาล
+              หรือน้ำเหลืองของน้ำตาล &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (33)</strong> – การจับสัตว์น้ำ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (34)</strong> – การทำกิจการโรงเลื่อย
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (35)</strong> – การกลั่น หรือหีบน้ำมัน
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (36)</strong> – การให้เช่าซื้อสังหาริมทรัพย์
+              ที่ไม่เข้าลักษณะตามมาตรา 40 (5) แห่งประมวลรัษฎากร
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (37)</strong> – การทำกิจการโรงสีข้าว
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (38)</strong> –
+              การทำเกษตรกรรมประเภทไม้ล้มลุกและธัญชาติ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (39)</strong> – การอบหรือบ่มใบยาสูบ
+              &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (40)</strong> – การเลี้ยงสัตว์ทุกชนิด
+              รวมทั้งการขายวัตถุพลอยได้ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (41)</strong> – การฆ่าสัตว์จำหน่าย
+              รวมทั้งการขายวัตถุพลอยได้ &nbsp;หักค่าใช้จ่าย 60%
+              <br />
+              <strong>ประเภทที่ (42)</strong> – การทำนาเกลือ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>ประเภทที่ (43)</strong> –
+              การขายเรือกำปั่นหรือเรือมีระวางตั้งแต่ 6 ตันขึ้นไป เรือกลไฟ
+              หรือเรือยนต์มีระวางตั้งแต่ 5 ตันขึ้นไป หรือแพ &nbsp;หักค่าใช้จ่าย
+              60%
+              <br />
+              <strong>
+                – เงินได้ประเภทที่ไม่ได้ระบุ ให้หักค่าใช้จ่ายจริง
+                ตามความจำเป็นและสมควร
+              </strong>
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded-xl"
+                onClick={() => setShow408Details(false)}
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

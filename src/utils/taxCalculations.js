@@ -33,50 +33,56 @@ export function calculateTaxForClient(incomes, td) {
     0
   )
 
-  // 3) Calculate expense deductions (per record), because 40(5) & 40(6) need subtypes.
+  // 3) We'll handle expense deductions.
   let totalExpenseDeductions = 0
 
-  // We'll combine 40(1) & 40(2) first, because they share a 50%-capped-at-100k rule.
+  // Step A: Combine 40(1) & 40(2):
   let combinedSalaryAmount = 0
   const otherIncomes = []
-
   for (const inc of adjustedIncomes) {
     if (
       inc.clientIncomeType === "40(1) เงินเดือน" ||
       inc.clientIncomeType === "40(2) รับจ้างทำงาน"
     ) {
-      // We'll accumulate these amounts, then apply a single 50% capped rule at the end.
       combinedSalaryAmount += inc.clientIncomeAmount
     } else {
-      // We'll handle all other records individually (including 40(3)...40(8))
       otherIncomes.push(inc)
     }
   }
-
-  // Now handle 40(1) & 40(2) combined
+  // 40(1) & 40(2) => 50% capped at 100k
   if (combinedSalaryAmount > 0) {
     let deduction = combinedSalaryAmount * 0.5
     if (deduction > 100000) deduction = 100000
     totalExpenseDeductions += deduction
   }
 
-  // Now handle each of the "other" incomes individually
+  // Step B: We'll accumulate all 40(8) subtypes *before* adding them,
+  // because we must combine
+  //   (1)(เงินได้<=300k => 60%) + (1)(เงินได้>300k => 40%)
+  // then cap at 600k.
+  let sum408Under300k = 0 // subtype: (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)
+  let sum408Over300k = 0 // subtype: (เงินได้ส่วนที่เกิน 300,000 บาท)
+  let sum408Rest = 0 // subtype: (2)ถึง(43), each 60%
+  let sum408OtherDeduction = 0 // for "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)"
+
+  // Step C: Loop over each "other" income (which includes 40(3)...40(8))
   for (const inc of otherIncomes) {
     let deduction = 0
+
     switch (inc.clientIncomeType) {
       case "40(3) ค่าลิขสิทธิ์ สิทธิบัตร":
-        // 50% capped at 100,000
+        // 50% capped at 100k
         deduction = inc.clientIncomeAmount * 0.5
         if (deduction > 100000) deduction = 100000
+        totalExpenseDeductions += deduction
         break
 
       case "40(4) ดอกเบี้ย เงินปันผล":
-        // 0%
         deduction = 0
+        totalExpenseDeductions += deduction
         break
 
       case "40(5) ค่าเช่าทรัพย์สิน":
-        // Use clientIncome405Type to decide the rate:
         switch (inc.clientIncome405Type) {
           case "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ":
             deduction = inc.clientIncomeAmount * 0.3
@@ -91,14 +97,12 @@ export function calculateTaxForClient(incomes, td) {
             deduction = inc.clientIncomeAmount * 0.1
             break
           default:
-            // If no subtype or unrecognized, treat as 0 or handle as needed
             deduction = 0
-            break
         }
+        totalExpenseDeductions += deduction
         break
 
       case "40(6) วิชาชีพอิสระ":
-        // Use clientIncome406Type to decide the rate:
         switch (inc.clientIncome406Type) {
           case "การประกอบโรคศิลปะ":
             deduction = inc.clientIncomeAmount * 0.6
@@ -108,27 +112,63 @@ export function calculateTaxForClient(incomes, td) {
             break
           default:
             deduction = 0
-            break
         }
+        totalExpenseDeductions += deduction
         break
 
       case "40(7) รับเหมาก่อสร้าง":
-        // 60%
         deduction = inc.clientIncomeAmount * 0.6
+        totalExpenseDeductions += deduction
         break
 
       case "40(8) รายได้อื่นๆ":
-        // 60%
-        deduction = inc.clientIncomeAmount * 0.6
+        // We'll handle subtypes ourselves:
+        const sub8 = inc.clientIncome408Type
+        if (sub8 === "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)") {
+          // We'll accumulate them and apply 60% with 600k cap combined
+          sum408Under300k += inc.clientIncomeAmount
+        } else if (sub8 === "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)") {
+          // We'll accumulate them and apply 40%, then combine with above for a 600k cap
+          sum408Over300k += inc.clientIncomeAmount
+        } else if (sub8 === "ประเภทที่ (2) ถึง (43)") {
+          // 60% fixed
+          const d = inc.clientIncomeAmount * 0.6
+          sum408Rest += d
+        } else if (sub8 === "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)") {
+          // Use user’s custom field
+          sum408OtherDeduction +=
+            inc.clientIncome408TypeOtherExpenseDeduction || 0
+        } else {
+          // no recognized subtype
+        }
         break
 
       default:
-        // Unrecognized or empty
+        // Unknown (or empty)
         deduction = 0
+        totalExpenseDeductions += deduction
         break
     }
-    totalExpenseDeductions += deduction
   }
+
+  // Now let's finalize the 40(8) sub-subtype calculations:
+  // 1) ประเภทที่ (1) (ไม่เกิน 300,000 บาท) => 60%,
+  //    ประเภทที่ (1) (เกิน 300,000 บาท) => 40%,
+  // combine => can't exceed 600,000
+  let deduction408Under300 = sum408Under300k * 0.6
+  let deduction408Over300 = sum408Over300k * 0.4
+  let combined408Ded = deduction408Under300 + deduction408Over300
+  if (combined408Ded > 600000) {
+    combined408Ded = 600000
+  }
+
+  // 2) Add sub(2)–(43) total
+  //   "sum408Rest" is total for "ประเภทที่ (2) ถึง (43)" => 60% (already done)
+  //   so we just add that
+  // 3) Add "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)"
+  totalExpenseDeductions += combined408Ded
+  totalExpenseDeductions += sum408Rest
+  totalExpenseDeductions += sum408OtherDeduction
 
   // Sum all tax deductions
   let totalTaxDeductions = 0
