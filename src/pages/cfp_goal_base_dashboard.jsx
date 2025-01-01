@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
@@ -23,20 +23,16 @@ const pageTransition = {
 }
 
 export default function CFPGoalBaseDashboard() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
   const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
-  const [totalInvestment, setTotalInvestment] = useState(0)
-  const [portfolioReturn, setPortfolioReturn] = useState(0)
   const [generalGoal, setGeneralGoal] = useState(null)
   const [fvOfCurrentInvestment, setFvOfCurrentInvestment] = useState(0)
   const [generalGoalAnnualSaving, setGeneralGoalAnnualSaving] = useState(0)
 
   useEffect(() => {
     fetchAllData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId])
 
   const fetchAllData = async () => {
@@ -64,8 +60,6 @@ export default function CFPGoalBaseDashboard() {
       // Calculate portfolio summary
       const { totalInvestAmount, portReturn } =
         calculatePortfolioSummary(assetsData)
-      setTotalInvestment(totalInvestAmount)
-      setPortfolioReturn(portReturn)
 
       // Calculate general goal
       const { fvOfCurrentInvestment: fv, generalGoalAnnualSaving: saving } =
@@ -84,10 +78,6 @@ export default function CFPGoalBaseDashboard() {
 
   const handleNavigateGeneralGoal = () => {
     navigate(`/goal-base/`)
-  }
-
-  const handleDashboard = () => {
-    navigate(`/dashboard`)
   }
 
   const isSufficient = generalGoalAnnualSaving <= 0
@@ -249,83 +239,8 @@ export default function CFPGoalBaseDashboard() {
                   <div className="flex flex-wrap gap-2 w-full justify-between my-3 px-8 text-tfpa_blue font-bold">
 
                   </div>
-                  {/* Two columns for details */}
-                  {/*<div className="grid grid-cols-2 gap-8">*/}
-                  {/*  /!* Left Column: Net Income and Growth *!/*/}
-                  {/*  <div className="flex flex-col space-y-4 text-xl">*/}
-                  {/*    <div className="flex justify-between">*/}
-                  {/*      <span>กระแสเงินสดสุทธิต่อปี</span>*/}
-                  {/*      <span>*/}
-                  {/*        {Number(generalGoal.clientNetIncome).toLocaleString()}{" "}*/}
-                  {/*        บาท*/}
-                  {/*      </span>*/}
-                  {/*    </div>*/}
-                  {/*    <div className="flex justify-between">*/}
-                  {/*      <span>อัตราการเติบโตของกระแสเงินสดสุทธิต่อปี</span>*/}
-                  {/*      <span>*/}
-                  {/*        {(generalGoal.clientNetIncomeGrowth * 100).toFixed(2)} %*/}
-                  {/*      </span>*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-
-                  {/*  /!* Right Column: Goal Value and Period *!/*/}
-                  {/*  <div className="flex flex-col space-y-4 text-xl">*/}
-                  {/*    <div className="flex justify-between">*/}
-                  {/*      <span>จำนวนเงินเพื่อเป้าหมาย</span>*/}
-                  {/*      <span>*/}
-                  {/*        {Number(*/}
-                  {/*          generalGoal.clientGeneralGoalValue*/}
-                  {/*        ).toLocaleString()}{" "}*/}
-                  {/*        บาท*/}
-                  {/*      </span>*/}
-                  {/*    </div>*/}
-                  {/*    <div className="flex justify-between">*/}
-                  {/*      <span>ระยะเวลาเป้าหมาย</span>*/}
-                  {/*      <span>{generalGoal.clientGeneralGoalPeriod} ปี</span>*/}
-                  {/*    </div>*/}
-                  {/*  </div>*/}
-                  {/*</div>*/}
                 </>
             )}
-
-            {/* Results */}
-            {/*<div className="flex flex-col items-center space-y-4 text-xl font-bold mt-4 mb-4">*/}
-            {/*  <div className="flex space-x-4 items-center text-tfpa_gold">*/}
-            {/*    <span>เงินรวมปัจจุบันในการลงทุนคิดเป็นค่าเงินในอนาคต</span>*/}
-            {/*    <span>{fvOfCurrentInvestment.toLocaleString()}</span>*/}
-            {/*    <span>บาท</span>*/}
-            {/*  </div>*/}
-
-            {/*  <div className="flex space-x-4 items-center text-tfpa_gold">*/}
-            {/*    <span>เงินที่ต้องเก็บออมต่อปี</span>*/}
-            {/*    <span>*/}
-            {/*      {Math.abs(generalGoalAnnualSaving).toLocaleString()}*/}
-            {/*    </span>*/}
-            {/*    <span>บาท</span>*/}
-            {/*  </div>*/}
-
-            {/*  <div*/}
-            {/*    className={`px-52 py-2 rounded-3xl ${*/}
-            {/*      isSufficient*/}
-            {/*        ? "bg-green-300 text-green-950"*/}
-            {/*        : "bg-red-300 text-red-950"*/}
-            {/*    }`}*/}
-            {/*  >*/}
-            {/*    {isSufficient*/}
-            {/*      ? "เงินที่ออมอยู่ต่อปีมีเพียงพอ"*/}
-            {/*      : "เงินที่ออมอยู่ต่อปีมีไม่เพียงพอ"}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-
-            {/*/!* Dashboard Button *!/*/}
-            {/*<div className="flex justify-center">*/}
-            {/*  <button*/}
-            {/*    onClick={handleDashboard}*/}
-            {/*    className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-bold"*/}
-            {/*  >*/}
-            {/*    Dashboard*/}
-            {/*  </button>*/}
-            {/*</div>*/}
           </motion.div>
         </div>
       </div>
