@@ -276,7 +276,9 @@ export default function CFPCashflowBaseDashboard() {
                             return (
                                 <>
                                     <div className="mx-1 flex gap-1">
-                                        <input type="checkbox" onChange={(e)=>selectGoals(e, index)} checked={buttonStatus[index]}/>
+                                        <input type="checkbox"
+                                               className="w-[25px]"
+                                               onChange={(e)=>selectGoals(e, index)} checked={buttonStatus[index]}/>
                                         <span className="">
                                             {goal.id.clientGoalName}
                                         </span>
