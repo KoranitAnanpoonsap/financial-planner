@@ -10,6 +10,7 @@ import PortfolioSelectionCFP from "./pages/portfolio_selection_cfp"
 import PortfolioCreationCFP from "./pages/portfolio_creation_cfp"
 import CFPCashflowBase from "./pages/cfp_cashflow_base"
 import CFPCashflowBaseCalculated from "./pages/cfp_cashflow_base_calculated"
+import CFPCashflowBaseDashboard from "./pages/cfp_cashflow_base_dashboard.jsx"
 import CFPGoalBase from "./pages/cfp_goal_base"
 import CFPGoalBaseCalculated from "./pages/cfp_goal_base_calculated"
 import CFPGoalBaseDashboard from "./pages/cfp_goal_base_dashboard.jsx";
@@ -44,6 +45,10 @@ function App() {
         <Route
           path="/cashflow-base-calculated/"
           element={<CFPCashflowBaseCalculated />}
+        />
+        <Route
+            path="/cashflow-base-dashboard/"
+            element={<CFPCashflowBaseDashboard />}
         />
         <Route path="/goal-base/" element={<CFPGoalBase />} />
         <Route

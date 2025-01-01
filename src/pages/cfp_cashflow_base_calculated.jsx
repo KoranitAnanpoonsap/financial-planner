@@ -110,7 +110,7 @@ export default function CFPCashflowBaseCalculated() {
 
   const handleDashboard = () => {
     // Navigate to a dashboard page
-    navigate(`/dashboard`)
+    navigate(`/cashflow-base-dashboard`)
   }
 
   return (
