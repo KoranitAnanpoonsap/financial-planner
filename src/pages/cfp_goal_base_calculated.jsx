@@ -89,8 +89,7 @@ export default function CFPGoalBaseCalculated() {
     navigate(`/goal-base-dashboard`)
   }
 
-  const isSufficient =
-    generalGoalAnnualSaving <= Number(generalGoal.clientNetIncome)
+  const isSufficient = generalGoalAnnualSaving <= 0
 
   return (
     <div className="flex flex-col min-h-screen font-ibm">
@@ -178,9 +177,7 @@ export default function CFPGoalBaseCalculated() {
 
               <div className="flex space-x-4 items-center text-tfpa_gold">
                 <span>เงินที่ต้องเก็บออมต่อปี</span>
-                <span>
-                  {Math.abs(generalGoalAnnualSaving).toLocaleString()}
-                </span>
+                <span>{generalGoalAnnualSaving.toLocaleString()}</span>
                 <span>บาท</span>
               </div>
 
