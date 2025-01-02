@@ -18,7 +18,7 @@ const getColorForType = (type) => {
     case "หุ้นกู้":
       return "#FF9F40"
     case "การลงทุนอื่นๆ":
-      return "#FF6384"
+      return "#2B0B3F"
     default:
       return "#CCCCCC"
   }
