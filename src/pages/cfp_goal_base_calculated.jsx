@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
 import ClientBluePanel from "../components/clientBluePanel.jsx"
@@ -22,8 +22,8 @@ const pageTransition = {
 }
 
 export default function CFPGoalBaseCalculated() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || 0)
+  const [clientId] = useState(Number(localStorage.getItem("clientId")) || 0)
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
@@ -88,8 +88,6 @@ export default function CFPGoalBaseCalculated() {
   const handleDashboard = () => {
     navigate(`/goal-base-dashboard`)
   }
-
-  const isSufficient = generalGoalAnnualSaving <= 0
 
   return (
     <div className="flex flex-col min-h-screen font-ibm">
@@ -168,31 +166,39 @@ export default function CFPGoalBaseCalculated() {
             )}
 
             {/* Results */}
-            <div className="flex flex-col items-center space-y-4 text-xl font-bold mt-4 mb-4">
-              <div className="flex space-x-4 items-center text-tfpa_gold">
-                <span>เงินรวมปัจจุบันในการลงทุนคิดเป็นค่าเงินในอนาคต</span>
-                <span>{fvOfCurrentInvestment.toLocaleString()}</span>
-                <span>บาท</span>
-              </div>
+            {generalGoal && (
+              <div className="flex flex-col items-center space-y-4 text-xl font-bold mt-4 mb-4">
+                <div className="flex space-x-4 items-center text-tfpa_gold">
+                  <span>เงินรวมปัจจุบันในการลงทุนคิดเป็นค่าเงินในอนาคต</span>
+                  <span>{fvOfCurrentInvestment.toLocaleString()}</span>
+                  <span>บาท</span>
+                </div>
 
-              <div className="flex space-x-4 items-center text-tfpa_gold">
-                <span>เงินที่ต้องเก็บออมต่อปี</span>
-                <span>{generalGoalAnnualSaving.toLocaleString()}</span>
-                <span>บาท</span>
-              </div>
+                <div className="flex space-x-4 items-center text-tfpa_gold">
+                  <span>เงินที่ต้องเก็บออมต่อปี</span>
+                  <span>
+                    {generalGoalAnnualSaving < 0
+                      ? 0
+                      : generalGoalAnnualSaving.toLocaleString()}
+                  </span>
+                  <span>บาท</span>
+                </div>
 
-              <div
-                className={`px-52 py-2 rounded-3xl ${
-                  isSufficient
-                    ? "bg-green-300 text-green-950"
-                    : "bg-red-300 text-red-950"
-                }`}
-              >
-                {isSufficient
-                  ? "เงินที่ออมอยู่ต่อปีมีเพียงพอ"
-                  : "เงินที่ออมอยู่ต่อปีมีไม่เพียงพอ"}
+                <div
+                  className={`px-52 py-2 rounded-3xl ${
+                    generalGoalAnnualSaving <=
+                    Number(generalGoal.clientNetIncome)
+                      ? "bg-green-300 text-green-950"
+                      : "bg-red-300 text-red-950"
+                  }`}
+                >
+                  {generalGoalAnnualSaving <=
+                  Number(generalGoal.clientNetIncome)
+                    ? "เงินที่ออมอยู่ต่อปีมีเพียงพอ"
+                    : "เงินที่ออมอยู่ต่อปีมีไม่เพียงพอ"}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Dashboard Button */}
             <div className="flex justify-center">
