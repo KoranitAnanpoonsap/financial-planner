@@ -126,7 +126,6 @@ export default function CFPCashflowBase() {
   }
 
   const handleCreateOrUpdateGoal = async () => {
-    // Automatically set clientSavingGrowth from expenses
     const newGoal = {
       id: {
         clientId: parseInt(clientId),
@@ -138,10 +137,33 @@ export default function CFPCashflowBase() {
 
     let url = `http://localhost:8080/api/cashflow`
     let method = "POST"
+
     if (editMode && editingGoal) {
-      // Update mode
-      url = `http://localhost:8080/api/cashflow/${clientId}/${editingGoal.id.clientGoalName}`
-      method = "PUT"
+      const originalName = editingGoal.id.clientGoalName
+
+      // If the name was changed, delete the old goal and create a new one
+      if (originalName !== clientGoalName) {
+        // Delete the original goal
+        try {
+          const deleteRes = await fetch(
+            `http://localhost:8080/api/cashflow/${clientId}/${originalName}`,
+            { method: "DELETE" }
+          )
+          if (!deleteRes.ok) {
+            throw new Error("Failed to delete old goal")
+          }
+        } catch (error) {
+          console.error("Error deleting old goal:", error)
+          return
+        }
+
+        // Use POST to create the new goal with the updated name
+        method = "POST"
+      } else {
+        // If the name wasn't changed, just update the goal
+        url = `http://localhost:8080/api/cashflow/${clientId}/${originalName}`
+        method = "PUT"
+      }
     }
 
     try {

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE })
 @RestController
 @RequestMapping("/api/portassets")
 public class CfpClientPortfolioAssetsController {
@@ -34,5 +36,26 @@ public class CfpClientPortfolioAssetsController {
         CfpClientPortfolioAssetsId id = new CfpClientPortfolioAssetsId(clientId, investName);
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Update an existing asset by clientId and clientAssetName
+    @PutMapping("/{clientId}/{investName}")
+    public ResponseEntity<CfpClientPortfolioAssets> updateAsset(@PathVariable Integer clientId,
+            @PathVariable String investName,
+            @RequestBody CfpClientPortfolioAssets updateAsset) {
+        CfpClientPortfolioAssetsId id = new CfpClientPortfolioAssetsId(clientId, investName);
+
+        return repository.findById(id)
+                .map(existingAsset -> {
+                    // Update the fields as needed
+                    existingAsset.setInvestType(updateAsset.getInvestType());
+                    existingAsset.setInvestAmount(updateAsset.getInvestAmount());
+                    existingAsset.setYearlyReturn(updateAsset.getYearlyReturn());
+
+                    // Save the updated entity
+                    CfpClientPortfolioAssets savedAsset = repository.save(existingAsset);
+                    return ResponseEntity.ok(savedAsset);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }

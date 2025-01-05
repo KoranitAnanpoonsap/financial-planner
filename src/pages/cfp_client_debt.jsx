@@ -82,9 +82,18 @@ export default function CFPClientDebtPage() {
 
     let url = `http://localhost:8080/api/clientdebt`
     let method = "POST"
+
     if (editMode && editingDebt) {
-      url = `http://localhost:8080/api/clientdebt/${clientId}/${editingDebt.id.clientDebtName}`
-      method = "PUT"
+      if (editingDebt.id.clientDebtName !== debtName) {
+        // If the debt name is being updated, delete the old record and create a new one
+        await fetch(
+          `http://localhost:8080/api/clientdebt/${clientId}/${editingDebt.id.clientDebtName}`,
+          { method: "DELETE" }
+        )
+      } else {
+        url = `http://localhost:8080/api/clientdebt/${clientId}/${editingDebt.id.clientDebtName}`
+        method = "PUT"
+      }
     }
 
     const res = await fetch(url, {

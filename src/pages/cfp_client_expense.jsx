@@ -81,29 +81,51 @@ export default function CFPClientExpensePage() {
 
     let url = `http://localhost:8080/api/clientexpense`
     let method = "POST"
+
     if (editMode && editingExpense) {
-      url = `http://localhost:8080/api/clientexpense/${clientId}/${editingExpense.id.clientExpenseName}`
-      method = "PUT"
+      if (editingExpense.id.clientExpenseName !== expenseName) {
+        // If the expense name is being updated, delete the old record and create a new one
+        await fetch(
+          `http://localhost:8080/api/clientexpense/${clientId}/${editingExpense.id.clientExpenseName}`,
+          { method: "DELETE" }
+        )
+      } else {
+        url = `http://localhost:8080/api/clientexpense/${clientId}/${editingExpense.id.clientExpenseName}`
+        method = "PUT"
+      }
     }
 
-    const res = await fetch(url, {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newExpense),
-    })
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newExpense),
+      })
 
-    if (!res.ok) {
-      console.error("Failed to create/update expense")
-      return
+      if (!res.ok) {
+        console.error("Failed to create/update expense")
+        return
+      }
+
+      await res.json()
+
+      // Refresh list
+      await fetchExpenses()
+
+      // Reset fields
+      setType("เลือก")
+      setExpenseName("")
+      setFrequency("ทุกเดือน")
+      setAmount("")
+      setGrowthRate("")
+      setDebtExpense("")
+      setNonMortgageDebtExpense("")
+      setSavingExpense("")
+      setEditMode(false)
+      setEditingExpense(null)
+    } catch (error) {
+      console.error("Error create/update expense:", error)
     }
-
-    await res.json()
-
-    // Refresh list
-    await fetchExpenses()
-
-    // Reset fields
-    resetFields()
   }
 
   const handleDeleteExpense = async (exp) => {

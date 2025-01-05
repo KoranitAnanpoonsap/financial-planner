@@ -87,9 +87,29 @@ export default function CFPClientAssetPage() {
 
     let url = `http://localhost:8080/api/clientassets`
     let method = "POST"
+
     if (editMode && editingAsset) {
-      url = `http://localhost:8080/api/clientassets/${clientId}/${editingAsset.id.clientAssetName}`
-      method = "PUT"
+      const originalName = editingAsset.id.clientAssetName
+
+      // If the name was changed, delete the old asset and create a new one
+      if (originalName !== assetName) {
+        // Delete the original asset
+        const deleteRes = await fetch(
+          `http://localhost:8080/api/clientassets/${clientId}/${originalName}`,
+          { method: "DELETE" }
+        )
+        if (!deleteRes.ok) {
+          console.error("Failed to delete old asset")
+          return
+        }
+
+        // Use POST to create the new asset with the updated name
+        method = "POST"
+      } else {
+        // If the name wasn't changed, just update the asset
+        url = `http://localhost:8080/api/clientassets/${clientId}/${originalName}`
+        method = "PUT"
+      }
     }
 
     const res = await fetch(url, {
@@ -105,10 +125,8 @@ export default function CFPClientAssetPage() {
 
     await res.json()
 
-    // Refresh list
+    // Refresh the asset list and reset fields
     await fetchAssets()
-
-    // Reset fields
     resetFields()
   }
 

@@ -109,28 +109,25 @@ export default function CFPClientIncomePage() {
       clientIncomeFrequency: frequency,
       clientIncomeAmount: parseFloat(amount),
       clientIncomeAnnualGrowthRate: parseFloat(growthRate) / 100,
-
-      // Provide the sub-type if 40(5), 40(6), or 40(8):
-      clientIncome405Type: "",
-      clientIncome406Type: "",
-      clientIncome408Type: "",
-    }
-
-    if (type.startsWith("40(5)")) {
-      newIncome.clientIncome405Type = income405Type || ""
-    }
-    if (type.startsWith("40(6)")) {
-      newIncome.clientIncome406Type = income406Type || ""
-    }
-    if (type.startsWith("40(8)")) {
-      newIncome.clientIncome408Type = income408Type || ""
+      clientIncome405Type: income405Type || "",
+      clientIncome406Type: income406Type || "",
+      clientIncome408Type: income408Type || "",
     }
 
     let url = `http://localhost:8080/api/clientincome`
     let method = "POST"
+
     if (editMode && editingIncome) {
-      url = `http://localhost:8080/api/clientincome/${clientId}/${editingIncome.id.clientIncomeName}`
-      method = "PUT"
+      if (editingIncome.id.clientIncomeName !== incomeName) {
+        // If the income name is being updated, delete the old record and create a new one
+        await fetch(
+          `http://localhost:8080/api/clientincome/${clientId}/${editingIncome.id.clientIncomeName}`,
+          { method: "DELETE" }
+        )
+      } else {
+        url = `http://localhost:8080/api/clientincome/${clientId}/${editingIncome.id.clientIncomeName}`
+        method = "PUT"
+      }
     }
 
     try {

@@ -97,7 +97,7 @@ export default function PortfolioSelectionCFP() {
     let url = `http://localhost:8080/api/portassets`
     let method = "POST"
     if (editMode && editingAsset) {
-      url = `http://localhost:8080/api/portassets/${clientId}/${editingAsset.id.investName}`
+      url = `http://localhost:8080/api/portassets/${clientId}/${investName}`
       method = "PUT"
     }
 
@@ -236,21 +236,23 @@ export default function PortfolioSelectionCFP() {
                   </option>
                 ))}
               </select>
-              <label className="text-tfpa_blue font-ibm font-bold mb-2">
-                ผลตอบแทนต่อปี (%)
-              </label>
               {investType === "การลงทุนอื่นๆ" && (
-                <input
-                  type="text"
-                  placeholder="ผลตอบแทนต่อปี (%)"
-                  value={customReturn}
-                  onChange={(e) => {
-                    setCustomReturn(e.target.value)
-                    const val = parseFloat(e.target.value) / 100 || 0
-                    setYearlyReturn(val)
-                  }}
-                  className="border rounded p-2 mb-2 w-full font-ibm"
-                />
+                <>
+                  <label className="text-tfpa_blue font-ibm font-bold mb-2">
+                    ผลตอบแทนต่อปี (%)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ผลตอบแทนต่อปี (%)"
+                    value={customReturn}
+                    onChange={(e) => {
+                      setCustomReturn(e.target.value)
+                      const val = parseFloat(e.target.value) / 100 || 0
+                      setYearlyReturn(val)
+                    }}
+                    className="border rounded p-2 mb-2 w-full font-ibm"
+                  />
+                </>
               )}
               <label className="text-tfpa_blue font-ibm font-bold mb-2">
                 ชื่อการลงทุน
