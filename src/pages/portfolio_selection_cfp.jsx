@@ -94,28 +94,36 @@ export default function PortfolioSelectionCFP() {
       yearlyReturn: calculateYearlyReturn(investType),
     }
 
-    let url = `http://localhost:8080/api/portassets`
-    let method = "POST"
-    if (editMode && editingAsset) {
-      url = `http://localhost:8080/api/portassets/${clientId}/${investName}`
-      method = "PUT"
-    }
-
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(assetObj),
-      })
+      if (editMode && editingAsset) {
+        // Simulate update by deleting the existing asset
+        const deleteResponse = await fetch(
+          `http://localhost:8080/api/portassets/${clientId}/${editingAsset.id.investName}`,
+          {
+            method: "DELETE",
+          }
+        )
 
-      if (!response.ok) {
-        throw new Error("Failed to create/update asset")
+        if (!deleteResponse.ok) {
+          throw new Error("Failed to delete asset for update")
+        }
       }
 
-      // If successful, refresh the list
-      const data = await response.json()
+      // Create the new or updated asset
+      const createResponse = await fetch(
+        `http://localhost:8080/api/portassets`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(assetObj),
+        }
+      )
+
+      if (!createResponse.ok) {
+        throw new Error("Failed to create/update asset")
+      }
 
       // Refresh assets by refetching
       await fetchAssetsAgain()
