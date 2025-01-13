@@ -92,6 +92,11 @@ export function calculateGoalPayments(goals, portfolioReturn, expenses, year) {
         anyPayment = true
       }
     }
+
+    for (let y = 1; y < year; y++) {
+      payment *= 1 + clientSavingGrowth
+    }
+
     payments.push({ [goal.id.clientGoalName]: payment.toFixed(2) })
   }
 
