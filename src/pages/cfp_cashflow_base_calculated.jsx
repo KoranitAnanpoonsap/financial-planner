@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
-import ClientBluePanel from "../components/clientBluePanel.jsx"
+import ClientBluePanel from "../components/cfpClientSidePanel.jsx"
 import { motion } from "framer-motion"
 
 const pageVariants = {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer"
 import Header from "../components/header"
-import ClientBluePanel from "../components/clientBluePanel"
+import ClientBluePanel from "../components/cfpClientSidePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { motion } from "framer-motion"
 

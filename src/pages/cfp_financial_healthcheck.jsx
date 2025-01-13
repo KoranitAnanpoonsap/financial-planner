@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import Header from "../components/header"
 import Footer from "../components/footer"
-import ClientBluePanel from "../components/clientBluePanel"
+import ClientBluePanel from "../components/cfpClientSidePanel"
 import { computeVariables, computeRatios } from "../utils/calculations"
 import { motion } from "framer-motion"
 
