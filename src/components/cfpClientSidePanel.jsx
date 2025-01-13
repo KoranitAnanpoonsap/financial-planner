@@ -25,7 +25,7 @@ const pageTransition = {
   duration: 0.3,
 }
 
-export default function ClientBluePanel() {
+export default function CfpClientSidePanel() {
   const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
   const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
   const navigate = useNavigate()
@@ -90,6 +90,7 @@ export default function ClientBluePanel() {
       routes: [
         `/goal-base/`,
         `/goal-base-calculated/`,
+        `/goal-base-dashboard/`,
         `/retirement-goal/`,
         `/retirement-goal-calculated/`,
       ],

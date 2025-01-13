@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
-import ClientBluePanel from "../components/cfpClientSidePanel.jsx"
+import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
 import { calculatePortfolioSummary } from "../utils/calculations.js"
 import { motion } from "framer-motion"
@@ -173,7 +173,7 @@ export default function CFPGoalBase() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-4 space-y-8">
           {/* Top buttons */}
           <div className="flex space-x-4 justify-center">

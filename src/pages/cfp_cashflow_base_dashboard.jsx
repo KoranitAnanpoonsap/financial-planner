@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import Footer from "../components/footer.jsx"
 import Header from "../components/header.jsx"
-import ClientBluePanel from "../components/cfpClientSidePanel.jsx"
+import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { motion } from "framer-motion"
 import { Line } from "react-chartjs-2"
 import {
@@ -314,7 +314,7 @@ export default function CFPCashflowBaseDashboard() {
     <div className="flex flex-col min-h-screen font-ibm font-bold text-tfpa_blue">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-4 space-y-8">
           <motion.div
             initial="initial"

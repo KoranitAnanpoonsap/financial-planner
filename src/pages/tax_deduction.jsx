@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer"
 import Header from "../components/header"
-import ClientBluePanel from "../components/cfpClientSidePanel"
+import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { motion } from "framer-motion"
 
@@ -328,7 +328,7 @@ export default function TaxDeductionPage() {
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-8 space-y-8">
           {/* Steps */}
           <div className="flex items-center justify-center space-x-8">
