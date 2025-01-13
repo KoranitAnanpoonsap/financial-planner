@@ -86,9 +86,9 @@ export default function PortfolioCreationCFP() {
             <div className="flex justify-end mt-4">
               <button
                 onClick={handleEditPortfolio}
-                className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded font-ibm"
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
               >
-                แก้ไขพอร์ต
+                กลับ
               </button>
             </div>
           </motion.div>
