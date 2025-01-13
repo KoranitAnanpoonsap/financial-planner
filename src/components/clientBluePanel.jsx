@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams, useLocation } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 import personIcon from "../assets/person.png"
 import personListIcon from "../assets/personlist.png"
 import newIcon from "../assets/new.png"
 import loadingIcon from "../assets/loading.png"
 import checkIcon from "../assets/check.png"
-import { motion } from "framer-motion"
 
 const pageVariants = {
   initial: {
