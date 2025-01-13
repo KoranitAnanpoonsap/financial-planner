@@ -426,6 +426,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.child}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const value = Math.max(0, Number(e.target.value))
                       setDeductionData((prev) => {
@@ -464,6 +465,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.child2561}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
                       setDeductionData((prev) => {
@@ -500,6 +502,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.adoptedChild}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
                       setDeductionData((prev) => {
@@ -536,6 +539,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.parentalCare}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -563,6 +567,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.disabledCare}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -590,6 +595,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.prenatalCare}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -620,6 +626,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.parentHealthInsurance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -660,6 +667,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.lifeInsurance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -705,6 +713,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.healthInsurance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const inputValue = Math.max(0, Number(e.target.value)) // Ensure value is not negative
                       setDeductionData((prev) => {
@@ -742,6 +751,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.pensionInsurance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -774,6 +784,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.spouseNoIncomeLifeInsurance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -806,6 +817,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.rmf}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -837,6 +849,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.ssf}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -868,6 +881,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.govPensionFund}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -899,6 +913,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.pvd}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -930,6 +945,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.nationSavingsFund}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -962,6 +978,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.socialSecurityPremium}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -994,6 +1011,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.socialEnterprise}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -1026,6 +1044,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.thaiEsg}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,
@@ -1081,6 +1100,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.generalDonation}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const val =
                         e.target.value === ""
@@ -1118,6 +1138,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.eduDonation}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const val =
                         e.target.value === ""
@@ -1152,6 +1173,7 @@ export default function TaxDeductionPage() {
                   <input
                     type="number"
                     value={deductionData.politicalPartyDonation}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setDeductionData((prev) => ({
                         ...prev,

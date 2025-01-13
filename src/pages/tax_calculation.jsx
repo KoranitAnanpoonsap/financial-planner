@@ -627,6 +627,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="rmf"
                         value={investments.rmf}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.rmf}
                         onFocus={handleInputFocus}
@@ -639,6 +640,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="ssf"
                         value={investments.ssf}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.ssf}
                         onFocus={handleInputFocus}
@@ -651,6 +653,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="govPensionFund"
                         value={investments.govPensionFund}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.govPensionFund}
                         onFocus={handleInputFocus}
@@ -663,6 +666,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="pvd"
                         value={investments.pvd}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.pvd}
                         onFocus={handleInputFocus}
@@ -675,6 +679,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="nationSavingsFund"
                         value={investments.nationSavingsFund}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.nationSavingsFund}
                         onFocus={handleInputFocus}
@@ -687,6 +692,7 @@ export default function TaxCalculationPage() {
                         type="number"
                         name="pensionInsurance"
                         value={investments.pensionInsurance}
+                        onWheel={(e) => e.target.blur()}
                         onChange={handleInvestmentChange}
                         max={remainingDeductions.pensionInsurance}
                         onFocus={handleInputFocus}

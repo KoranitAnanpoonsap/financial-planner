@@ -220,6 +220,7 @@ export default function CFPGoalBase() {
                   <input
                     type="number"
                     value={clientNetIncome}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientNetIncome(e.target.value)}
                     className="border rounded p-2 w-full font-ibm mt-1 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -231,6 +232,7 @@ export default function CFPGoalBase() {
                   <input
                     type="number"
                     value={clientNetIncomeGrowth}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientNetIncomeGrowth(e.target.value)}
                     className="border rounded p-2 w-full font-ibm mt-1 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -256,6 +258,7 @@ export default function CFPGoalBase() {
                   <input
                     type="number"
                     value={clientGeneralGoalValue}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientGeneralGoalValue(e.target.value)}
                     className="border rounded p-2 w-full font-ibm mt-1 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -267,6 +270,7 @@ export default function CFPGoalBase() {
                   <input
                     type="number"
                     value={clientGeneralGoalPeriod}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientGeneralGoalPeriod(e.target.value)}
                     className="border rounded p-2 w-full font-ibm mt-1 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />

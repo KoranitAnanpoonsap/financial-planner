@@ -430,6 +430,7 @@ export default function TaxIncomePage() {
                                                 0
                                               }
                                               onFocus={(e) => e.target.select()}
+                                              onWheel={(e) => e.target.blur()}
                                               onChange={(e) =>
                                                 handleUpdateOtherExpense(
                                                   item,

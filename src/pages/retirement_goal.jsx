@@ -245,6 +245,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={clientCurrentAge}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientCurrentAge(e.target.value)}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -259,6 +260,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={clientRetirementAge}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientRetirementAge(e.target.value)}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -273,6 +275,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={clientLifeExpectancy}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setClientLifeExpectancy(e.target.value)}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />
@@ -287,6 +290,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={clientCurrentYearlyExpense}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setClientCurrentYearlyExpense(e.target.value)
                     }
@@ -303,6 +307,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={clientExpectedRetiredPortReturn}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       setClientExpectedRetiredPortReturn(e.target.value)
                     }
@@ -319,6 +324,7 @@ export default function RetirementGoalPage() {
                   <input
                     type="number"
                     value={inflationRate}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => setInflationRate(e.target.value)}
                     className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   />

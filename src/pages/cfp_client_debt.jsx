@@ -289,6 +289,7 @@ export default function CFPClientDebtPage() {
                 <input
                   type="number"
                   value={amount}
+                  onWheel={(e) => e.target.blur()}
                   onChange={(e) => setAmount(e.target.value)}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
@@ -301,6 +302,7 @@ export default function CFPClientDebtPage() {
                 <input
                   type="number"
                   value={interest}
+                  onWheel={(e) => e.target.blur()}
                   onChange={(e) => setInterest(e.target.value)}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
@@ -325,6 +327,7 @@ export default function CFPClientDebtPage() {
                 <input
                   type="number"
                   value={years}
+                  onWheel={(e) => e.target.blur()}
                   onChange={(e) => setYears(e.target.value)}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
@@ -337,6 +340,7 @@ export default function CFPClientDebtPage() {
                 <input
                   type="number"
                   value={principal}
+                  onWheel={(e) => e.target.blur()}
                   onChange={(e) => setPrincipal(e.target.value)}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
