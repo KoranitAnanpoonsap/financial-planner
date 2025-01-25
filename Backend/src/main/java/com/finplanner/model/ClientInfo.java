@@ -2,6 +2,7 @@ package com.finplanner.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "client_info") // Table name in the database
@@ -9,14 +10,17 @@ public class ClientInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "client_id")
+    @Column(name = "client_id", insertable = false, updatable = false)
     private Integer clientId;
 
-    @Column(name = "client_format_id", length = 6, insertable = false)
+    @Column(name = "client_uuid", columnDefinition = "uuid", updatable = false, nullable = false)
+    private UUID clientUuid;
+
+    @Column(name = "client_format_id", length = 6, updatable = false, insertable = false)
     private String clientFormatId;
 
     @ManyToOne
-    @JoinColumn(name = "cfp_of_this_client", referencedColumnName = "cfp_id")
+    @JoinColumn(name = "cfp_of_this_client", referencedColumnName = "cfp_uuid")
     private CfpInfo cfpOfThisClient; // Foreign key reference to CfpInfo
 
     @Column(name = "client_status", length = 20)
@@ -56,6 +60,14 @@ public class ClientInfo {
     private LocalDate clientDateOfBirth;
 
     // Getters and Setters for all fields
+
+    // Automatically set clientUuid before persisting
+    @PrePersist
+    public void prePersist() {
+        if (clientUuid == null) {
+            clientUuid = UUID.randomUUID();
+        }
+    }
 
     public Integer getClientId() {
         return clientId;
@@ -171,5 +183,13 @@ public class ClientInfo {
 
     public void setClientDateOfBirth(LocalDate clientDateOfBirth) {
         this.clientDateOfBirth = clientDateOfBirth;
+    }
+
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
     }
 }

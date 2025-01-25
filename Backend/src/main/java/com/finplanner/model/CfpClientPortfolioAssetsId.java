@@ -5,12 +5,16 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Embeddable
 public class CfpClientPortfolioAssetsId implements Serializable {
 
-    @Column(name = "client_id")
-    private Integer clientId;
+    @Column(name = "client_uuid")
+    @JsonProperty("clientUuid")
+    private UUID clientUuid;
 
     @Column(name = "invest_name", length = 100)
     private String investName;
@@ -20,18 +24,18 @@ public class CfpClientPortfolioAssetsId implements Serializable {
     }
 
     // Parameterized constructor
-    public CfpClientPortfolioAssetsId(Integer clientId, String investName) {
-        this.clientId = clientId;
+    public CfpClientPortfolioAssetsId(UUID clientUuid, String investName) {
+        this.clientUuid = clientUuid;
         this.investName = investName;
     }
 
     // Getters and Setters
-    public Integer getClientId() {
-        return clientId;
+    public UUID getClientUuid() {
+        return clientUuid;
     }
 
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
     }
 
     public String getInvestName() {
@@ -50,12 +54,12 @@ public class CfpClientPortfolioAssetsId implements Serializable {
         if (o == null || getClass() != o.getClass())
             return false;
         CfpClientPortfolioAssetsId that = (CfpClientPortfolioAssetsId) o;
-        return Objects.equals(clientId, that.clientId) &&
+        return Objects.equals(clientUuid, that.clientUuid) &&
                 Objects.equals(investName, that.investName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientId, investName);
+        return Objects.hash(clientUuid, investName);
     }
 }

@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
-import {
-  calculatePortfolioSummary,
-  calculateGeneralGoal,
-} from "../utils/calculations.js"
+import { calculateGoal } from "../utils/calculations.js"
 import { motion } from "framer-motion"
 
 const pageVariants = {
@@ -18,59 +15,39 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPGoalBaseCalculated() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || 0)
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || 0)
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
-  const [assets, setAssets] = useState([])
-  const [totalInvestment, setTotalInvestment] = useState(0)
-  const [portfolioReturn, setPortfolioReturn] = useState(0)
-  const [generalGoal, setGeneralGoal] = useState(null)
+  const [Goal, setGoal] = useState(null)
   const [fvOfCurrentInvestment, setFvOfCurrentInvestment] = useState(0)
-  const [generalGoalAnnualSaving, setGeneralGoalAnnualSaving] = useState(0)
+  const [GoalAnnualSaving, setGoalAnnualSaving] = useState(0)
 
   useEffect(() => {
     fetchAllData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
-      // Fetch general goal
-      const ggResponse = await fetch(
-        `http://localhost:8080/api/generalgoal/${clientId}`
+      // Fetch goal
+      const gResponse = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/calculategoal/${clientUuid}`
       )
-      if (!ggResponse.ok) {
-        throw new Error("No general goal data found")
+      if (!gResponse.ok) {
+        throw new Error("No goal data found")
       }
-      const ggData = await ggResponse.json()
-      setGeneralGoal(ggData)
+      const gData = await gResponse.json()
+      setGoal(gData)
 
-      // Fetch assets
-      const assetsResponse = await fetch(
-        `http://localhost:8080/api/portassets/${clientId}`
-      )
-      if (!assetsResponse.ok) {
-        throw new Error("Failed to fetch assets")
-      }
-      const assetsData = await assetsResponse.json()
-      setAssets(assetsData)
-
-      // Calculate portfolio summary
-      const { totalInvestAmount, portReturn } =
-        calculatePortfolioSummary(assetsData)
-      setTotalInvestment(totalInvestAmount)
-      setPortfolioReturn(portReturn)
-
-      // Calculate general goal
-      const { fvOfCurrentInvestment: fv, generalGoalAnnualSaving: saving } =
-        calculateGeneralGoal(ggData, totalInvestAmount, portReturn)
+      // Calculate goal
+      const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
+        calculateGoal(gData)
       setFvOfCurrentInvestment(fv)
-      setGeneralGoalAnnualSaving(saving)
+      setGoalAnnualSaving(saving)
     } catch (error) {
       console.error("Error fetching data:", error)
       // Optionally, you can set default values or handle the error state here
@@ -81,7 +58,7 @@ export default function CFPGoalBaseCalculated() {
     navigate(`/retirement-goal/`)
   }
 
-  const handleNavigateGeneralGoal = () => {
+  const handleNavigateGoal = () => {
     navigate(`/goal-base/`)
   }
 
@@ -99,7 +76,7 @@ export default function CFPGoalBaseCalculated() {
           <div className="flex space-x-4 justify-center">
             <button
               className="bg-tfpa_gold px-4 py-2 rounded font-bold text-white"
-              onClick={handleNavigateGeneralGoal}
+              onClick={handleNavigateGoal}
             >
               เป้าหมายทั่วไป
             </button>
@@ -119,12 +96,10 @@ export default function CFPGoalBaseCalculated() {
             transition={pageTransition}
           >
             {/* Blue Box with Goal Info */}
-            {generalGoal && (
+            {Goal && (
               <div className="bg-tfpa_blue p-6 rounded-3xl space-y-6 text-white font-bold mx-32">
                 {/* Goal Name */}
-                <h2 className="text-center text-2xl">
-                  {generalGoal.clientGeneralGoalName}
-                </h2>
+                <h2 className="text-center text-2xl">{Goal.goalName}</h2>
 
                 {/* Two columns for details */}
                 <div className="grid grid-cols-2 gap-8">
@@ -132,16 +107,11 @@ export default function CFPGoalBaseCalculated() {
                   <div className="flex flex-col space-y-4 text-xl">
                     <div className="flex justify-between">
                       <span>กระแสเงินสดสุทธิต่อปี</span>
-                      <span>
-                        {Number(generalGoal.clientNetIncome).toLocaleString()}{" "}
-                        บาท
-                      </span>
+                      <span>{Number(Goal.netIncome).toLocaleString()} บาท</span>
                     </div>
                     <div className="flex justify-between">
                       <span>อัตราการเติบโตของกระแสเงินสดสุทธิต่อปี</span>
-                      <span>
-                        {(generalGoal.clientNetIncomeGrowth * 100).toFixed(2)} %
-                      </span>
+                      <span>{(Goal.netIncomeGrowth * 100).toFixed(2)} %</span>
                     </div>
                   </div>
 
@@ -149,16 +119,11 @@ export default function CFPGoalBaseCalculated() {
                   <div className="flex flex-col space-y-4 text-xl">
                     <div className="flex justify-between">
                       <span>จำนวนเงินเพื่อเป้าหมาย</span>
-                      <span>
-                        {Number(
-                          generalGoal.clientGeneralGoalValue
-                        ).toLocaleString()}{" "}
-                        บาท
-                      </span>
+                      <span>{Number(Goal.goalValue).toLocaleString()} บาท</span>
                     </div>
                     <div className="flex justify-between">
                       <span>ระยะเวลาเป้าหมาย</span>
-                      <span>{generalGoal.clientGeneralGoalPeriod} ปี</span>
+                      <span>{Goal.goalPeriod} ปี</span>
                     </div>
                   </div>
                 </div>
@@ -166,7 +131,7 @@ export default function CFPGoalBaseCalculated() {
             )}
 
             {/* Results */}
-            {generalGoal && (
+            {Goal && (
               <div className="flex flex-col items-center space-y-4 text-xl font-bold mt-4 mb-4">
                 <div className="flex space-x-4 items-center text-tfpa_gold">
                   <span>เงินรวมปัจจุบันในการลงทุนคิดเป็นค่าเงินในอนาคต</span>
@@ -177,23 +142,21 @@ export default function CFPGoalBaseCalculated() {
                 <div className="flex space-x-4 items-center text-tfpa_gold">
                   <span>เงินที่ต้องเก็บออมต่อปี</span>
                   <span>
-                    {generalGoalAnnualSaving < 0
+                    {GoalAnnualSaving < 0
                       ? 0
-                      : generalGoalAnnualSaving.toLocaleString()}
+                      : GoalAnnualSaving.toLocaleString()}
                   </span>
                   <span>บาท</span>
                 </div>
 
                 <div
                   className={`px-52 py-2 rounded-3xl ${
-                    generalGoalAnnualSaving <=
-                    Number(generalGoal.clientNetIncome)
+                    GoalAnnualSaving <= Number(Goal.netIncome)
                       ? "bg-green-300 text-green-950"
                       : "bg-red-300 text-red-950"
                   }`}
                 >
-                  {generalGoalAnnualSaving <=
-                  Number(generalGoal.clientNetIncome)
+                  {GoalAnnualSaving <= Number(Goal.netIncome)
                     ? "เงินที่ออมอยู่ต่อปีมีเพียงพอ"
                     : "เงินที่ออมอยู่ต่อปีมีไม่เพียงพอ"}
                 </div>

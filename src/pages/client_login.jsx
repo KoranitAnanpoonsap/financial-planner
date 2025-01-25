@@ -42,10 +42,13 @@ export default function ClientLogin() {
     formData.append("password", password)
 
     try {
-      const response = await fetch("http://localhost:8080/api/clients/login", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/clients/login",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
 
       if (response.ok) {
         const data = await response.json()

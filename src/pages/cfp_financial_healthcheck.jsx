@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { computeVariables, computeRatios } from "../utils/calculations"
@@ -14,7 +14,7 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 function FractionDisplay({ topLabel, bottomLabel }) {
@@ -30,8 +30,7 @@ function FractionDisplay({ topLabel, bottomLabel }) {
 }
 
 export default function CFPFinancialHealthCheck() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
 
   const [ratios, setRatios] = useState({
     liquidity: 0,
@@ -66,26 +65,26 @@ export default function CFPFinancialHealthCheck() {
 
   useEffect(() => {
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchData = async () => {
     const incomeRes = await fetch(
-      `http://localhost:8080/api/clientincome/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
     )
     const incomes = await incomeRes.json()
 
     const expenseRes = await fetch(
-      `http://localhost:8080/api/clientexpense/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`
     )
     const expenses = await expenseRes.json()
 
     const assetRes = await fetch(
-      `http://localhost:8080/api/clientassets/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}`
     )
     const assets = await assetRes.json()
 
     const debtRes = await fetch(
-      `http://localhost:8080/api/clientdebt/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientdebt/${clientUuid}`
     )
     const debts = await debtRes.json()
 

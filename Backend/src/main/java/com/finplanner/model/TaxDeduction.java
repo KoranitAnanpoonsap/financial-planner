@@ -1,5 +1,7 @@
 package com.finplanner.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -7,15 +9,15 @@ import jakarta.persistence.*;
 public class TaxDeduction {
 
     @Id
-    private Integer clientId; // This matches ClientInfo's primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "tax_deduction_id", insertable = false, updatable = false)
+    private Integer taxDeductionId;
 
-    @MapsId("clientId") // This tells JPA that clientId in TaxPlan maps to ClientInfo's primary key
-    @OneToOne
-    @JoinColumn(name = "client_id", referencedColumnName = "client_id")
-    private ClientInfo clientInfo;
+    @Column(name = "client_uuid", columnDefinition = "uuid")
+    private UUID clientUuid; // This matches ClientInfo's uuid
 
-    @Column(name = "marital_status", length = 50)
-    private String maritalStatus;
+    @Column(name = "marital_status")
+    private Integer maritalStatus;
 
     @Column(name = "child")
     private Integer child;
@@ -85,19 +87,27 @@ public class TaxDeduction {
 
     // Getters and Setters
 
-    public Integer getClientId() {
-        return clientId;
+    public Integer getTaxDeductionId() {
+        return taxDeductionId;
     }
 
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
+    public void setTaxDeductionId(Integer taxDeductionId) {
+        this.taxDeductionId = taxDeductionId;
     }
 
-    public String getMaritalStatus() {
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
+    }
+
+    public Integer getMaritalStatus() {
         return maritalStatus;
     }
 
-    public void setMaritalStatus(String maritalStatus) {
+    public void setMaritalStatus(Integer maritalStatus) {
         this.maritalStatus = maritalStatus;
     }
 

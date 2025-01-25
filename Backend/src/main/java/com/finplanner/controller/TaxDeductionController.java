@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/taxdeduction")
@@ -16,9 +17,10 @@ public class TaxDeductionController {
     private TaxDeductionRepository taxDeductionRepository;
 
     // Get a TaxDeduction by clientId
-    @GetMapping("/{clientId}")
-    public ResponseEntity<TaxDeduction> getTaxDeductionByClientId(@PathVariable("clientId") Integer clientId) {
-        Optional<TaxDeduction> taxDeductionOpt = taxDeductionRepository.findById(clientId);
+    @GetMapping("/{clientUuid}")
+    public ResponseEntity<TaxDeduction> getTaxDeductionByClientId(@PathVariable String clientUuid) {
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        Optional<TaxDeduction> taxDeductionOpt = taxDeductionRepository.findByClientUuid(uuid);
         return taxDeductionOpt.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -30,22 +32,12 @@ public class TaxDeductionController {
         return ResponseEntity.ok(created);
     }
 
-    // Delete a TaxDeduction by clientId
-    @DeleteMapping("/{clientId}")
-    public ResponseEntity<Void> deleteTaxDeduction(@PathVariable("clientId") Integer clientId) {
-        if (taxDeductionRepository.existsById(clientId)) {
-            taxDeductionRepository.deleteById(clientId);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     // Update an existing TaxDeduction by clientId
-    @PutMapping("/{clientId}")
-    public ResponseEntity<TaxDeduction> updateTaxDeduction(@PathVariable("clientId") Integer clientId,
+    @PutMapping("/{clientUuid}")
+    public ResponseEntity<TaxDeduction> updateTaxDeduction(@PathVariable String clientUuid,
             @RequestBody TaxDeduction updatedTaxDeduction) {
-        return taxDeductionRepository.findById(clientId)
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return taxDeductionRepository.findByClientUuid(uuid)
                 .map(existingDeduction -> {
                     // Update fields as needed
                     existingDeduction.setMaritalStatus(updatedTaxDeduction.getMaritalStatus());

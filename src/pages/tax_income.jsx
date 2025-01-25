@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { motion } from "framer-motion"
@@ -15,12 +15,11 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function TaxIncomePage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   // We'll store incomes in a state that includes both the original & displayed amounts.
@@ -32,15 +31,15 @@ export default function TaxIncomePage() {
   const [show408Details, setShow408Details] = useState(false)
 
   useEffect(() => {
-    if (!clientId) return
+    if (!clientUuid) return
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   async function fetchData() {
     try {
       // 1) Fetch all client incomes from your API
       const res = await fetch(
-        `http://localhost:8080/api/clientincome/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
       )
       if (!res.ok) throw new Error("Failed to fetch incomes")
       const data = await res.json()
@@ -49,7 +48,8 @@ export default function TaxIncomePage() {
       // but keep original clientIncomeAmount for DB updates.
       const adjusted = data.map((inc) => {
         let displayIncomeAmount = inc.clientIncomeAmount
-        if (inc.clientIncomeFrequency === "ทุกเดือน") {
+        // If monthly, multiply by 12
+        if (inc.clientIncomeFrequency === 1) {
           displayIncomeAmount *= 12
         }
         return {
@@ -60,7 +60,7 @@ export default function TaxIncomePage() {
       setIncomes(adjusted)
 
       // 2) Compute totalIncome & totalExpense from your tax logic
-      const result = await fetchAndCalculateTaxForClient(clientId)
+      const result = await fetchAndCalculateTaxForClient(clientUuid)
       setTotalIncome(result.totalIncome)
       setTotalExpense(result.totalExpenseDeductions)
     } catch (error) {
@@ -79,8 +79,8 @@ export default function TaxIncomePage() {
     setIncomes((prevIncomes) =>
       prevIncomes.map((inc) => {
         if (
-          inc.id.clientId === item.id.clientId &&
-          inc.id.clientIncomeName === item.id.clientIncomeName
+          inc.clientUuid === item.clientUuid &&
+          inc.clientIncomeName === item.clientIncomeName
         ) {
           return {
             ...inc,
@@ -95,7 +95,8 @@ export default function TaxIncomePage() {
     //    The server expects a complete record (non-null fields).
     //    Notice we do *not* use inc.displayIncomeAmount for the DB:
     const updatedIncome = {
-      id: item.id, // the composite key
+      clientUuid: item.clientUuid,
+      clientIncomeName: item.clientIncomeName,
       clientIncomeType: item.clientIncomeType,
       clientIncomeFrequency: item.clientIncomeFrequency,
       clientIncomeAmount: item.clientIncomeAmount, // keep the original amount
@@ -110,8 +111,10 @@ export default function TaxIncomePage() {
     // 3) Send PUT request
     try {
       // Make sure we encode the income name if your endpoint requires it.
-      const putUrl = `http://localhost:8080/api/clientincome/${clientId}/${encodeURIComponent(
-        item.id.clientIncomeName
+      const putUrl = `${
+        import.meta.env.VITE_API_KEY
+      }api/clientincome/${clientUuid}/${encodeURIComponent(
+        item.clientIncomeName
       )}`
 
       const res = await fetch(putUrl, {
@@ -132,27 +135,27 @@ export default function TaxIncomePage() {
 
   // Prepare categories structure
   const categories = {
-    "40(1) เงินเดือน": {
+    1: {
       code: "40(1)",
       label: "เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส บำนาญ ฯลฯ",
       amount: 0,
     },
-    "40(2) รับจ้างทำงาน": {
+    2: {
       code: "40(2)",
       label: "ค่านายหน้า เบี้ยประชุม หรือเงินได้จากหน้าที่ / การรับทำงานให้",
       amount: 0,
     },
-    "40(3) ค่าลิขสิทธิ์ สิทธิบัตร": {
+    3: {
       code: "40(3)",
       label: "เงินได้จากค่าลิขสิทธิ์หรือเงินรายปี",
       amount: 0,
     },
-    "40(4) ดอกเบี้ย เงินปันผล": {
+    4: {
       code: "40(4)",
       label: "เงินได้จากการออกการลงทุน",
       amount: 0,
     },
-    "40(5) ค่าเช่าทรัพย์สิน": {
+    5: {
       code: "40(5)",
       label: "เงินได้จากการให้เช่าทรัพย์สิน",
       amount: 0,
@@ -163,7 +166,7 @@ export default function TaxIncomePage() {
         ทรัพย์สินอื่นๆ: 0,
       },
     },
-    "40(6) วิชาชีพอิสระ": {
+    6: {
       code: "40(6)",
       label: "เงินได้จากวิชาชีพอิสระ",
       amount: 0,
@@ -172,12 +175,12 @@ export default function TaxIncomePage() {
         "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม": 0,
       },
     },
-    "40(7) รับเหมาก่อสร้าง": {
+    7: {
       code: "40(7)",
       label: "เงินได้จากการรับเหมาที่ผู้รับเหมาต้องจัดหาสัมภาระในส่วนสำคัญ",
       amount: 0,
     },
-    "40(8) รายได้อื่นๆ": {
+    8: {
       code: "40(8)",
       label: "เงินได้อื่นๆ",
       amount: 0,
@@ -201,19 +204,20 @@ export default function TaxIncomePage() {
     // Add inc.displayIncomeAmount to the category's total
     categories[mainType].amount += inc.displayIncomeAmount || 0
 
-    if (mainType === "40(5) ค่าเช่าทรัพย์สิน") {
+    if (mainType === 5) {
       const sub405 = inc.clientIncome405Type
       if (categories[mainType].subtypes[sub405] !== undefined) {
         categories[mainType].subtypes[sub405] += inc.displayIncomeAmount || 0
       }
-    } else if (mainType === "40(6) วิชาชีพอิสระ") {
+    } else if (mainType === 6) {
       const sub406 = inc.clientIncome406Type
       if (categories[mainType].subtypes[sub406] !== undefined) {
         categories[mainType].subtypes[sub406] += inc.displayIncomeAmount || 0
       }
-    } else if (mainType === "40(8) รายได้อื่นๆ") {
+    } else if (mainType === 8) {
       const sub408 = inc.clientIncome408Type
-      if (sub408 === "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)") {
+      // เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)
+      if (sub408 === 4) {
         const rec = categories[mainType].subtypes[sub408]
         rec.total += inc.displayIncomeAmount || 0
         // push entire inc
@@ -402,7 +406,7 @@ export default function TaxIncomePage() {
                                           className="flex items-center space-x-4"
                                         >
                                           <div className="w-1/2 text-tfpa_blue">
-                                            ┗ {item.id.clientIncomeName}
+                                            ┗ {item.clientIncomeName}
                                           </div>
                                           <div className="flex-1 flex flex-wrap items-center space-x-2">
                                             {/* Amount displayed (12x if monthly) */}

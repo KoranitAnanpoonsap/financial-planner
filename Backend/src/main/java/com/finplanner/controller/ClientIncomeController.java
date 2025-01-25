@@ -1,13 +1,14 @@
 package com.finplanner.controller;
 
 import com.finplanner.model.ClientIncome;
-import com.finplanner.model.ClientIncomeId;
 import com.finplanner.repository.ClientIncomeRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/clientincome")
@@ -17,9 +18,10 @@ public class ClientIncomeController {
     private ClientIncomeRepository clientIncomeRepository;
 
     // Get all incomes for a given clientId
-    @GetMapping("/{clientId}")
-    public List<ClientIncome> getIncomesByClientId(@PathVariable("clientId") Integer clientId) {
-        return clientIncomeRepository.findById_ClientId(clientId);
+    @GetMapping("/{clientUuid}")
+    public List<ClientIncome> getIncomesByClientId(@PathVariable String clientUuid) {
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return clientIncomeRepository.findByClientUuid(uuid);
     }
 
     // Create a new income record
@@ -29,39 +31,43 @@ public class ClientIncomeController {
         return ResponseEntity.ok(createdIncome);
     }
 
-    // Delete an income by clientId and clientIncomeName
-    @DeleteMapping("/{clientId}/{clientIncomeName}")
-    public ResponseEntity<Void> deleteIncome(@PathVariable("clientId") Integer clientId,
-            @PathVariable("clientIncomeName") String clientIncomeName) {
-        // Note that the constructor expects clientIncomeName first, then clientId
-        ClientIncomeId id = new ClientIncomeId(clientIncomeName, clientId);
-        clientIncomeRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    // Delete an income by clientUuid and clientIncomeName
+    @DeleteMapping("/{clientUuid}/{clientIncomeName}")
+    public ResponseEntity<Object> deleteIncome(
+            @PathVariable String clientUuid,
+            @PathVariable String clientIncomeName) {
+
+        UUID uuid = UUID.fromString(clientUuid);
+        return clientIncomeRepository.findByClientUuidAndClientIncomeName(uuid, clientIncomeName)
+                .map(existing -> {
+                    clientIncomeRepository.delete(existing);
+                    return ResponseEntity.noContent().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Update an existing income by clientId and clientIncomeName
-    @PutMapping("/{clientId}/{clientIncomeName}")
+    // Update an existing income by clientUuid and clientIncomeName
+    @PutMapping("/{clientUuid}/{clientIncomeName}")
     public ResponseEntity<ClientIncome> updateIncome(
-            @PathVariable("clientId") Integer clientId,
-            @PathVariable("clientIncomeName") String clientIncomeName,
+            @PathVariable String clientUuid,
+            @PathVariable String clientIncomeName,
             @RequestBody ClientIncome updatedIncome) {
-        ClientIncomeId id = new ClientIncomeId(clientIncomeName, clientId);
 
-        return clientIncomeRepository.findById(id)
-                .map(existingIncome -> {
-                    existingIncome.setClientIncomeType(updatedIncome.getClientIncomeType());
-                    existingIncome.setClientIncomeFrequency(updatedIncome.getClientIncomeFrequency());
-                    existingIncome.setClientIncomeAmount(updatedIncome.getClientIncomeAmount());
-                    existingIncome.setClientIncomeAnnualGrowthRate(updatedIncome.getClientIncomeAnnualGrowthRate());
-                    existingIncome.setClientIncome405Type(updatedIncome.getClientIncome405Type());
-                    existingIncome.setClientIncome406Type(updatedIncome.getClientIncome406Type());
-                    existingIncome.setClientIncome408Type(updatedIncome.getClientIncome408Type());
-                    existingIncome.setClientIncome408TypeOtherExpenseDeduction(
+        UUID uuid = UUID.fromString(clientUuid);
+        return clientIncomeRepository.findByClientUuidAndClientIncomeName(uuid, clientIncomeName)
+                .map(existing -> {
+                    existing.setClientIncomeType(updatedIncome.getClientIncomeType());
+                    existing.setClientIncomeFrequency(updatedIncome.getClientIncomeFrequency());
+                    existing.setClientIncomeAmount(updatedIncome.getClientIncomeAmount());
+                    existing.setClientIncomeAnnualGrowthRate(updatedIncome.getClientIncomeAnnualGrowthRate());
+                    existing.setClientIncome405Type(updatedIncome.getClientIncome405Type());
+                    existing.setClientIncome406Type(updatedIncome.getClientIncome406Type());
+                    existing.setClientIncome408Type(updatedIncome.getClientIncome408Type());
+                    existing.setClientIncome408TypeOtherExpenseDeduction(
                             updatedIncome.getClientIncome408TypeOtherExpenseDeduction());
 
-                    // Then save:
-                    ClientIncome savedIncome = clientIncomeRepository.save(existingIncome);
-                    return ResponseEntity.ok(savedIncome);
+                    ClientIncome saved = clientIncomeRepository.save(existing);
+                    return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

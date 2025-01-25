@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { motion } from "framer-motion"
@@ -24,14 +24,32 @@ const pageTransition = {
   duration: 0.3,
 }
 
+const MARITAL_STATUS = {
+  SELECT: 0,
+  SINGLE: 1, // โสด
+  SPOUSE_SEPARATE: 2, // คู่สมรสมีเงินได้แยกยื่นแบบ
+  SPOUSE_COMBINED: 3, // คู่สมรสมีเงินได้ยื่นรวม
+  SPOUSE_NO_INCOME: 4, // คู่สมรสไม่มีเงินได้
+}
+
+const MARITAL_STATUS_OPTIONS = [
+  { value: MARITAL_STATUS.SELECT, label: "เลือก" },
+  { value: MARITAL_STATUS.SINGLE, label: "โสด" },
+  {
+    value: MARITAL_STATUS.SPOUSE_SEPARATE,
+    label: "คู่สมรสมีเงินได้แยกยื่นแบบ",
+  },
+  { value: MARITAL_STATUS.SPOUSE_COMBINED, label: "คู่สมรสมีเงินได้ยื่นรวม" },
+  { value: MARITAL_STATUS.SPOUSE_NO_INCOME, label: "คู่สมรสไม่มีเงินได้" },
+]
+
 export default function TaxDeductionPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
   const [baseForDonation, setBaseForDonation] = useState(0)
 
   const [deductionData, setDeductionData] = useState({
-    maritalStatus: "",
+    maritalStatus: MARITAL_STATUS.SELECT,
     child: 0,
     child2561: 0,
     adoptedChild: 0,
@@ -93,18 +111,20 @@ export default function TaxDeductionPage() {
 
   useEffect(() => {
     fetchDeduction()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   useEffect(() => {
     if (exists && totalIncome > 0) {
       calculateDeductions(deductionData, totalIncome)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deductionData, totalIncome, expenseDeductions, exists])
 
   const fetchDeduction = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8080/api/taxdeduction/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/taxdeduction/${clientUuid}`
       )
       if (res.ok) {
         const data = await res.json()
@@ -114,7 +134,7 @@ export default function TaxDeductionPage() {
         setExists(false)
       }
 
-      const result = await fetchAndCalculateTaxForClient(clientId)
+      const result = await fetchAndCalculateTaxForClient(clientUuid)
       setTotalIncome(result.totalIncome)
       setExpenseDeductions(result.totalExpenseDeductions)
     } catch (error) {
@@ -124,7 +144,7 @@ export default function TaxDeductionPage() {
 
   const refreshCalculations = async (newData = deductionData) => {
     try {
-      const result = await fetchAndCalculateTaxForClient(clientId)
+      const result = await fetchAndCalculateTaxForClient(clientUuid)
       setTotalIncome(result.totalIncome)
       setExpenseDeductions(result.totalExpenseDeductions)
 
@@ -138,15 +158,15 @@ export default function TaxDeductionPage() {
     const updated = {
       ...deductionData,
       [field]: val,
-      clientId: parseInt(clientId),
+      clientUuid: clientUuid,
     }
 
     setDeductionData(updated)
 
     const method = exists ? "PUT" : "POST"
     const url = exists
-      ? `http://localhost:8080/api/taxdeduction/${clientId}`
-      : `http://localhost:8080/api/taxdeduction`
+      ? `${import.meta.env.VITE_API_KEY}api/taxdeduction/${clientUuid}`
+      : `${import.meta.env.VITE_API_KEY}api/taxdeduction`
 
     try {
       const res = await fetch(url, {
@@ -175,24 +195,25 @@ export default function TaxDeductionPage() {
 
   function calculateDeductions(data, totalInc) {
     let msDeduct = 0
+    // marital status: 1=โสด, 2=คู่สมรสมีเงินได้แยกยื่นแบบ, 3=คู่สมรสมีเงินได้ยื่นรวม, 4=คู่สมรสไม่มีเงินได้
     if (
-      data.maritalStatus === "โสด" ||
-      data.maritalStatus === "คู่สมรสมีเงินได้แยกยื่นแบบ"
+      data.maritalStatus === MARITAL_STATUS.SINGLE ||
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_SEPARATE
     ) {
       msDeduct = 60000
     } else if (
-      data.maritalStatus === "คู่สมรสมีเงินได้ยื่นรวม" ||
-      data.maritalStatus === "คู่สมรสไม่มีเงินได้"
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_COMBINED ||
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_NO_INCOME
     ) {
       msDeduct = 120000
     }
 
     const cDeduct =
-      data.maritalStatus == "คู่สมรสมีเงินได้ยื่นรวม"
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_COMBINED
         ? data.child * 60000
         : data.child * 30000
     const c2561Deduct =
-      data.maritalStatus == "คู่สมรสมีเงินได้ยื่นรวม"
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_COMBINED
         ? data.child > 0
           ? data.child2561 * 120000
           : 0
@@ -201,7 +222,7 @@ export default function TaxDeductionPage() {
         : 0
     const legalChildren = data.child + data.child2561
     const adoptedDeduct =
-      data.maritalStatus == "คู่สมรสมีเงินได้ยื่นรวม"
+      data.maritalStatus === MARITAL_STATUS.SPOUSE_COMBINED
         ? legalChildren < 3
           ? Math.min(data.adoptedChild, 3 - legalChildren) * 60000
           : 0
@@ -390,30 +411,29 @@ export default function TaxDeductionPage() {
                   <select
                     value={deductionData.maritalStatus}
                     onChange={(e) => {
+                      const value =
+                        parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
                       setDeductionData((prev) => ({
                         ...prev,
-                        maritalStatus: e.target.value,
+                        maritalStatus: value,
                       }))
                     }}
                     onBlur={(e) =>
-                      handleUpdate("maritalStatus", e.target.value)
+                      handleUpdate(
+                        "maritalStatus",
+                        parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
+                      )
                     }
                     className="border border-gray-300 rounded px-2 py-1 w-64 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   >
-                    <option value="">เลือก</option>
-                    <option value="โสด">โสด</option>
-                    <option value="คู่สมรสมีเงินได้แยกยื่นแบบ">
-                      คู่สมรสมีเงินได้แยกยื่นแบบ
-                    </option>
-                    <option value="คู่สมรสมีเงินได้ยื่นรวม">
-                      คู่สมรสมีเงินได้ยื่นรวม
-                    </option>
-                    <option value="คู่สมรสไม่มีเงินได้">
-                      คู่สมรสไม่มีเงินได้
-                    </option>
+                    {MARITAL_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                   <span className="text-tfpa_gold font-bold">
-                    {displayValues.maritalStatusDeduction.toLocaleString()}
+                    {displayValues.maritalStatusDeduction}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
                 </div>

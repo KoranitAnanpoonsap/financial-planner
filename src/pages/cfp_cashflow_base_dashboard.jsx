@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { motion } from "framer-motion"
 import { Line } from "react-chartjs-2"

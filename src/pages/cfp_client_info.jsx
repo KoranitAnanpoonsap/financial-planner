@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
@@ -14,23 +14,22 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPClientInfoPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [clientInfo, setClientInfo] = useState(null)
 
   useEffect(() => {
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchData = async () => {
     const res = await fetch(
-      `http://localhost:8080/api/clients/info/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clients/info/${clientUuid}`
     )
     if (res.ok) {
       const data = await res.json()
@@ -78,7 +77,9 @@ export default function CFPClientInfoPage() {
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
                 1
               </div>
-              <span className="font-bold text-tfpa_blue">ข้อมูลส่วนตัว</span>
+              <span className="font-bold text-tfpa_blue mt-1">
+                ข้อมูลส่วนตัว
+              </span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -88,7 +89,7 @@ export default function CFPClientInfoPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
+              <span className="font-bold mt-1">รายได้</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -98,7 +99,7 @@ export default function CFPClientInfoPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
+              <span className="font-bold mt-1">รายจ่าย</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -108,7 +109,7 @@ export default function CFPClientInfoPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold">สินทรัพย์</span>
+              <span className="font-bold mt-1">สินทรัพย์</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -118,7 +119,7 @@ export default function CFPClientInfoPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
+              <span className="font-bold mt-1">หนี้สิน</span>
             </button>
           </div>
           <motion.div

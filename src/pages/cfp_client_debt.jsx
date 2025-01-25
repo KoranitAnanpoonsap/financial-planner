@@ -1,9 +1,27 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import { useNavigate } from "react-router-dom"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
+
+// Mapping for debt types
+const debtTypes = {
+  1: "หนี้บ้าน",
+  2: "หนี้รถยนต์",
+  3: "หนี้รถจักรยานยนต์",
+  4: "หนี้บัตรเครดิต",
+  5: "หนี้บัตรกดเงินสด",
+  6: "หนี้ผ่อนชำระสินค้า",
+  7: "หนี้นอกระบบ",
+  8: "หนี้อื่นๆ",
+}
+
+// Mapping for debt terms
+const debtTerms = {
+  1: "ระยะสั้น",
+  2: "ระยะยาว",
+}
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -14,131 +32,164 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPClientDebtPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [debts, setDebts] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editingDebt, setEditingDebt] = useState(null)
 
-  const [debtType, setDebtType] = useState("เลือก")
+  const [debtType, setDebtType] = useState(0) // 0 represents "เลือก"
   const [debtName, setDebtName] = useState("")
-  const [debtTerm, setDebtTerm] = useState("ระยะสั้น") // default
+  const [debtTerm, setDebtTerm] = useState(1) // 1 represents "ระยะสั้น"
   const [amount, setAmount] = useState("")
   const [interest, setInterest] = useState("")
   const [startDate, setStartDate] = useState("")
   const [years, setYears] = useState("")
   const [principal, setPrincipal] = useState("")
 
-  const debtTypes = [
-    "หนี้บ้าน",
-    "หนี้รถยนต์",
-    "หนี้รถจักรยานยนต์",
-    "หนี้บัตรเครดิต",
-    "หนี้บัตรกดเงินสด",
-    "หนี้ผ่อนชำระสินค้า",
-    "หนี้นอกระบบ",
-    "หนี้อื่นๆ",
-  ]
-
-  const debtTerms = [
-    { label: "ระยะสั้น", value: "ระยะสั้น" },
-    { label: "ระยะยาว", value: "ระยะยาว" },
-  ]
-
   useEffect(() => {
     fetchDebts()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchDebts = async () => {
-    const res = await fetch(`http://localhost:8080/api/clientdebt/${clientId}`)
-    if (!res.ok) {
-      console.error("Failed to fetch debts")
-      return
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/clientdebt/${clientUuid}`
+      )
+      if (!res.ok) {
+        console.error("Failed to fetch debts")
+        return
+      }
+      const data = await res.json()
+      setDebts(data)
+    } catch (error) {
+      console.error("Error fetching debts:", error)
     }
-    const data = await res.json()
-    setDebts(data)
+  }
+
+  // Helper functions to get labels from values
+  const getDebtTypeLabel = (typeValue) => {
+    return debtTypes[typeValue] || "ไม่ระบุ"
+  }
+
+  const getDebtTermLabel = (termValue) => {
+    return debtTerms[termValue] || "ไม่ระบุ"
   }
 
   const handleCreateOrUpdateDebt = async () => {
-    const newDebt = {
-      id: {
-        clientId: parseInt(clientId),
-        clientDebtName: debtName,
-      },
-      clientDebtType: debtType,
-      clientDebtTerm: debtTerm,
-      clientDebtAmount: parseInt(amount),
-      clientDebtAnnualInterest: parseFloat(interest / 100),
-      clientStartDateDebt: startDate,
-      clientDebtDuration: parseInt(years),
-      clientDebtPrincipal: parseInt(principal),
+    // Validate required fields
+    if (
+      debtType === 0 ||
+      debtName.trim() === "" ||
+      debtTerm === 0 ||
+      amount === "" ||
+      interest === "" ||
+      startDate.trim() === "" ||
+      years === "" ||
+      principal === ""
+    ) {
+      return
     }
 
-    let url = `http://localhost:8080/api/clientdebt`
+    const newDebt = {
+      clientUuid: clientUuid,
+      clientDebtName: debtName,
+      clientDebtType: debtType,
+      clientDebtTerm: debtTerm,
+      clientDebtAmount: parseFloat(amount),
+      clientDebtAnnualInterest: parseFloat(interest) / 100,
+      clientStartDateDebt: startDate, // Ensure format YYYY-MM-DD
+      clientDebtDuration: parseInt(years, 10),
+      clientDebtPrincipal: parseFloat(principal),
+    }
+
+    let url = `${import.meta.env.VITE_API_KEY}api/clientdebt`
     let method = "POST"
 
     if (editMode && editingDebt) {
-      if (editingDebt.id.clientDebtName !== debtName) {
+      if (editingDebt.clientDebtName !== debtName) {
         // If the debt name is being updated, delete the old record and create a new one
-        await fetch(
-          `http://localhost:8080/api/clientdebt/${clientId}/${editingDebt.id.clientDebtName}`,
+        const deleteRes = await fetch(
+          `${
+            import.meta.env.VITE_API_KEY
+          }api/clientdebt/${clientUuid}/${encodeURIComponent(
+            editingDebt.clientDebtName
+          )}`,
           { method: "DELETE" }
         )
+        if (!deleteRes.ok) {
+          console.error("Failed to delete old debt")
+          return
+        }
+        // Continue with POST to create new debt
       } else {
-        url = `http://localhost:8080/api/clientdebt/${clientId}/${editingDebt.id.clientDebtName}`
+        // If the name wasn't changed, just update the debt
+        url = `${
+          import.meta.env.VITE_API_KEY
+        }api/clientdebt/${clientUuid}/${encodeURIComponent(
+          editingDebt.clientDebtName
+        )}`
         method = "PUT"
       }
     }
 
-    const res = await fetch(url, {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newDebt),
-    })
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDebt),
+      })
 
-    if (!res.ok) {
-      console.error("Failed to create/update debt")
-      return
+      if (!res.ok) {
+        console.error("Failed to create/update debt")
+        return
+      }
+
+      await res.json()
+
+      // Refresh list
+      await fetchDebts()
+
+      // Reset fields
+      resetFields()
+    } catch (error) {
+      console.error("Error creating/updating debt:", error)
     }
-
-    await res.json()
-
-    // Refresh list
-    await fetchDebts()
-
-    // Reset fields
-    resetFields()
   }
 
   const handleDeleteDebt = async (dbt) => {
-    const { clientId: cId, clientDebtName } = dbt.id
-    const res = await fetch(
-      `http://localhost:8080/api/clientdebt/${cId}/${clientDebtName}`,
-      { method: "DELETE" }
-    )
-    if (!res.ok) {
-      console.error("Failed to delete debt")
-      return
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/clientdebt/${clientUuid}/${
+          dbt.clientDebtName
+        }`,
+        { method: "DELETE" }
+      )
+      if (!res.ok) {
+        console.error("Failed to delete debt")
+        return
+      }
+      // Refresh list
+      await fetchDebts()
+    } catch (error) {
+      console.error("Error deleting debt:", error)
     }
-
-    // Refresh list
-    await fetchDebts()
   }
 
   const handleEdit = (dbt) => {
     setEditMode(true)
     setEditingDebt(dbt)
     setDebtType(dbt.clientDebtType)
-    setDebtName(dbt.id.clientDebtName)
+    setDebtName(dbt.clientDebtName)
     setDebtTerm(dbt.clientDebtTerm)
     setAmount(dbt.clientDebtAmount.toString())
-    setInterest(dbt.clientDebtAnnualInterest.toString())
+    setInterest((dbt.clientDebtAnnualInterest * 100).toString())
     setStartDate(dbt.clientStartDateDebt)
     setYears(dbt.clientDebtDuration.toString())
     setPrincipal(dbt.clientDebtPrincipal.toString())
@@ -151,9 +202,9 @@ export default function CFPClientDebtPage() {
   const resetFields = () => {
     setEditMode(false)
     setEditingDebt(null)
-    setDebtType("เลือก")
+    setDebtType(0)
     setDebtName("")
-    setDebtTerm("ระยะสั้น")
+    setDebtTerm(1)
     setAmount("")
     setInterest("")
     setStartDate("")
@@ -174,6 +225,7 @@ export default function CFPClientDebtPage() {
         <div className="flex-1 p-8 space-y-8">
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
+            {/* Step 1 */}
             <button
               onClick={() => navigate(`/client-info/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
@@ -181,9 +233,11 @@ export default function CFPClientDebtPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
-              <span className="font-bold">ข้อมูลส่วนตัว</span>
+              <span className="font-bold mt-1">ข้อมูลส่วนตัว</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
+
+            {/* Step 2 */}
             <button
               onClick={() => navigate(`/client-income/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
@@ -191,9 +245,11 @@ export default function CFPClientDebtPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
+              <span className="font-bold mt-1">รายได้</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
+
+            {/* Step 3 */}
             <button
               onClick={() => navigate(`/client-expense/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
@@ -201,9 +257,11 @@ export default function CFPClientDebtPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
+              <span className="font-bold mt-1">รายจ่าย</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
+
+            {/* Step 4 */}
             <button
               onClick={() => navigate(`/client-asset/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
@@ -211,9 +269,11 @@ export default function CFPClientDebtPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold">สินทรัพย์</span>
+              <span className="font-bold mt-1">สินทรัพย์</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
+
+            {/* Step 5 */}
             <button
               onClick={() => navigate(`/client-debt/`)}
               className="flex flex-col items-center focus:outline-none text-gray-400"
@@ -221,9 +281,10 @@ export default function CFPClientDebtPage() {
               <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold text-tfpa_blue">หนี้สิน</span>
+              <span className="font-bold text-tfpa_blue mt-1">หนี้สิน</span>
             </button>
           </div>
+
           <motion.div
             initial="initial"
             animate="in"
@@ -235,24 +296,29 @@ export default function CFPClientDebtPage() {
               5. หนี้สิน
             </h3>
             <div className="space-y-4">
+              {/* Debt Type */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ประเภทหนี้สิน
                 </label>
                 <select
                   value={debtType}
-                  onChange={(e) => setDebtType(e.target.value)}
+                  onChange={(e) => {
+                    const selectedType = parseInt(e.target.value, 10)
+                    setDebtType(selectedType)
+                  }}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 >
-                  <option value="เลือก">เลือก</option>
-                  {debtTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  <option value={0}>เลือก</option>
+                  {Object.entries(debtTypes).map(([key, value]) => (
+                    <option key={key} value={parseInt(key, 10)}>
+                      {value}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Debt Name */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ชื่อหนี้สิน
@@ -265,23 +331,26 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
-              <div className="mb-2 text-tfpa_blue font-bold">ประเภทหนี้สิน</div>
-              <div className="flex space-x-4">
-                {debtTerms.map((dt) => (
-                  <div key={dt.value} className="flex items-center space-x-2">
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        debtTerm === dt.value
-                          ? "bg-tfpa_blue"
-                          : "border border-tfpa_blue"
-                      } cursor-pointer`}
-                      onClick={() => setDebtTerm(dt.value)}
-                    ></div>
-                    <span>{dt.label}</span>
-                  </div>
-                ))}
+              {/* Debt Term */}
+              <div>
+                <label className="block text-tfpa_blue font-bold mb-2">
+                  ประเภทหนี้สิน
+                </label>
+                <select
+                  value={debtTerm}
+                  onChange={(e) => setDebtTerm(parseInt(e.target.value, 10))}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                >
+                  <option value={0}>เลือก</option>
+                  {Object.entries(debtTerms).map(([key, label]) => (
+                    <option key={key} value={parseInt(key, 10)}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
+              {/* Amount */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   จำนวน (บาท)
@@ -295,6 +364,7 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
+              {/* Interest */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ดอกเบี้ยต่อปี (%)
@@ -308,18 +378,20 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
+              {/* Start Date */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
-                  วันที่เริ่มต้นของหนี้สิน (YYYY-MM-DD)
+                  วันที่เริ่มต้นของหนี้สิน
                 </label>
                 <input
-                  type="text"
+                  type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
               </div>
 
+              {/* Debt Duration (Years) */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   จำนวนปีของหนี้สิน (ปี)
@@ -333,6 +405,7 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
+              {/* Principal */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   เงินต้น (บาท)
@@ -346,7 +419,8 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
-              <div className="flex space-x-4 mt-4">
+              {/* Action Buttons */}
+              <div className="flex space-x-4">
                 {editMode ? (
                   <>
                     <button
@@ -373,6 +447,7 @@ export default function CFPClientDebtPage() {
               </div>
             </div>
 
+            {/* Existing Debts Table */}
             <h3 className="text-tfpa_blue font-bold text-lg mt-4">
               หนี้สินที่มีอยู่
             </h3>
@@ -395,23 +470,43 @@ export default function CFPClientDebtPage() {
                     ดอกเบี้ยต่อปี (%)
                   </th>
                   <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    วันที่เริ่มต้น
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    จำนวนปี
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    เงินต้น (บาท)
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
                     จัดการ
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {debts.map((dbt) => (
-                  <tr key={`${dbt.id.clientId}-${dbt.id.clientDebtName}`}>
-                    <td className="py-2 px-4 border">{dbt.clientDebtType}</td>
+                  <tr key={`${dbt.clientUuid}-${dbt.clientDebtName}`}>
                     <td className="py-2 px-4 border">
-                      {dbt.id.clientDebtName}
+                      {getDebtTypeLabel(dbt.clientDebtType)}
                     </td>
-                    <td className="py-2 px-4 border">{dbt.clientDebtTerm}</td>
+                    <td className="py-2 px-4 border">{dbt.clientDebtName}</td>
+                    <td className="py-2 px-4 border">
+                      {getDebtTermLabel(dbt.clientDebtTerm)}
+                    </td>
                     <td className="py-2 px-4 border text-right">
                       {dbt.clientDebtAmount.toLocaleString()}
                     </td>
                     <td className="py-2 px-4 border text-right">
                       {(dbt.clientDebtAnnualInterest * 100).toFixed(2)}%
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {new Date(dbt.clientStartDateDebt).toLocaleDateString()}
+                    </td>
+                    <td className="py-2 px-4 border text-right">
+                      {dbt.clientDebtDuration}
+                    </td>
+                    <td className="py-2 px-4 border text-right">
+                      {dbt.clientDebtPrincipal.toLocaleString()}
                     </td>
                     <td className="py-2 px-4 border">
                       <div className="flex space-x-4">
@@ -431,10 +526,18 @@ export default function CFPClientDebtPage() {
                     </td>
                   </tr>
                 ))}
+                {debts.length === 0 && (
+                  <tr>
+                    <td className="py-2 px-4 border text-center" colSpan="9">
+                      ไม่มีหนี้สินที่บันทึกไว้
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
-            <div className="flex justify-start">
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
               <button
                 onClick={handleBack}
                 className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"

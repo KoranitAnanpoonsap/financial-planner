@@ -1,9 +1,50 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
+
+// Mapping for income types
+const incomeTypes = {
+  1: "40(1) เงินเดือน",
+  2: "40(2) รับจ้างทำงาน",
+  3: "40(3) ค่าลิขสิทธิ์ สิทธิบัตร",
+  4: "40(4) ดอกเบี้ย เงินปันผล",
+  5: "40(5) ค่าเช่าทรัพย์สิน",
+  6: "40(6) วิชาชีพอิสระ",
+  7: "40(7) รับเหมาก่อสร้าง",
+  8: "40(8) รายได้อื่นๆ",
+}
+
+// Mapping for 40(5) subtypes
+const income405SubTypes = {
+  1: "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ",
+  2: "ที่ดินที่ใช้ในการเกษตร",
+  3: "ที่ดินที่มิได้ใช้ในการเกษตร",
+  4: "ทรัพย์สินอื่นๆ",
+}
+
+// Mapping for 40(6) subtypes
+const income406SubTypes = {
+  1: "การประกอบโรคศิลปะ",
+  2: "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม",
+}
+
+// Mapping for 40(8) subtypes
+const income408SubTypes = {
+  1: "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)",
+  2: "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)",
+  3: "ประเภทที่ (2) ถึง (43)",
+  4: "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)",
+}
+
+// Mapping for frequencies
+const frequencyTypes = {
+  1: "ทุกเดือน",
+  2: "ทุกปี",
+  3: "ได้เป็นก้อน",
+}
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -14,79 +55,37 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPClientIncomePage() {
-  // cfpId and clientId from localStorage
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editingIncome, setEditingIncome] = useState(null)
 
-  const [type, setType] = useState("เลือก")
+  const [type, setType] = useState(0) // 0 represents "เลือก"
   const [incomeName, setIncomeName] = useState("")
-  const [frequency, setFrequency] = useState("ทุกเดือน") // default
+  const [frequency, setFrequency] = useState(1) // 1 represents "ทุกเดือน"
   const [amount, setAmount] = useState("")
   const [growthRate, setGrowthRate] = useState("")
-  const [income405Type, setIncome405Type] = useState("") // For 40(5)
-  const [income406Type, setIncome406Type] = useState("") // For 40(6)
-  const [income408Type, setIncome408Type] = useState("") // For 40(8)
+  const [income405Type, setIncome405Type] = useState(0) // 0 represents "เลือก"
+  const [income406Type, setIncome406Type] = useState(0) // 0 represents "เลือก"
+  const [income408Type, setIncome408Type] = useState(0) // 0 represents "เลือก"
 
   // For showing/hiding the 40(8) details modal
   const [show408Details, setShow408Details] = useState(false)
 
-  // Income types
-  const incomeTypes = [
-    "40(1) เงินเดือน",
-    "40(2) รับจ้างทำงาน",
-    "40(3) ค่าลิขสิทธิ์ สิทธิบัตร",
-    "40(4) ดอกเบี้ย เงินปันผล",
-    "40(5) ค่าเช่าทรัพย์สิน",
-    "40(6) วิชาชีพอิสระ",
-    "40(7) รับเหมาก่อสร้าง",
-    "40(8) รายได้อื่นๆ",
-  ]
-
-  // 40(5) subtypes
-  const income405SubTypes = [
-    "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ",
-    "ที่ดินที่ใช้ในการเกษตร",
-    "ที่ดินที่มิได้ใช้ในการเกษตร",
-    "ทรัพย์สินอื่นๆ",
-  ]
-
-  // 40(6) subtypes
-  const income406SubTypes = [
-    "การประกอบโรคศิลปะ",
-    "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม",
-  ]
-
-  // 40(8) subtypes
-  const income408SubTypes = [
-    "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)",
-    "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)",
-    "ประเภทที่ (2) ถึง (43)",
-    "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)",
-  ]
-
-  const frequencies = [
-    { label: "ทุกเดือน", value: "ทุกเดือน" },
-    { label: "ทุกปี", value: "ทุกปี" },
-    { label: "ได้เป็นก้อน", value: "ได้เป็นก้อน" },
-  ]
-
   useEffect(() => {
     fetchIncomes()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchIncomes = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8080/api/clientincome/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
       )
       if (!res.ok) {
         console.error("Failed to fetch incomes")
@@ -100,32 +99,45 @@ export default function CFPClientIncomePage() {
   }
 
   const handleCreateOrUpdateIncome = async () => {
+    // Validate required fields
+    if (
+      type === 0 ||
+      incomeName.trim() === "" ||
+      frequency === 0 ||
+      amount === "" ||
+      growthRate === ""
+    ) {
+      return
+    }
+
     const newIncome = {
-      id: {
-        clientId: parseInt(clientId),
-        clientIncomeName: incomeName,
-      },
+      clientUuid: clientUuid,
+      clientIncomeName: incomeName,
       clientIncomeType: type,
       clientIncomeFrequency: frequency,
       clientIncomeAmount: parseFloat(amount),
       clientIncomeAnnualGrowthRate: parseFloat(growthRate) / 100,
-      clientIncome405Type: income405Type || "",
-      clientIncome406Type: income406Type || "",
-      clientIncome408Type: income408Type || "",
+      clientIncome405Type: type === 5 ? income405Type : null,
+      clientIncome406Type: type === 6 ? income406Type : null,
+      clientIncome408Type: type === 8 ? income408Type : null,
     }
 
-    let url = `http://localhost:8080/api/clientincome`
+    let url = `${import.meta.env.VITE_API_KEY}api/clientincome`
     let method = "POST"
 
     if (editMode && editingIncome) {
-      if (editingIncome.id.clientIncomeName !== incomeName) {
+      if (editingIncome.clientIncomeName !== incomeName) {
         // If the income name is being updated, delete the old record and create a new one
         await fetch(
-          `http://localhost:8080/api/clientincome/${clientId}/${editingIncome.id.clientIncomeName}`,
+          `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}/${
+            editingIncome.clientIncomeName
+          }`,
           { method: "DELETE" }
         )
       } else {
-        url = `http://localhost:8080/api/clientincome/${clientId}/${editingIncome.id.clientIncomeName}`
+        url = `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}/${
+          editingIncome.clientIncomeName
+        }`
         method = "PUT"
       }
     }
@@ -148,26 +160,18 @@ export default function CFPClientIncomePage() {
       await fetchIncomes()
 
       // Reset fields
-      setType("เลือก")
-      setIncomeName("")
-      setFrequency("ทุกเดือน")
-      setAmount("")
-      setGrowthRate("")
-      setIncome405Type("")
-      setIncome406Type("")
-      setIncome408Type("")
-      setEditMode(false)
-      setEditingIncome(null)
+      handleCancelEdit()
     } catch (error) {
       console.error("Error create/update income:", error)
     }
   }
 
   const handleDeleteIncome = async (inc) => {
-    const { clientId: cId, clientIncomeName } = inc.id
     try {
       const res = await fetch(
-        `http://localhost:8080/api/clientincome/${cId}/${clientIncomeName}`,
+        `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}/${
+          inc.clientIncomeName
+        }`,
         { method: "DELETE" }
       )
       if (!res.ok) {
@@ -185,27 +189,27 @@ export default function CFPClientIncomePage() {
     setEditMode(true)
     setEditingIncome(inc)
     setType(inc.clientIncomeType)
-    setIncomeName(inc.id.clientIncomeName)
+    setIncomeName(inc.clientIncomeName)
     setFrequency(inc.clientIncomeFrequency)
     setAmount(inc.clientIncomeAmount.toString())
     setGrowthRate((inc.clientIncomeAnnualGrowthRate * 100).toString())
 
-    setIncome405Type(inc.clientIncome405Type || "")
-    setIncome406Type(inc.clientIncome406Type || "")
-    setIncome408Type(inc.clientIncome408Type || "")
+    setIncome405Type(inc.clientIncome405Type || 0)
+    setIncome406Type(inc.clientIncome406Type || 0)
+    setIncome408Type(inc.clientIncome408Type || 0)
   }
 
   const handleCancelEdit = () => {
     setEditMode(false)
     setEditingIncome(null)
-    setType("เลือก")
+    setType(0)
     setIncomeName("")
-    setFrequency("ทุกเดือน")
+    setFrequency(1)
     setAmount("")
     setGrowthRate("")
-    setIncome405Type("")
-    setIncome406Type("")
-    setIncome408Type("")
+    setIncome405Type(0)
+    setIncome406Type(0)
+    setIncome408Type(0)
   }
 
   const handleBack = () => {
@@ -234,7 +238,7 @@ export default function CFPClientIncomePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
-              <span className="font-bold">ข้อมูลส่วนตัว</span>
+              <span className="font-bold mt-1">ข้อมูลส่วนตัว</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
 
@@ -246,7 +250,7 @@ export default function CFPClientIncomePage() {
               <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold text-tfpa_blue">รายได้</span>
+              <span className="font-bold text-tfpa_blue mt-1">รายได้</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
 
@@ -258,7 +262,7 @@ export default function CFPClientIncomePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
+              <span className="font-bold mt-1">รายจ่าย</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
 
@@ -270,7 +274,7 @@ export default function CFPClientIncomePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold">สินทรัพย์</span>
+              <span className="font-bold mt-1">สินทรัพย์</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
 
@@ -282,7 +286,7 @@ export default function CFPClientIncomePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
+              <span className="font-bold mt-1">หนี้สิน</span>
             </button>
           </div>
 
@@ -303,43 +307,46 @@ export default function CFPClientIncomePage() {
                 <select
                   value={type}
                   onChange={(e) => {
-                    setType(e.target.value)
+                    const selectedType = parseInt(e.target.value, 10)
+                    setType(selectedType)
                     // Reset any sub-type if not 40(5), 40(6), or 40(8)
-                    if (!e.target.value.startsWith("40(5)")) {
-                      setIncome405Type("")
+                    if (selectedType !== 5) {
+                      setIncome405Type(0)
                     }
-                    if (!e.target.value.startsWith("40(6)")) {
-                      setIncome406Type("")
+                    if (selectedType !== 6) {
+                      setIncome406Type(0)
                     }
-                    if (!e.target.value.startsWith("40(8)")) {
-                      setIncome408Type("")
+                    if (selectedType !== 8) {
+                      setIncome408Type(0)
                     }
                   }}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 >
-                  <option value="เลือก">เลือก</option>
-                  {incomeTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  <option value={0}>เลือก</option>
+                  {Object.entries(incomeTypes).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
                     </option>
                   ))}
                 </select>
               </div>
 
               {/* 40(5) subtype dropdown */}
-              {type.startsWith("40(5)") && (
+              {type === 5 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
                     ประเภท 40(5)
                   </label>
                   <select
                     value={income405Type}
-                    onChange={(e) => setIncome405Type(e.target.value)}
+                    onChange={(e) =>
+                      setIncome405Type(parseInt(e.target.value, 10))
+                    }
                     className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   >
-                    <option value="">เลือก</option>
-                    {income405SubTypes.map((sub) => (
-                      <option key={sub} value={sub}>
+                    <option value={0}>เลือก</option>
+                    {Object.entries(income405SubTypes).map(([key, sub]) => (
+                      <option key={key} value={key}>
                         {sub}
                       </option>
                     ))}
@@ -348,19 +355,21 @@ export default function CFPClientIncomePage() {
               )}
 
               {/* 40(6) subtype dropdown */}
-              {type.startsWith("40(6)") && (
+              {type === 6 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
                     ประเภท 40(6)
                   </label>
                   <select
                     value={income406Type}
-                    onChange={(e) => setIncome406Type(e.target.value)}
+                    onChange={(e) =>
+                      setIncome406Type(parseInt(e.target.value, 10))
+                    }
                     className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   >
-                    <option value="">เลือก</option>
-                    {income406SubTypes.map((sub) => (
-                      <option key={sub} value={sub}>
+                    <option value={0}>เลือก</option>
+                    {Object.entries(income406SubTypes).map(([key, sub]) => (
+                      <option key={key} value={key}>
                         {sub}
                       </option>
                     ))}
@@ -369,7 +378,7 @@ export default function CFPClientIncomePage() {
               )}
 
               {/* 40(8) subtype dropdown + details button (beside the label) */}
-              {type.startsWith("40(8)") && (
+              {type === 8 && (
                 <div>
                   {/* "ประเภท 40(8)" label and a details button just a small space apart */}
                   <label className="text-tfpa_blue font-bold mb-2 inline-flex items-center">
@@ -384,22 +393,17 @@ export default function CFPClientIncomePage() {
                   </label>
                   <select
                     value={income408Type}
-                    onChange={(e) => setIncome408Type(e.target.value)}
+                    onChange={(e) =>
+                      setIncome408Type(parseInt(e.target.value, 10))
+                    }
                     className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                   >
-                    <option value="">เลือก</option>
-                    <option value="ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)">
-                      ประเภทที่ (1) เงินได้ไม่เกิน 300,000
-                    </option>
-                    <option value="ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)">
-                      ประเภทที่ (1) เงินได้เกิน 300,000
-                    </option>
-                    <option value="ประเภทที่ (2) ถึง (43)">
-                      ประเภทที่ (2) ถึง (43)
-                    </option>
-                    <option value="เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)">
-                      เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)
-                    </option>
+                    <option value={0}>เลือก</option>
+                    {Object.entries(income408SubTypes).map(([key, sub]) => (
+                      <option key={key} value={key}>
+                        {sub}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
@@ -420,17 +424,17 @@ export default function CFPClientIncomePage() {
               {/* Frequency */}
               <div className="mb-2 text-tfpa_blue font-bold">ความถี่</div>
               <div className="flex space-x-4">
-                {frequencies.map((f) => (
-                  <div key={f.value} className="flex items-center space-x-2">
+                {Object.entries(frequencyTypes).map(([key, label]) => (
+                  <div key={key} className="flex items-center space-x-2">
                     <div
                       className={`w-4 h-4 rounded-full ${
-                        frequency === f.value
+                        frequency === parseInt(key, 10)
                           ? "bg-tfpa_blue"
                           : "border border-tfpa_blue"
                       } cursor-pointer`}
-                      onClick={() => setFrequency(f.value)}
+                      onClick={() => setFrequency(parseInt(key, 10))}
                     ></div>
-                    <span>{f.label}</span>
+                    <span>{label}</span>
                   </div>
                 ))}
               </div>
@@ -463,6 +467,7 @@ export default function CFPClientIncomePage() {
                 />
               </div>
 
+              {/* Action Buttons */}
               <div className="flex space-x-4">
                 {editMode ? (
                   <>
@@ -490,6 +495,7 @@ export default function CFPClientIncomePage() {
               </div>
             </div>
 
+            {/* Existing Incomes Table */}
             <h3 className="text-tfpa_blue font-bold text-lg mt-4">
               รายได้ที่มีอยู่
             </h3>
@@ -521,22 +527,22 @@ export default function CFPClientIncomePage() {
               </thead>
               <tbody>
                 {incomes.map((inc) => (
-                  <tr key={`${inc.id.clientId}-${inc.id.clientIncomeName}`}>
-                    <td className="py-2 px-4 border">{inc.clientIncomeType}</td>
+                  <tr key={`${inc.clientUuid}-${inc.clientIncomeName}`}>
                     <td className="py-2 px-4 border">
-                      {inc.clientIncomeType.startsWith("40(5)")
-                        ? inc.clientIncome405Type
-                        : inc.clientIncomeType.startsWith("40(6)")
-                        ? inc.clientIncome406Type
-                        : inc.clientIncomeType.startsWith("40(8)")
-                        ? inc.clientIncome408Type
+                      {incomeTypes[inc.clientIncomeType] || "ไม่ระบุ"}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {inc.clientIncomeType === 5
+                        ? income405SubTypes[inc.clientIncome405Type] || "-"
+                        : inc.clientIncomeType === 6
+                        ? income406SubTypes[inc.clientIncome406Type] || "-"
+                        : inc.clientIncomeType === 8
+                        ? income408SubTypes[inc.clientIncome408Type] || "-"
                         : "-"}
                     </td>
+                    <td className="py-2 px-4 border">{inc.clientIncomeName}</td>
                     <td className="py-2 px-4 border">
-                      {inc.id.clientIncomeName}
-                    </td>
-                    <td className="py-2 px-4 border">
-                      {inc.clientIncomeFrequency}
+                      {frequencyTypes[inc.clientIncomeFrequency] || "ไม่ระบุ"}
                     </td>
                     <td className="py-2 px-4 border text-right">
                       {inc.clientIncomeAmount.toLocaleString()}
@@ -565,6 +571,7 @@ export default function CFPClientIncomePage() {
               </tbody>
             </table>
 
+            {/* Navigation Buttons */}
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
@@ -584,7 +591,7 @@ export default function CFPClientIncomePage() {
       </div>
       <Footer />
 
-      {/* 40(8) Details Modal */}
+      {/* 40(8) Details Model */}
       {show408Details && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
           <div className="bg-white w-11/12 md:w-3/4 lg:w-1/2 p-6 rounded shadow-lg overflow-auto max-h-[80vh]">

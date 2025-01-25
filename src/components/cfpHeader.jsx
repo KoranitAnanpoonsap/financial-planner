@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import logo from "../assets/TFPA_logo.png"
 
 export default function Header() {
@@ -7,15 +7,17 @@ export default function Header() {
     localStorage.getItem("cfpFirstName") || ""
   )
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
+  const [cfpUuid] = useState(localStorage.getItem("cfpUuid") || "")
   const navigate = useNavigate()
 
-  // Fetch CFP first name based on cfpId only if not already stored
+  // Fetch CFP first name based on cfpUuid only if not already stored
   useEffect(() => {
     const fetchCfpInfo = async () => {
       if (!cfpFirstName) {
         try {
-          const response = await fetch(`http://localhost:8080/api/cfp/${cfpId}`)
+          const response = await fetch(
+            `${import.meta.env.VITE_API_KEY}api/cfp/${cfpUuid}`
+          )
           if (!response.ok) {
             throw new Error("Error fetching CFP information")
           }
@@ -30,7 +32,7 @@ export default function Header() {
     }
 
     fetchCfpInfo()
-  }, [cfpId, cfpFirstName])
+  }, [cfpUuid, cfpFirstName])
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen)

@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { motion } from "framer-motion"
+
+// Import the calculation functions
+import {
+  calculatePortfolioSummary,
+  calculateYearlyIncome,
+  calculateYearlyExpense,
+  calculateGoalPayments,
+} from "../utils/calculations.js"
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -14,20 +22,11 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
-// Import the calculation functions
-import {
-  calculatePortfolioSummary,
-  calculateYearlyIncome,
-  calculateYearlyExpense,
-  calculateGoalPayments,
-} from "../utils/calculations.js"
-
 export default function CFPCashflowBaseCalculated() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
@@ -39,15 +38,16 @@ export default function CFPCashflowBaseCalculated() {
 
   useEffect(() => {
     fetchAllData()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
       const [incomesRes, expensesRes, goalsRes, assetsRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/clientincome/${clientId}`),
-        fetch(`http://localhost:8080/api/clientexpense/${clientId}`),
-        fetch(`http://localhost:8080/api/cashflow/${clientId}`),
-        fetch(`http://localhost:8080/api/portassets/${clientId}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/cashflow/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`),
       ])
 
       if (!incomesRes.ok || !expensesRes.ok || !goalsRes.ok || !assetsRes.ok) {
@@ -130,13 +130,13 @@ export default function CFPCashflowBaseCalculated() {
               <table className="min-w-full bg-white border border-gray-300 text-sm">
                 <thead>
                   <tr>
-                    <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    <th className="py-2 px-4 border text-left font-ibm font-bold text-tfpa_blue">
                       (บาท)
                     </th>
                     {calculationResults.map((r) => (
                       <th
                         key={r.year}
-                        className="py-2 px-4 border font-ibm font-bold text-tfpa_blue"
+                        className="py-2 px-4 border text-right font-ibm font-bold text-tfpa_blue"
                       >
                         ปี {r.year}
                       </th>
@@ -157,24 +157,27 @@ export default function CFPCashflowBaseCalculated() {
                     ))}
                   </tr>
                   {incomes.map((inc) => (
-                    <tr key={inc.id.clientIncomeName}>
+                    <tr key={inc.clientIncomeName}>
                       <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
-                        {inc.id.clientIncomeName}
+                        {inc.clientIncomeName}
                       </td>
                       {calculationResults.map((r, i) => {
                         // find inc amount
                         const detail = r.incomeDetails.find(
-                          (d) => Object.keys(d)[0] === inc.id.clientIncomeName
+                          (d) => Object.keys(d)[0] === inc.clientIncomeName
                         )
                         const val = detail
-                          ? detail[inc.id.clientIncomeName]
+                          ? detail[inc.clientIncomeName]
                           : "0.00"
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue_panel_select"
+                            className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue_panel_select"
                           >
-                            {parseFloat(val).toLocaleString()}
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         )
                       })}
@@ -188,10 +191,13 @@ export default function CFPCashflowBaseCalculated() {
                     {calculationResults.map((r, i) => (
                       <td
                         key={i}
-                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_gold"
                         style={{ color: "#d4a017" }}
                       >
-                        {r.totalIncome.toLocaleString()}
+                        {r.totalIncome.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </td>
                     ))}
                   </tr>
@@ -209,23 +215,26 @@ export default function CFPCashflowBaseCalculated() {
                     ))}
                   </tr>
                   {expenses.map((exp) => (
-                    <tr key={exp.id.clientExpenseName}>
+                    <tr key={exp.clientExpenseName}>
                       <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
-                        {exp.id.clientExpenseName}
+                        {exp.clientExpenseName}
                       </td>
                       {calculationResults.map((r, i) => {
                         const detail = r.expenseDetails.find(
-                          (d) => Object.keys(d)[0] === exp.id.clientExpenseName
+                          (d) => Object.keys(d)[0] === exp.clientExpenseName
                         )
                         const val = detail
-                          ? detail[exp.id.clientExpenseName]
+                          ? detail[exp.clientExpenseName]
                           : "0.00"
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue_panel_select"
+                            className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue_panel_select"
                           >
-                            {parseFloat(val).toLocaleString()}
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         )
                       })}
@@ -239,10 +248,13 @@ export default function CFPCashflowBaseCalculated() {
                     {calculationResults.map((r, i) => (
                       <td
                         key={i}
-                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_gold"
                         style={{ color: "#d4a017" }}
                       >
-                        {r.totalExpense.toLocaleString()}
+                        {r.totalExpense.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </td>
                     ))}
                   </tr>
@@ -255,30 +267,36 @@ export default function CFPCashflowBaseCalculated() {
                     {calculationResults.map((r, i) => (
                       <td
                         key={i}
-                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue"
                       >
-                        {r.netIncome.toLocaleString()}
+                        {r.netIncome.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </td>
                     ))}
                   </tr>
 
                   {/* Goals */}
                   {goals.map((goal) => (
-                    <tr key={goal.id.clientGoalName}>
+                    <tr key={goal.clientGoalName}>
                       <td className="py-2 px-4 border text-lg text-red-600 font-ibm font-semibold">
-                        การออมเพื่อเป้าหมาย {goal.id.clientGoalName}
+                        การออมเพื่อเป้าหมาย {goal.clientGoalName}
                       </td>
                       {calculationResults.map((r, i) => {
                         const pay = r.goalPayments.find(
-                          (g) => Object.keys(g)[0] === goal.id.clientGoalName
+                          (g) => Object.keys(g)[0] === goal.clientGoalName
                         )
-                        const val = pay ? pay[goal.id.clientGoalName] : "0.00"
+                        const val = pay ? pay[goal.clientGoalName] : "0.00"
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-center text-red-600 font-ibm font-semibold"
+                            className="py-2 px-4 border text-right text-red-600 font-ibm font-semibold"
                           >
-                            {parseFloat(val).toLocaleString()}
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </td>
                         )
                       })}
@@ -298,10 +316,13 @@ export default function CFPCashflowBaseCalculated() {
                       return (
                         <td
                           key={i}
-                          className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
+                          className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue"
                           style={style}
                         >
-                          {r.netIncomeAfterGoals.toLocaleString()}
+                          {r.netIncomeAfterGoals.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </td>
                       )
                     })}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { calculatePortfolioSummary } from "../utils/calculations.js"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
@@ -16,12 +16,11 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPCashflowBase() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
@@ -48,12 +47,12 @@ export default function CFPCashflowBase() {
     fetchIncomes()
     fetchExpenses()
     fetchGoals()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchAssets = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/portassets/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
       )
       if (!response.ok) {
         throw new Error("Failed to fetch assets")
@@ -72,7 +71,7 @@ export default function CFPCashflowBase() {
   const fetchIncomes = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/clientincome/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
       )
       if (!response.ok) {
         throw new Error("Failed to fetch incomes")
@@ -87,7 +86,7 @@ export default function CFPCashflowBase() {
   const fetchExpenses = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/clientexpense/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`
       )
       if (!response.ok) {
         throw new Error("Failed to fetch expenses")
@@ -95,9 +94,7 @@ export default function CFPCashflowBase() {
       const data = await response.json()
 
       // Find the expense with type "รายจ่ายเพื่อการออม"
-      const savingExpense = data.find(
-        (exp) => exp.clientExpenseType === "รายจ่ายเพื่อการออม"
-      )
+      const savingExpense = data.find((exp) => exp.clientExpenseType === 3)
       if (savingExpense) {
         setClientSavingGrowthRate(
           (savingExpense.clientExpenseAnnualGrowthRate * 100).toFixed(2)
@@ -113,7 +110,7 @@ export default function CFPCashflowBase() {
   const fetchGoals = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/cashflow/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/cashflow/${clientUuid}`
       )
       if (!response.ok) {
         throw new Error("Failed to fetch goals")
@@ -127,26 +124,26 @@ export default function CFPCashflowBase() {
 
   const handleCreateOrUpdateGoal = async () => {
     const newGoal = {
-      id: {
-        clientId: parseInt(clientId),
-        clientGoalName: clientGoalName,
-      },
+      clientUuid: clientUuid,
+      clientGoalName: clientGoalName,
       clientGoalValue: parseFloat(clientGoalValue),
       clientGoalPeriod: parseInt(clientGoalPeriod),
     }
 
-    let url = `http://localhost:8080/api/cashflow`
+    let url = `${import.meta.env.VITE_API_KEY}api/cashflow`
     let method = "POST"
 
     if (editMode && editingGoal) {
-      const originalName = editingGoal.id.clientGoalName
+      const originalName = editingGoal.clientGoalName
 
       // If the name was changed, delete the old goal and create a new one
       if (originalName !== clientGoalName) {
         // Delete the original goal
         try {
           const deleteRes = await fetch(
-            `http://localhost:8080/api/cashflow/${clientId}/${originalName}`,
+            `${
+              import.meta.env.VITE_API_KEY
+            }api/cashflow/${clientUuid}/${originalName}`,
             { method: "DELETE" }
           )
           if (!deleteRes.ok) {
@@ -161,7 +158,9 @@ export default function CFPCashflowBase() {
         method = "POST"
       } else {
         // If the name wasn't changed, just update the goal
-        url = `http://localhost:8080/api/cashflow/${clientId}/${originalName}`
+        url = `${
+          import.meta.env.VITE_API_KEY
+        }api/cashflow/${clientUuid}/${originalName}`
         method = "PUT"
       }
     }
@@ -194,11 +193,11 @@ export default function CFPCashflowBase() {
   }
 
   const handleDeleteGoal = async (goal) => {
-    const { clientId: gClientId, clientGoalName: gGoalName } = goal.id
-
     try {
       const response = await fetch(
-        `http://localhost:8080/api/cashflow/${gClientId}/${gGoalName}`,
+        `${import.meta.env.VITE_API_KEY}api/cashflow/${clientUuid}/${
+          goal.clientGoalName
+        }`,
         {
           method: "DELETE",
         }
@@ -207,7 +206,9 @@ export default function CFPCashflowBase() {
         throw new Error("Failed to delete goal")
       }
 
-      setGoals((prev) => prev.filter((g) => g.id.clientGoalName !== gGoalName))
+      setGoals((prev) =>
+        prev.filter((g) => g.clientGoalName !== goal.clientGoalName)
+      )
     } catch (error) {
       console.error("Error deleting goal:", error)
     }
@@ -216,7 +217,7 @@ export default function CFPCashflowBase() {
   const handleEdit = (goal) => {
     setEditMode(true)
     setEditingGoal(goal)
-    setClientGoalName(goal.id.clientGoalName)
+    setClientGoalName(goal.clientGoalName)
     setClientGoalValue(goal.clientGoalValue.toString())
     setClientGoalPeriod(goal.clientGoalPeriod.toString())
     // No need to set clientSavingGrowth as it's now derived from expenses
@@ -279,9 +280,9 @@ export default function CFPCashflowBase() {
                   </thead>
                   <tbody>
                     {incomes.map((income) => (
-                      <tr key={income.id.clientIncomeName}>
+                      <tr key={income.clientIncomeName}>
                         <td className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                          {income.id.clientIncomeName}
+                          {income.clientIncomeName}
                         </td>
                         <td className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
                           {(income.clientIncomeAnnualGrowthRate * 100).toFixed(
@@ -397,9 +398,9 @@ export default function CFPCashflowBase() {
                 </thead>
                 <tbody>
                   {goals.map((goal) => (
-                    <tr key={goal.id.clientGoalName}>
+                    <tr key={goal.clientGoalName}>
                       <td className="py-2 px-4 border">
-                        {goal.id.clientGoalName}
+                        {goal.clientGoalName}
                       </td>
                       <td className="py-2 px-4 border">
                         {goal.clientGoalValue.toLocaleString()}

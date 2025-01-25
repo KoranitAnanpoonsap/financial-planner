@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import { useNavigate } from "react-router-dom"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
+
+// Define mappings for expense types and frequencies
+const expenseTypes = [
+  { value: 1, label: "รายจ่ายคงที่" },
+  { value: 2, label: "รายจ่ายผันแปร" },
+  { value: 3, label: "รายจ่ายเพื่อการออม" },
+  { value: 4, label: "รายจ่ายอื่นๆ" },
+]
+
+const frequencies = [
+  { value: 1, label: "ทุกเดือน" },
+  { value: 2, label: "ทุกปี" },
+  { value: 3, label: "จ่ายเป็นก้อน" },
+]
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -14,62 +28,62 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPClientExpensePage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [expenses, setExpenses] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editingExpense, setEditingExpense] = useState(null)
 
-  const [type, setType] = useState("เลือก")
+  const [type, setType] = useState(0) // 0 represents "เลือก"
   const [expenseName, setExpenseName] = useState("")
-  const [frequency, setFrequency] = useState("ทุกเดือน") // default
+  const [frequency, setFrequency] = useState(1) // 1 represents "ทุกเดือน"
   const [amount, setAmount] = useState("")
   const [growthRate, setGrowthRate] = useState("")
   const [debtExpense, setDebtExpense] = useState(false)
   const [nonMortgageDebtExpense, setNonMortgageDebtExpense] = useState(false)
   const [savingExpense, setSavingExpense] = useState(false)
 
-  const expenseTypes = [
-    "รายจ่ายคงที่",
-    "รายจ่ายผันแปร",
-    "รายจ่ายเพื่อการออม",
-    "รายจ่ายอื่นๆ",
-  ]
-
-  const frequencies = [
-    { label: "ทุกเดือน", value: "ทุกเดือน" },
-    { label: "ทุกปี", value: "ทุกปี" },
-    { label: "จ่ายเป็นก้อน", value: "จ่ายเป็นก้อน" },
-  ]
-
   useEffect(() => {
     fetchExpenses()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchExpenses = async () => {
-    const res = await fetch(
-      `http://localhost:8080/api/clientexpense/${clientId}`
-    )
-    if (!res.ok) {
-      console.error("Failed to fetch expenses")
-      return
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`
+      )
+      if (!res.ok) {
+        console.error("Failed to fetch expenses")
+        return
+      }
+      const data = await res.json()
+      setExpenses(data)
+    } catch (error) {
+      console.error("Error fetching expenses:", error)
     }
-    const data = await res.json()
-    setExpenses(data)
+  }
+
+  // Helper functions to get labels from values
+  const getExpenseTypeLabel = (typeValue) => {
+    const type = expenseTypes.find((t) => t.value === typeValue)
+    return type ? type.label : "ไม่ระบุ"
+  }
+
+  const getFrequencyLabel = (frequencyValue) => {
+    const freq = frequencies.find((f) => f.value === frequencyValue)
+    return freq ? freq.label : "ไม่ระบุ"
   }
 
   const handleCreateOrUpdateExpense = async () => {
     const newExpense = {
-      id: {
-        clientId: parseInt(clientId),
-        clientExpenseName: expenseName,
-      },
+      clientUuid: clientUuid,
+      clientExpenseName: expenseName,
       clientExpenseType: type,
       clientExpenseFrequency: frequency,
       clientExpenseAmount: parseFloat(amount),
@@ -79,18 +93,22 @@ export default function CFPClientExpensePage() {
       clientSavingExpense: savingExpense,
     }
 
-    let url = `http://localhost:8080/api/clientexpense`
+    let url = `${import.meta.env.VITE_API_KEY}api/clientexpense`
     let method = "POST"
 
     if (editMode && editingExpense) {
-      if (editingExpense.id.clientExpenseName !== expenseName) {
+      if (editingExpense.clientExpenseName !== expenseName) {
         // If the expense name is being updated, delete the old record and create a new one
         await fetch(
-          `http://localhost:8080/api/clientexpense/${clientId}/${editingExpense.id.clientExpenseName}`,
+          `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}/${
+            editingExpense.clientExpenseName
+          }`,
           { method: "DELETE" }
         )
       } else {
-        url = `http://localhost:8080/api/clientexpense/${clientId}/${editingExpense.id.clientExpenseName}`
+        url = `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}/${
+          editingExpense.clientExpenseName
+        }`
         method = "PUT"
       }
     }
@@ -113,25 +131,17 @@ export default function CFPClientExpensePage() {
       await fetchExpenses()
 
       // Reset fields
-      setType("เลือก")
-      setExpenseName("")
-      setFrequency("ทุกเดือน")
-      setAmount("")
-      setGrowthRate("")
-      setDebtExpense("")
-      setNonMortgageDebtExpense("")
-      setSavingExpense("")
-      setEditMode(false)
-      setEditingExpense(null)
+      resetFields()
     } catch (error) {
       console.error("Error create/update expense:", error)
     }
   }
 
   const handleDeleteExpense = async (exp) => {
-    const { clientId: cId, clientExpenseName } = exp.id
     const res = await fetch(
-      `http://localhost:8080/api/clientexpense/${cId}/${clientExpenseName}`,
+      `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}/${
+        exp.clientExpenseName
+      }`,
       { method: "DELETE" }
     )
     if (!res.ok) {
@@ -147,7 +157,7 @@ export default function CFPClientExpensePage() {
     setEditMode(true)
     setEditingExpense(exp)
     setType(exp.clientExpenseType)
-    setExpenseName(exp.id.clientExpenseName)
+    setExpenseName(exp.clientExpenseName)
     setFrequency(exp.clientExpenseFrequency)
     setAmount(exp.clientExpenseAmount.toString())
     setGrowthRate((exp.clientExpenseAnnualGrowthRate * 100).toString())
@@ -163,9 +173,9 @@ export default function CFPClientExpensePage() {
   const resetFields = () => {
     setEditMode(false)
     setEditingExpense(null)
-    setType("เลือก")
+    setType(0)
     setExpenseName("")
-    setFrequency("ทุกเดือน")
+    setFrequency(1)
     setAmount("")
     setGrowthRate("")
     setDebtExpense(false)
@@ -185,26 +195,16 @@ export default function CFPClientExpensePage() {
   const handleTypeChange = (newType) => {
     setType(newType)
     // Set defaults based on type
-    if (newType === "รายจ่ายคงที่") {
-      // savingExpense = false, others unchanged (assume default false)
+    if (newType === 1 || newType === 2 || newType === 4) {
+      // For "รายจ่ายคงที่", "รายจ่ายผันแปร", "รายจ่ายอื่นๆ"
       setDebtExpense(false)
       setNonMortgageDebtExpense(false)
       setSavingExpense(false)
-    } else if (newType === "รายจ่ายผันแปร") {
-      // all three default to no
-      setDebtExpense(false)
-      setNonMortgageDebtExpense(false)
-      setSavingExpense(false)
-    } else if (newType === "รายจ่ายเพื่อการออม") {
-      // debtExpense = no, nonMortgageDebtExpense = no, savingExpense = yes
+    } else if (newType === 3) {
+      // For "รายจ่ายเพื่อการออม"
       setDebtExpense(false)
       setNonMortgageDebtExpense(false)
       setSavingExpense(true)
-    } else if (newType === "รายจ่ายอื่นๆ") {
-      // savingExpense = no, (assume debtExpense and nonMortgageDebtExpense remain no)
-      setDebtExpense(false)
-      setNonMortgageDebtExpense(false)
-      setSavingExpense(false)
     }
   }
 
@@ -223,7 +223,7 @@ export default function CFPClientExpensePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
-              <span className="font-bold">ข้อมูลส่วนตัว</span>
+              <span className="font-bold mt-1">ข้อมูลส่วนตัว</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -233,7 +233,7 @@ export default function CFPClientExpensePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
+              <span className="font-bold mt-1">รายได้</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -243,7 +243,7 @@ export default function CFPClientExpensePage() {
               <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold text-tfpa_blue">รายจ่าย</span>
+              <span className="font-bold text-tfpa_blue mt-1">รายจ่าย</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -253,7 +253,7 @@ export default function CFPClientExpensePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold">สินทรัพย์</span>
+              <span className="font-bold mt-1">สินทรัพย์</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -263,7 +263,7 @@ export default function CFPClientExpensePage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
+              <span className="font-bold mt-1">หนี้สิน</span>
             </button>
           </div>
           <motion.div
@@ -277,24 +277,28 @@ export default function CFPClientExpensePage() {
               3. รายจ่าย
             </h3>
             <div className="space-y-4">
+              {/* Expense Type */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ประเภทรายจ่าย
                 </label>
                 <select
                   value={type}
-                  onChange={(e) => handleTypeChange(e.target.value)}
+                  onChange={(e) =>
+                    handleTypeChange(parseInt(e.target.value, 10))
+                  }
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 >
-                  <option value="เลือก">เลือก</option>
+                  <option value={0}>เลือก</option>
                   {expenseTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                    <option key={t.value} value={t.value}>
+                      {t.label}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Expense Name */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ชื่อรายจ่าย
@@ -307,6 +311,7 @@ export default function CFPClientExpensePage() {
                 />
               </div>
 
+              {/* Frequency */}
               <div className="mb-2 text-tfpa_blue font-bold">ความถี่</div>
               <div className="flex space-x-4">
                 {frequencies.map((f) => (
@@ -324,6 +329,7 @@ export default function CFPClientExpensePage() {
                 ))}
               </div>
 
+              {/* Amount */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   จำนวน (บาท)
@@ -337,6 +343,7 @@ export default function CFPClientExpensePage() {
                 />
               </div>
 
+              {/* Growth Rate */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   อัตราการเติบโต (%)
@@ -350,6 +357,7 @@ export default function CFPClientExpensePage() {
                 />
               </div>
 
+              {/* Debt Expense */}
               <div className="mt-4">
                 <label className="block text-tfpa_blue font-bold mb-2">
                   เป็นเงินชำระคืนหนี้สิน?
@@ -378,6 +386,7 @@ export default function CFPClientExpensePage() {
                 </div>
               </div>
 
+              {/* Non-Mortgage Debt Expense */}
               <div className="mt-4">
                 <label className="block text-tfpa_blue font-bold mb-2">
                   เป็นเงินชำระคืนหนี้ไม่รวมจดจำนอง?
@@ -408,6 +417,7 @@ export default function CFPClientExpensePage() {
                 </div>
               </div>
 
+              {/* Saving Expense */}
               <div className="mt-4">
                 <label className="block text-tfpa_blue font-bold mb-2">
                   เป็นรายจ่ายเพื่อการออม?
@@ -438,6 +448,7 @@ export default function CFPClientExpensePage() {
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex space-x-4 mt-4 mb-4">
                 {editMode ? (
                   <>
@@ -465,6 +476,7 @@ export default function CFPClientExpensePage() {
               </div>
             </div>
 
+            {/* Existing Expenses Table */}
             <h3 className="text-tfpa_blue font-bold text-lg mt-4">
               รายจ่ายที่มีอยู่
             </h3>
@@ -493,15 +505,15 @@ export default function CFPClientExpensePage() {
               </thead>
               <tbody>
                 {expenses.map((exp) => (
-                  <tr key={`${exp.id.clientId}-${exp.id.clientExpenseName}`}>
+                  <tr key={`${exp.clientUuid}-${exp.clientExpenseName}`}>
                     <td className="py-2 px-4 border">
-                      {exp.clientExpenseType}
+                      {getExpenseTypeLabel(exp.clientExpenseType)}
                     </td>
                     <td className="py-2 px-4 border">
-                      {exp.id.clientExpenseName}
+                      {exp.clientExpenseName}
                     </td>
                     <td className="py-2 px-4 border">
-                      {exp.clientExpenseFrequency}
+                      {getFrequencyLabel(exp.clientExpenseFrequency)}
                     </td>
                     <td className="py-2 px-4 border text-right">
                       {exp.clientExpenseAmount.toLocaleString()}
@@ -530,6 +542,7 @@ export default function CFPClientExpensePage() {
               </tbody>
             </table>
 
+            {/* Navigation Buttons */}
             <div className="flex justify-between">
               <button
                 onClick={handleBack}

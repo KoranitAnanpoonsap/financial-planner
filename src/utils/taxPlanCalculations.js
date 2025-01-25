@@ -1,14 +1,14 @@
-export async function fetchAndCalculateTaxPlanForClient(clientId, totalPlan) {
+export async function fetchAndCalculateTaxPlanForClient(clientUuid, totalPlan) {
   // Fetch incomes
   const incomesRes = await fetch(
-    `http://localhost:8080/api/clientincome/${clientId}`
+    `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
   )
   if (!incomesRes.ok) throw new Error("Failed to fetch incomes")
   const incomesData = await incomesRes.json()
 
   // Fetch tax deductions
   const tdRes = await fetch(
-    `http://localhost:8080/api/taxdeduction/${clientId}`
+    `${import.meta.env.VITE_API_KEY}api/taxdeduction/${clientUuid}`
   )
   let tdData = null
   if (tdRes.ok) {
@@ -21,11 +21,13 @@ export async function fetchAndCalculateTaxPlanForClient(clientId, totalPlan) {
 export function calculateTaxPlanForClient(incomes, td, totalPlan) {
   // 1) Adjust incomes to yearly if frequency == "ทุกเดือน".
   const adjustedIncomes = incomes.map((inc) => {
-    if (inc.clientIncomeFrequency === "ทุกเดือน") {
+    // If income is monthly, multiply by 12
+    if (inc.clientIncomeFrequency === 1) {
       inc.clientIncomeAmount = inc.clientIncomeAmount * 12
     }
     return inc
   })
+
 
   // 2) Calculate total income
   const totalIncome = adjustedIncomes.reduce(
@@ -41,8 +43,8 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
   const otherIncomes = []
   for (const inc of adjustedIncomes) {
     if (
-      inc.clientIncomeType === "40(1) เงินเดือน" ||
-      inc.clientIncomeType === "40(2) รับจ้างทำงาน"
+      inc.clientIncomeType === 1 ||
+      inc.clientIncomeType === 2
     ) {
       combinedSalaryAmount += inc.clientIncomeAmount
     } else {
@@ -70,30 +72,37 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
     let deduction = 0
 
     switch (inc.clientIncomeType) {
-      case "40(3) ค่าลิขสิทธิ์ สิทธิบัตร":
+      // 403
+      case 3:
         // 50% capped at 100k
         deduction = inc.clientIncomeAmount * 0.5
         if (deduction > 100000) deduction = 100000
         totalExpenseDeductions += deduction
         break
 
-      case "40(4) ดอกเบี้ย เงินปันผล":
+      // 404
+      case 4:
         deduction = 0
         totalExpenseDeductions += deduction
         break
 
-      case "40(5) ค่าเช่าทรัพย์สิน":
+      // 405
+      case 5:
         switch (inc.clientIncome405Type) {
-          case "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ":
+          // บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ
+          case 1:
             deduction = inc.clientIncomeAmount * 0.3
             break
-          case "ที่ดินที่ใช้ในการเกษตร":
+          // ที่ดินที่ใช้ในการเกษตร
+          case 2:
             deduction = inc.clientIncomeAmount * 0.2
             break
-          case "ที่ดินที่มิได้ใช้ในการเกษตร":
+          // ที่ดินที่มิได้ใช้ในการเกษตร
+          case 3:
             deduction = inc.clientIncomeAmount * 0.15
             break
-          case "ทรัพย์สินอื่นๆ":
+          // ทรัพย์สินอื่นๆ
+          case 4:
             deduction = inc.clientIncomeAmount * 0.1
             break
           default:
@@ -102,12 +111,15 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
         totalExpenseDeductions += deduction
         break
 
-      case "40(6) วิชาชีพอิสระ":
+      // 406
+      case 6:
         switch (inc.clientIncome406Type) {
-          case "การประกอบโรคศิลปะ":
+          // การประกอบโรคศิลปะ
+          case 1:
             deduction = inc.clientIncomeAmount * 0.6
             break
-          case "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม":
+          // กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม
+          case 2:
             deduction = inc.clientIncomeAmount * 0.3
             break
           default:
@@ -116,25 +128,34 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
         totalExpenseDeductions += deduction
         break
 
-      case "40(7) รับเหมาก่อสร้าง":
+      // 407
+      case 7:
         deduction = inc.clientIncomeAmount * 0.6
         totalExpenseDeductions += deduction
         break
 
-      case "40(8) รายได้อื่นๆ":
+      // 408
+      case 8:
         // We'll handle subtypes ourselves:
         const sub8 = inc.clientIncome408Type
-        if (sub8 === "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)") {
+        // ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)
+        if (sub8 === 1) {
           // We'll accumulate them and apply 60% with 600k cap combined
           sum408Under300k += inc.clientIncomeAmount
-        } else if (sub8 === "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)") {
+
+        // ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)
+        } else if (sub8 === 2) {
           // We'll accumulate them and apply 40%, then combine with above for a 600k cap
           sum408Over300k += inc.clientIncomeAmount
-        } else if (sub8 === "ประเภทที่ (2) ถึง (43)") {
+
+          // ประเภทที่ (2) ถึง (43)
+        } else if (sub8 === 3) {
           // 60% fixed
           const d = inc.clientIncomeAmount * 0.6
           sum408Rest += d
-        } else if (sub8 === "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)") {
+
+        // เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)
+        } else if (sub8 === 4) {
           // Use user’s custom field
           sum408OtherDeduction +=
             inc.clientIncome408TypeOtherExpenseDeduction || 0
@@ -176,26 +197,28 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
   if (td != null) {
     // Marital status
     const ms = td.maritalStatus
-    if (ms === "โสด" || ms === "คู่สมรสมีเงินได้แยกยื่นแบบ") {
+
+    //ms: 1 = โสด, 2 = คู่สมรสมีเงินได้แยกยื่นแบบ, 3 = คู่สมรสมีเงินได้ยื่นรวม, 4 = คู่สมรสไม่มีเงินได้
+    if (ms === 1 || ms === 2) {
       totalTaxDeductions += 60000
     } else if (
-      ms === "คู่สมรสมีเงินได้ยื่นรวม" ||
-      ms === "คู่สมรสไม่มีเงินได้"
+      ms === 3 ||
+      ms === 4
     ) {
       totalTaxDeductions += 120000
     }
 
     // child = 30,000 each
     totalTaxDeductions +=
-      ms == "คู่สมรสมีเงินได้ยื่นรวม" ? td.child * 60000 : td.child * 30000
+      ms == 3 ? td.child * 60000 : td.child * 30000
     // child2561 = 60,000 each
     totalTaxDeductions +=
-      ms == "คู่สมรสมีเงินได้ยื่นรวม"
+      ms == 3
         ? td.child2561 * 120000
         : td.child2561 * 60000
     // adopted_child = 30,000 each
     totalTaxDeductions +=
-      ms == "คู่สมรสมีเงินได้ยื่นรวม"
+      ms == 3
         ? td.adoptedChild * 60000
         : td.adoptedChild * 30000
     // parental_care = 30,000 each
@@ -241,7 +264,7 @@ export function calculateTaxPlanForClient(incomes, td, totalPlan) {
   const method1Tax = calculateMethod1Tax(incomeAfterDeductions)
 
   const salary = adjustedIncomes
-    .filter((i) => i.clientIncomeType === "40(1) เงินเดือน")
+    .filter((i) => i.clientIncomeType === 1) // 40(1) เงินเดือน
     .reduce((sum, i) => sum + i.clientIncomeAmount, 0)
   const incomeNonSalary = totalIncome - salary
 

@@ -25,9 +25,8 @@ const pageTransition = {
   duration: 0.3,
 }
 
-export default function CfpClientSidePanel() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+export default function CfpSidePanel() {
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -42,7 +41,7 @@ export default function CfpClientSidePanel() {
     const fetchClientDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/clients/${clientId}`
+          `${import.meta.env.VITE_API_KEY}api/clients/${clientUuid}`
         )
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -63,7 +62,7 @@ export default function CfpClientSidePanel() {
     }
 
     fetchClientDetails()
-  }, [clientId]) // Only re-run the effect when clientId changes
+  }, [clientUuid]) // Only re-run the effect when clientId changes
 
   const currentPath = location.pathname
 
@@ -85,7 +84,7 @@ export default function CfpClientSidePanel() {
       routes: [`/portfolio-selection/`, `/portfolio-chart/`],
     },
     {
-      label: "การวางแผนเป้าหมายเดียว",
+      label: "การคำนวณเป้าหมาย",
       icon: loadingIcon,
       routes: [
         `/goal-base/`,

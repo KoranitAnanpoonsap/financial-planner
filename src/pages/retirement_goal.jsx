@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { calculatePortfolioSummary } from "../utils/calculations.js"
 import { motion } from "framer-motion"
@@ -15,17 +15,12 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function RetirementGoalPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
-
-  const [assets, setAssets] = useState([])
-  const [totalInvestment, setTotalInvestment] = useState(0)
-  const [portfolioReturn, setPortfolioReturn] = useState(0)
 
   // Fields from RetirementGoal
   const [clientCurrentAge, setClientCurrentAge] = useState("") // อายุปัจจุบัน
@@ -46,23 +41,15 @@ export default function RetirementGoalPage() {
   useEffect(() => {
     fetchAllData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
-      const [assetsRes, retirementGoalRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/portassets/${clientId}`),
-        fetch(`http://localhost:8080/api/retirementgoal/${clientId}`),
+      const [retirementGoalRes] = await Promise.all([
+        fetch(
+          `${import.meta.env.VITE_API_KEY}api/retirementgoal/${clientUuid}`
+        ),
       ])
-
-      if (!assetsRes.ok) throw new Error("Failed to fetch assets")
-      const assetsData = await assetsRes.json()
-      setAssets(assetsData)
-
-      const { totalInvestAmount, portReturn } =
-        calculatePortfolioSummary(assetsData)
-      setTotalInvestment(totalInvestAmount)
-      setPortfolioReturn(portReturn)
 
       if (retirementGoalRes.ok) {
         const rg = await retirementGoalRes.json()
@@ -143,7 +130,7 @@ export default function RetirementGoalPage() {
   const handleSaveGoal = async () => {
     // Construct RetirementGoal object
     const goal = {
-      clientId: parseInt(clientId),
+      clientUuid: clientUuid,
       clientCurrentAge: parseInt(clientCurrentAge),
       clientRetirementAge: parseInt(clientRetirementAge),
       clientLifeExpectancy: parseInt(clientLifeExpectancy),
@@ -158,8 +145,8 @@ export default function RetirementGoalPage() {
 
     const method = retirementGoalExists ? "PUT" : "POST"
     const url = retirementGoalExists
-      ? `http://localhost:8080/api/retirementgoal/${clientId}`
-      : `http://localhost:8080/api/retirementgoal`
+      ? `${import.meta.env.VITE_API_KEY}api/retirementgoal/${clientUuid}`
+      : `${import.meta.env.VITE_API_KEY}api/retirementgoal`
 
     try {
       const response = await fetch(url, {
@@ -182,12 +169,12 @@ export default function RetirementGoalPage() {
       )
       setClientExpectedRetiredPortReturn(
         savedGoal.clientExpectedRetiredPortReturn !== undefined
-          ? (savedGoal.clientExpectedRetiredPortReturn * 100).toString()
+          ? (savedGoal.clientExpectedRetiredPortReturn * 100).toFixed(2)
           : ""
       )
       setInflationRate(
         savedGoal.inflationRate !== undefined
-          ? (savedGoal.inflationRate * 100).toString()
+          ? (savedGoal.inflationRate * 100).toFixed(2)
           : ""
       )
       // Optionally, refetch all data to ensure synchronization

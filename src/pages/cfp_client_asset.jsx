@@ -1,9 +1,33 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import { useNavigate } from "react-router-dom"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
+
+// Define mappings for asset types, invest types, and invest risks
+const assetTypes = [
+  { value: 1, label: "สินทรัพย์สภาพคล่อง" },
+  { value: 2, label: "สินทรัพย์ส่วนตัว" },
+  { value: 3, label: "สินทรัพย์ลงทุนปัจจุบัน" },
+  { value: 4, label: "สินทรัพย์อื่นๆ" },
+]
+
+const investTypes = [
+  { value: 1, label: "หุ้นไทย" },
+  { value: 2, label: "หุ้นต่างประเทศ" },
+  { value: 3, label: "หุ้นกู้" },
+  { value: 4, label: "ตราสารหนี้" },
+  { value: 5, label: "ทองคำ" },
+  { value: 6, label: "เงินฝาก" },
+  { value: 7, label: "การลงทุนอื่นๆ" },
+]
+
+const investRisks = [
+  { value: 1, label: "เสี่ยงสูง" },
+  { value: 2, label: "เสี่ยงปานกลาง" },
+  { value: 3, label: "เสี่ยงต่ำ" },
+]
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -14,88 +38,87 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.4,
 }
 
 export default function CFPClientAssetPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editingAsset, setEditingAsset] = useState(null)
 
-  const [assetType, setAssetType] = useState("เลือก")
+  const [assetType, setAssetType] = useState(0) // 0 represents "เลือก"
   const [assetName, setAssetName] = useState("")
   const [assetAmount, setAssetAmount] = useState("")
   const [buyDate, setBuyDate] = useState("") // for personal asset
-  const [investType, setInvestType] = useState("หุ้นไทย") // default for invest asset
-  const [investRisk, setInvestRisk] = useState("เสี่ยงปานกลาง") // default for invest asset
-
-  const assetTypes = [
-    "สินทรัพย์สภาพคล่อง",
-    "สินทรัพย์ส่วนตัว",
-    "สินทรัพย์ลงทุนปัจจุบัน",
-    "สินทรัพย์อื่นๆ",
-  ]
-
-  const investTypes = [
-    "หุ้นไทย",
-    "หุ้นต่างประเทศ",
-    "หุ้นกู้",
-    "ตราสารหนี้",
-    "ทองคำ",
-    "เงินฝาก",
-    "การลงทุนอื่นๆ",
-  ]
-
-  const investRisks = ["เสี่ยงสูง", "เสี่ยงต่ำ", "เสี่ยงปานกลาง"]
+  const [investType, setInvestType] = useState(1) // default for invest asset (หุ้นไทย)
+  const [investRisk, setInvestRisk] = useState(2) // default for invest asset (เสี่ยงปานกลาง)
 
   useEffect(() => {
     fetchAssets()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchAssets = async () => {
-    const res = await fetch(
-      `http://localhost:8080/api/clientassets/${clientId}`
-    )
-    if (!res.ok) {
-      console.error("Failed to fetch assets")
-      return
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}`
+      )
+      if (!res.ok) {
+        console.error("Failed to fetch assets")
+        return
+      }
+      const data = await res.json()
+      setAssets(data)
+    } catch (error) {
+      console.error("Error fetching assets:", error)
     }
-    const data = await res.json()
-    setAssets(data)
+  }
+
+  // Helper functions to get labels from values
+  const getAssetTypeLabel = (typeValue) => {
+    const type = assetTypes.find((t) => t.value === typeValue)
+    return type ? type.label : "ไม่ระบุ"
+  }
+
+  const getInvestTypeLabel = (investTypeValue) => {
+    const invest = investTypes.find((it) => it.value === investTypeValue)
+    return invest ? invest.label : "ไม่ระบุ"
+  }
+
+  const getInvestRiskLabel = (investRiskValue) => {
+    const risk = investRisks.find((ir) => ir.value === investRiskValue)
+    return risk ? risk.label : "ไม่ระบุ"
   }
 
   const handleCreateOrUpdateAsset = async () => {
     const newAsset = {
-      id: {
-        clientId: parseInt(clientId),
-        clientAssetName: assetName,
-      },
+      clientUuid: clientUuid,
+      clientAssetName: assetName,
       clientAssetType: assetType,
       clientAssetAmount: parseFloat(assetAmount),
       // For personal asset
       clientAssetBuyDate: buyDate ? buyDate : null,
       // For invest asset
-      clientAssetInvestType:
-        assetType === "สินทรัพย์ลงทุนปัจจุบัน" ? investType : null,
-      clientAssetInvestRisk:
-        assetType === "สินทรัพย์ลงทุนปัจจุบัน" ? investRisk : null,
+      clientAssetInvestType: assetType === 3 ? investType : null,
+      clientAssetInvestRisk: assetType === 3 ? investRisk : null,
     }
 
-    let url = `http://localhost:8080/api/clientassets`
+    let url = `${import.meta.env.VITE_API_KEY}api/clientassets`
     let method = "POST"
 
     if (editMode && editingAsset) {
-      const originalName = editingAsset.id.clientAssetName
+      const originalName = editingAsset.clientAssetName
 
       // If the name was changed, delete the old asset and create a new one
       if (originalName !== assetName) {
         // Delete the original asset
         const deleteRes = await fetch(
-          `http://localhost:8080/api/clientassets/${clientId}/${originalName}`,
+          `${
+            import.meta.env.VITE_API_KEY
+          }api/clientassets/${clientUuid}/${originalName}`,
           { method: "DELETE" }
         )
         if (!deleteRes.ok) {
@@ -107,7 +130,9 @@ export default function CFPClientAssetPage() {
         method = "POST"
       } else {
         // If the name wasn't changed, just update the asset
-        url = `http://localhost:8080/api/clientassets/${clientId}/${originalName}`
+        url = `${
+          import.meta.env.VITE_API_KEY
+        }api/clientassets/${clientUuid}/${originalName}`
         method = "PUT"
       }
     }
@@ -131,9 +156,10 @@ export default function CFPClientAssetPage() {
   }
 
   const handleDeleteAsset = async (ast) => {
-    const { clientId: cId, clientAssetName } = ast.id
     const res = await fetch(
-      `http://localhost:8080/api/clientassets/${cId}/${clientAssetName}`,
+      `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}/${
+        ast.clientAssetName
+      }`,
       { method: "DELETE" }
     )
     if (!res.ok) {
@@ -149,16 +175,16 @@ export default function CFPClientAssetPage() {
     setEditMode(true)
     setEditingAsset(ast)
     setAssetType(ast.clientAssetType)
-    setAssetName(ast.id.clientAssetName)
+    setAssetName(ast.clientAssetName)
     setAssetAmount(ast.clientAssetAmount.toString())
     setBuyDate(ast.clientAssetBuyDate || "")
 
-    if (ast.clientAssetType === "สินทรัพย์ลงทุนปัจจุบัน") {
-      setInvestType(ast.clientAssetInvestType || "หุ้นไทย")
-      setInvestRisk(ast.clientAssetInvestRisk || "เสี่ยงปานกลาง")
+    if (ast.clientAssetType === 3) {
+      setInvestType(ast.clientAssetInvestType || 1)
+      setInvestRisk(ast.clientAssetInvestRisk || 2)
     } else {
-      setInvestType("หุ้นไทย")
-      setInvestRisk("เสี่ยงปานกลาง")
+      setInvestType(1)
+      setInvestRisk(2)
     }
   }
 
@@ -169,12 +195,12 @@ export default function CFPClientAssetPage() {
   const resetFields = () => {
     setEditMode(false)
     setEditingAsset(null)
-    setAssetType("เลือก")
+    setAssetType(0)
     setAssetName("")
     setAssetAmount("")
     setBuyDate("")
-    setInvestType("หุ้นไทย")
-    setInvestRisk("เสี่ยงปานกลาง")
+    setInvestType(1)
+    setInvestRisk(2)
   }
 
   const handleBack = () => {
@@ -202,7 +228,7 @@ export default function CFPClientAssetPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
-              <span className="font-bold">ข้อมูลส่วนตัว</span>
+              <span className="font-bold mt-1">ข้อมูลส่วนตัว</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -212,7 +238,7 @@ export default function CFPClientAssetPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
+              <span className="font-bold mt-1">รายได้</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -222,7 +248,7 @@ export default function CFPClientAssetPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
+              <span className="font-bold mt-1">รายจ่าย</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -232,7 +258,7 @@ export default function CFPClientAssetPage() {
               <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold text-tfpa_blue">สินทรัพย์</span>
+              <span className="font-bold text-tfpa_blue mt-1">สินทรัพย์</span>
             </button>
             <div className="h-px bg-gray-300 w-24"></div>
             <button
@@ -242,7 +268,7 @@ export default function CFPClientAssetPage() {
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
+              <span className="font-bold mt-1">หนี้สิน</span>
             </button>
           </div>
           <motion.div
@@ -256,24 +282,26 @@ export default function CFPClientAssetPage() {
               4. สินทรัพย์
             </h3>
             <div className="space-y-4">
+              {/* Asset Type */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ประเภทสินทรัพย์
                 </label>
                 <select
                   value={assetType}
-                  onChange={(e) => setAssetType(e.target.value)}
+                  onChange={(e) => setAssetType(parseInt(e.target.value, 10))}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 >
-                  <option value="เลือก">เลือก</option>
+                  <option value={0}>เลือก</option>
                   {assetTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                    <option key={t.value} value={t.value}>
+                      {t.label}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Asset Name */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
                   ชื่อสินทรัพย์
@@ -286,7 +314,8 @@ export default function CFPClientAssetPage() {
                 />
               </div>
 
-              {assetType !== "เลือก" && (
+              {/* Asset Amount */}
+              {assetType !== 0 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
                     มูลค่าปัจจุบัน (บาท)
@@ -301,21 +330,24 @@ export default function CFPClientAssetPage() {
                 </div>
               )}
 
-              {assetType === "สินทรัพย์ส่วนตัว" && (
+              {/* Buy Date for Personal Asset */}
+              {assetType === 2 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
-                    วันที่ซื้อสินทรัพย์ (YYYY-MM-DD)
+                    วันที่ซื้อสินทรัพย์
                   </label>
                   <input
-                    type="text"
+                    type="date"
                     value={buyDate}
                     onChange={(e) => setBuyDate(e.target.value)}
                     className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                    placeholder="mm/dd/yyyy"
                   />
                 </div>
               )}
 
-              {assetType === "สินทรัพย์ลงทุนปัจจุบัน" && (
+              {/* Invest Type and Risk for Invest Asset */}
+              {assetType === 3 && (
                 <>
                   <div>
                     <label className="block text-tfpa_blue font-bold mb-2">
@@ -323,12 +355,14 @@ export default function CFPClientAssetPage() {
                     </label>
                     <select
                       value={investType}
-                      onChange={(e) => setInvestType(e.target.value)}
+                      onChange={(e) =>
+                        setInvestType(parseInt(e.target.value, 10))
+                      }
                       className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                     >
                       {investTypes.map((it) => (
-                        <option key={it} value={it}>
-                          {it}
+                        <option key={it.value} value={it.value}>
+                          {it.label}
                         </option>
                       ))}
                     </select>
@@ -340,12 +374,14 @@ export default function CFPClientAssetPage() {
                     </label>
                     <select
                       value={investRisk}
-                      onChange={(e) => setInvestRisk(e.target.value)}
+                      onChange={(e) =>
+                        setInvestRisk(parseInt(e.target.value, 10))
+                      }
                       className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                     >
-                      {investRisks.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
+                      {investRisks.map((ir) => (
+                        <option key={ir.value} value={ir.value}>
+                          {ir.label}
                         </option>
                       ))}
                     </select>
@@ -353,6 +389,7 @@ export default function CFPClientAssetPage() {
                 </>
               )}
 
+              {/* Action Buttons */}
               <div className="flex space-x-4 mt-4">
                 {editMode ? (
                   <>
@@ -380,6 +417,7 @@ export default function CFPClientAssetPage() {
               </div>
             </div>
 
+            {/* Existing Assets Table */}
             <h3 className="text-tfpa_blue font-bold text-lg mt-4">
               สินทรัพย์ที่มีอยู่
             </h3>
@@ -402,11 +440,11 @@ export default function CFPClientAssetPage() {
               </thead>
               <tbody>
                 {assets.map((ast) => (
-                  <tr key={`${ast.id.clientId}-${ast.id.clientAssetName}`}>
-                    <td className="py-2 px-4 border">{ast.clientAssetType}</td>
+                  <tr key={`${ast.clientUuid}-${ast.clientAssetName}`}>
                     <td className="py-2 px-4 border">
-                      {ast.id.clientAssetName}
+                      {getAssetTypeLabel(ast.clientAssetType)}
                     </td>
+                    <td className="py-2 px-4 border">{ast.clientAssetName}</td>
                     <td className="py-2 px-4 border text-right">
                       {ast.clientAssetAmount.toLocaleString()}
                     </td>
@@ -431,6 +469,7 @@ export default function CFPClientAssetPage() {
               </tbody>
             </table>
 
+            {/* Navigation Buttons */}
             <div className="flex justify-between">
               <button
                 onClick={handleBack}

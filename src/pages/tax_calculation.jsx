@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { fetchAndCalculateTaxForClient } from "../utils/taxCalculations"
 import { fetchAndCalculateTaxPlanForClient } from "../utils/taxPlanCalculations"
@@ -26,8 +26,7 @@ const pageTransition = {
 }
 
 export default function TaxCalculationPage() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   // Tax Calculation States
@@ -84,19 +83,19 @@ export default function TaxCalculationPage() {
 
   useEffect(() => {
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchData = async () => {
     try {
       // Fetch tax calculation data
-      const taxResult = await fetchAndCalculateTaxForClient(clientId)
+      const taxResult = await fetchAndCalculateTaxForClient(clientUuid)
       setOldTaxToPay(taxResult.taxToPay)
       setTotalIncome(taxResult.totalIncome)
       setIncomeAfterDeductions(taxResult.incomeAfterDeductions)
 
       // Fetch tax deductions data
       const taxDeductionsRes = await fetch(
-        `http://localhost:8080/api/taxdeduction/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/taxdeduction/${clientUuid}`
       )
       let taxDeductionsData = null
       if (taxDeductionsRes.ok) {
@@ -129,7 +128,7 @@ export default function TaxCalculationPage() {
 
       // Fetch existing tax plan
       const taxPlanRes = await fetch(
-        `http://localhost:8080/api/taxplan/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`
       )
       if (taxPlanRes.ok) {
         const taxPlanData = await taxPlanRes.json()
@@ -166,7 +165,7 @@ export default function TaxCalculationPage() {
         500000
       )
       const newTaxResult = await fetchAndCalculateTaxPlanForClient(
-        clientId,
+        clientUuid,
         totalUsedDeductions
       )
       setNewTaxToPay(newTaxResult.taxToPay)
@@ -314,7 +313,7 @@ export default function TaxCalculationPage() {
   const saveInvestments = async (fieldName, value) => {
     try {
       const payload = {
-        clientId: Number(clientId),
+        clientUuid: clientUuid,
         investRmf: fieldName === "rmf" ? value : investments.rmf,
         investSsf: fieldName === "ssf" ? value : investments.ssf,
         investGovPensionFund:
@@ -332,12 +331,12 @@ export default function TaxCalculationPage() {
 
       // Check if tax plan exists
       const taxPlanRes = await fetch(
-        `http://localhost:8080/api/taxplan/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`
       )
       if (taxPlanRes.ok) {
         // Update existing tax plan
         const updateRes = await fetch(
-          `http://localhost:8080/api/taxplan/${clientId}`,
+          `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`,
           {
             method: "PUT",
             headers: {
@@ -349,13 +348,16 @@ export default function TaxCalculationPage() {
         if (!updateRes.ok) throw new Error("Failed to update tax plan")
       } else {
         // Create new tax plan
-        const createRes = await fetch(`http://localhost:8080/api/taxplan`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        })
+        const createRes = await fetch(
+          `${import.meta.env.VITE_API_KEY}api/taxplan`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          }
+        )
         if (!createRes.ok) throw new Error("Failed to create tax plan")
       }
 
@@ -375,7 +377,7 @@ export default function TaxCalculationPage() {
           500000
         )
         const newTaxResult = await fetchAndCalculateTaxPlanForClient(
-          clientId,
+          clientUuid,
           totalUsedDeductions
         )
         setNewTaxToPay(newTaxResult.taxToPay)

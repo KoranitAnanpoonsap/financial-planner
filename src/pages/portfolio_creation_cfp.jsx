@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { calculatePortfolioSummary } from "../utils/calculations.js"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
@@ -16,12 +16,11 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.8,
 }
 
 export default function PortfolioCreationCFP() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const [totalInvestment, setTotalInvestment] = useState(0)
   const [portfolioReturn, setPortfolioReturn] = useState(0)
   const [assets, setAssets] = useState([])
@@ -31,7 +30,7 @@ export default function PortfolioCreationCFP() {
     const fetchAssets = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/portassets/${clientId}`
+          `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
         )
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -49,7 +48,7 @@ export default function PortfolioCreationCFP() {
     }
 
     fetchAssets()
-  }, [clientId])
+  }, [clientUuid])
 
   const handleEditPortfolio = () => {
     navigate(`/portfolio-selection/`) // Navigate back to PortfolioSelectionCFP

@@ -1,12 +1,14 @@
 package com.finplanner.controller;
 
 import com.finplanner.model.TaxPlan;
+
 import com.finplanner.repository.TaxPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/taxplan")
@@ -16,9 +18,10 @@ public class TaxPlanController {
     private TaxPlanRepository taxPlanRepository;
 
     // Get a TaxPlan by clientId
-    @GetMapping("/{clientId}")
-    public ResponseEntity<TaxPlan> getTaxPlanByClientId(@PathVariable("clientId") Integer clientId) {
-        Optional<TaxPlan> taxPlanOpt = taxPlanRepository.findById(clientId);
+    @GetMapping("/{clientUuid}")
+    public ResponseEntity<TaxPlan> getTaxPlanByClientId(@PathVariable String clientUuid) {
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        Optional<TaxPlan> taxPlanOpt = taxPlanRepository.findByClientUuid(uuid);
         return taxPlanOpt.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -31,22 +34,12 @@ public class TaxPlanController {
         return ResponseEntity.ok(created);
     }
 
-    // Delete a TaxPlan by clientId
-    @DeleteMapping("/{clientId}")
-    public ResponseEntity<Void> deleteTaxPlan(@PathVariable("clientId") Integer clientId) {
-        if (taxPlanRepository.existsById(clientId)) {
-            taxPlanRepository.deleteById(clientId);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     // Update an existing TaxPlan by clientId
-    @PutMapping("/{clientId}")
-    public ResponseEntity<TaxPlan> updateTaxPlan(@PathVariable("clientId") Integer clientId,
+    @PutMapping("/{clientUuid}")
+    public ResponseEntity<TaxPlan> updateTaxPlan(@PathVariable String clientUuid,
             @RequestBody TaxPlan updatedTaxPlan) {
-        return taxPlanRepository.findById(clientId)
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return taxPlanRepository.findByClientUuid(uuid)
                 .map(existingPlan -> {
                     // Update fields as needed
                     existingPlan.setInvestRmf(updatedTaxPlan.getInvestRmf());

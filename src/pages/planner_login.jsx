@@ -47,15 +47,18 @@ export default function PlannerLogin() {
     formData.append("password", password)
 
     try {
-      const response = await fetch("http://localhost:8080/api/cfp/login", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/cfp/login",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
 
       if (response.ok) {
         const data = await response.json()
-        const cfpId = data.cfpId
-        localStorage.setItem("cfpId", cfpId)
+        const cfpUuid = data.cfpUuid
+        localStorage.setItem("cfpUuid", cfpUuid)
         navigate(`/cfp-homepage/`)
       } else {
         const errorMessage = await response.text()

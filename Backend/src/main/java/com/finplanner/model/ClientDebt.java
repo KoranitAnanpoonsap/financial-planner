@@ -1,6 +1,7 @@
 package com.finplanner.model;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -8,14 +9,22 @@ import jakarta.persistence.*;
 @Table(name = "client_debt")
 public class ClientDebt {
 
-    @EmbeddedId
-    private ClientDebtId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "client_debt_id", insertable = false, updatable = false)
+    private Integer clientDebtId;
 
-    @Column(name = "client_debt_type", nullable = false, length = 20)
-    private String clientDebtType;
+    @Column(name = "client_uuid", nullable = false)
+    private UUID clientUuid;
 
-    @Column(name = "client_debt_term", nullable = false, length = 10)
-    private String clientDebtTerm;
+    @Column(name = "client_debt_name", length = 100, nullable = false)
+    private String clientDebtName;
+
+    @Column(name = "client_debt_type", nullable = false)
+    private Integer clientDebtType;
+
+    @Column(name = "client_debt_term", nullable = false)
+    private Integer clientDebtTerm;
 
     @Column(name = "client_debt_amount", nullable = false)
     private Integer clientDebtAmount;
@@ -33,27 +42,43 @@ public class ClientDebt {
     private Integer clientDebtPrincipal;
 
     // Getters and Setters
-    public ClientDebtId getId() {
-        return id;
+    public Integer getClientDebtId() {
+        return clientDebtId;
     }
 
-    public void setId(ClientDebtId id) {
-        this.id = id;
+    public void setClienDebtId(Integer clientDebtId) {
+        this.clientDebtId = clientDebtId;
     }
 
-    public String getClientDebtType() {
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
+    }
+
+    public String getClientDebtName() {
+        return clientDebtName;
+    }
+
+    public void setClientDebtName(String clientDebtName) {
+        this.clientDebtName = clientDebtName;
+    }
+
+    public Integer getClientDebtType() {
         return clientDebtType;
     }
 
-    public void setClientDebtType(String clientDebtType) {
+    public void setClientDebtType(Integer clientDebtType) {
         this.clientDebtType = clientDebtType;
     }
 
-    public String getClientDebtTerm() {
+    public Integer getClientDebtTerm() {
         return clientDebtTerm;
     }
 
-    public void setClientDebtTerm(String clientDebtTerm) {
+    public void setClientDebtTerm(Integer clientDebtTerm) {
         this.clientDebtTerm = clientDebtTerm;
     }
 

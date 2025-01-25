@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import {
   calculatePortfolioSummary,
-  calculateGeneralGoal,
+  calculateGoal,
 } from "../utils/calculations.js"
 import { motion } from "framer-motion"
 import PortfolioPieChart from "../components/portfolioPieChart.jsx"
@@ -23,33 +23,36 @@ const pageTransition = {
 }
 
 export default function CFPGoalBaseDashboard() {
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
-  const [generalGoal, setGeneralGoal] = useState(null)
+  const [Goal, setGoal] = useState(null)
   const [fvOfCurrentInvestment, setFvOfCurrentInvestment] = useState(0)
-  const [generalGoalAnnualSaving, setGeneralGoalAnnualSaving] = useState(0)
+  const [GoalAnnualSaving, setGoalAnnualSaving] = useState(0)
 
   useEffect(() => {
     fetchAllData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
-      // Fetch general goal
-      const ggResponse = await fetch(
-        `http://localhost:8080/api/generalgoal/${clientId}`
+      // Fetch goal
+      const gResponse = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/calculategoal/${clientUuid}`
       )
-      if (!ggResponse.ok) {
-        throw new Error("No general goal data found")
+      if (!gResponse.ok) {
+        throw new Error("No goal data found")
       }
-      const ggData = await ggResponse.json()
-      setGeneralGoal(ggData)
+      const gData = await gResponse.json()
+      setGoal(gData)
+
+      const totalInvestAmount = gData.totalInvestment
+      const portReturn = gData.portReturn
 
       // Fetch assets
       const assetsResponse = await fetch(
-        `http://localhost:8080/api/portassets/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
       )
       if (!assetsResponse.ok) {
         throw new Error("Failed to fetch assets")
@@ -57,15 +60,11 @@ export default function CFPGoalBaseDashboard() {
       const assetsData = await assetsResponse.json()
       setAssets(assetsData)
 
-      // Calculate portfolio summary
-      const { totalInvestAmount, portReturn } =
-        calculatePortfolioSummary(assetsData)
-
-      // Calculate general goal
-      const { fvOfCurrentInvestment: fv, generalGoalAnnualSaving: saving } =
-        calculateGeneralGoal(ggData, totalInvestAmount, portReturn)
+      // Calculate goal
+      const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
+        calculateGoal(gData, totalInvestAmount, portReturn)
       setFvOfCurrentInvestment(fv)
-      setGeneralGoalAnnualSaving(saving)
+      setGoalAnnualSaving(saving)
     } catch (error) {
       console.error("Error fetching data:", error)
       // Optionally, you can set default values or handle the error state here
@@ -76,7 +75,7 @@ export default function CFPGoalBaseDashboard() {
     navigate(`/retirement-goal/`)
   }
 
-  const handleNavigateGeneralGoal = () => {
+  const handleNavigateGoal = () => {
     navigate(`/goal-base/`)
   }
 
@@ -105,7 +104,7 @@ export default function CFPGoalBaseDashboard() {
         <div className="flex flex-col items-center justify-center h-full gap-5">
           กระแสเงินสดสุทธิปัจจุบันต่อปี
           <span className="text-[48px] font-bold font-sans">
-            {Number(generalGoal.clientNetIncome).toLocaleString()}{" "}
+            {Number(Goal.netIncome).toLocaleString()}{" "}
           </span>
         </div>
       </div>
@@ -121,7 +120,7 @@ export default function CFPGoalBaseDashboard() {
           <br />
           ต่อการออมหรือไม่
           <span className="text-[48px] font-bold font-sans">
-            {generalGoalAnnualSaving <= Number(generalGoal.clientNetIncome)
+            {GoalAnnualSaving <= Number(Goal.netIncome)
               ? "เพียงพอ"
               : "ไม่เพียงพอ"}
           </span>
@@ -137,7 +136,7 @@ export default function CFPGoalBaseDashboard() {
         <div className="flex flex-col items-center justify-center h-full gap-5 text-center">
           จำนวนครั้งที่ต้องเก็บออม
           <span className="text-[48px] font-bold font-sans">
-            {generalGoal.clientGeneralGoalPeriod}
+            {Goal.goalPeriod}
           </span>
         </div>
       </div>
@@ -151,11 +150,7 @@ export default function CFPGoalBaseDashboard() {
         <div className="flex flex-col justify-center h-full">
           <div className="p-5 text-right">
             <div className="absolute text-2xl font-bold">
-              {(
-                (fvOfCurrentInvestment / generalGoal.clientGeneralGoalValue) *
-                100
-              ).toFixed(2)}
-              %
+              {((fvOfCurrentInvestment / Goal.goalValue) * 100).toFixed(2)}%
             </div>
             สัดส่วนการลงทุนในปัจจุบันคิดเป็นค่าเงินในอนาคต
             <br />
@@ -165,14 +160,11 @@ export default function CFPGoalBaseDashboard() {
                 className={"flex h-3 bg-tfpa_light_blue mb-2 rounded-xl"}
                 style={{
                   width:
-                    (
-                      (fvOfCurrentInvestment /
-                        generalGoal.clientGeneralGoalValue) *
-                      100
-                    ).toFixed(2) < 100
+                    ((fvOfCurrentInvestment / Goal.goalValue) * 100).toFixed(
+                      2
+                    ) < 100
                       ? (
-                          (fvOfCurrentInvestment /
-                            generalGoal.clientGeneralGoalValue) *
+                          (fvOfCurrentInvestment / Goal.goalValue) *
                           100
                         ).toFixed(2) + "%"
                       : "100%",
@@ -183,8 +175,7 @@ export default function CFPGoalBaseDashboard() {
           <div className="p-5 text-right">
             <div className="absolute text-2xl font-bold">
               {(
-                (Number(generalGoal.clientNetIncome) /
-                  Math.abs(generalGoalAnnualSaving)) *
+                (Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)) *
                 100
               ).toFixed(2)}
               %
@@ -198,13 +189,12 @@ export default function CFPGoalBaseDashboard() {
                 style={{
                   width:
                     (
-                      (Number(generalGoal.clientNetIncome) /
-                        Math.abs(generalGoalAnnualSaving)) *
+                      (Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)) *
                       100
                     ).toFixed(2) < 100
                       ? (
-                          (Number(generalGoal.clientNetIncome) /
-                            Math.abs(generalGoalAnnualSaving)) *
+                          (Number(Goal.netIncome) /
+                            Math.abs(GoalAnnualSaving)) *
                           100
                         ).toFixed(2) + "%"
                       : "100%",
@@ -213,8 +203,8 @@ export default function CFPGoalBaseDashboard() {
             </div>
             {/*<div className={"flex h-2 bg-tfpa_light_blue"}*/}
             {/*     style={{*/}
-            {/*         width: ((Number(generalGoal.clientNetIncome) / Math.abs(generalGoalAnnualSaving)).toFixed(2)) < 100 ? ((Number(generalGoal.clientNetIncome) / Math.abs(generalGoalAnnualSaving)).toFixed(2)) : 100 + "%",*/}
-            {/*         borderRightWidth: ((Number(generalGoal.clientNetIncome) / Math.abs(generalGoalAnnualSaving)).toFixed(2) < 100) ? (100 - (Number(generalGoal.clientNetIncome) / Math.abs(generalGoalAnnualSaving)).toFixed(2)) : 0 + "%"*/}
+            {/*         width: ((Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)).toFixed(2)) < 100 ? ((Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)).toFixed(2)) : 100 + "%",*/}
+            {/*         borderRightWidth: ((Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)).toFixed(2) < 100) ? (100 - (Number(Goal.netIncome) / Math.abs(GoalAnnualSaving)).toFixed(2)) : 0 + "%"*/}
             {/*     }}>*/}
             {/*</div>*/}
           </div>
@@ -233,7 +223,7 @@ export default function CFPGoalBaseDashboard() {
           <div className="flex space-x-4 justify-center">
             <button
               className="bg-tfpa_gold px-4 py-2 rounded font-bold text-white"
-              onClick={handleNavigateGeneralGoal}
+              onClick={handleNavigateGoal}
             >
               เป้าหมายทั่วไป
             </button>
@@ -253,11 +243,11 @@ export default function CFPGoalBaseDashboard() {
             transition={pageTransition}
           >
             {/* Blue Box with Goal Info */}
-            {generalGoal && (
+            {Goal && (
               <>
                 {/* Goal Name */}
                 <h1 className="text-center text-4xl text-tfpa_blue font-bold">
-                  เป้าหมาย: {generalGoal.clientGeneralGoalName}
+                  เป้าหมาย: {Goal.goalName}
                 </h1>
                 <div className="flex flex-wrap gap-2 w-full justify-between my-3 px-8 text-tfpa_blue font-bold">
                   <InvestmentProportion />

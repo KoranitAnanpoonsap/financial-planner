@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
+import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { calculateRetirementGoal } from "../utils/calculations.js"
 import { motion } from "framer-motion"
@@ -19,8 +19,7 @@ const pageTransition = {
 }
 
 export default function RetirementGoalCalculated() {
-  const [cfpId] = useState(Number(localStorage.getItem("cfpId")) || "")
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [retirementGoal, setRetirementGoal] = useState(null)
@@ -34,33 +33,50 @@ export default function RetirementGoalCalculated() {
   // Slider state for retiredExpensePortion (0 to 1)
   const [retiredExpensePortion, setRetiredExpensePortion] = useState(1)
 
+  const [localPortionPercent, setLocalPortionPercent] = useState(100)
+  const debounceTimer = useRef(null) // Ref for debounce timer
+
   useEffect(() => {
     fetchRetirementGoalData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchRetirementGoalData = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8080/api/retirementgoal/${clientId}`
+        `${import.meta.env.VITE_API_KEY}api/retirementgoal/${clientUuid}`
       )
       if (!res.ok) throw new Error("No retirement goal data")
       const rg = await res.json()
       setRetirementGoal(rg)
 
-      // Determine the saved portion or default to 100%
       const savedPortion =
         rg.clientRetiredExpensePortion != null
           ? rg.clientRetiredExpensePortion
           : 1
       setRetiredExpensePortion(savedPortion)
+      setLocalPortionPercent(savedPortion * 100) // Initialize local state
 
-      // Initial calculation with the saved portion
       performCalculation(rg, savedPortion)
     } catch (error) {
       console.error("Error fetching retirement goal data:", error)
-      // Optionally, set default values or handle error state here
     }
+  }
+
+  const handlePortionChange = (e) => {
+    const portionValue = e.target.value / 100
+    setRetiredExpensePortion(portionValue)
+    setLocalPortionPercent(e.target.value) // Update local state immediately
+    performCalculation(retirementGoal, portionValue)
+
+    // Debounce the server update
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      updateRetiredExpensePortion(portionValue)
+    }, 500) // 500ms debounce
   }
 
   const performCalculation = (rg, portion) => {
@@ -77,15 +93,6 @@ export default function RetirementGoalCalculated() {
     setRetirementGoalAmount(retirementGoal)
   }
 
-  const handlePortionChange = async (e) => {
-    const portionValue = e.target.value / 100 // Convert from percent to decimal
-    setRetiredExpensePortion(portionValue)
-    if (retirementGoal) {
-      performCalculation(retirementGoal, portionValue)
-      await updateRetiredExpensePortion(portionValue)
-    }
-  }
-
   const updateRetiredExpensePortion = async (portion) => {
     const updatedGoal = {
       ...retirementGoal,
@@ -94,7 +101,7 @@ export default function RetirementGoalCalculated() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/retirementgoal/${clientId}`,
+        `${import.meta.env.VITE_API_KEY}api/retirementgoal/${clientUuid}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -107,15 +114,17 @@ export default function RetirementGoalCalculated() {
       const savedGoal = await response.json()
       setRetirementGoal(savedGoal)
 
-      // Ensure the retiredExpensePortion is updated from savedGoal in case backend modified it
       const updatedPortion =
         savedGoal.clientRetiredExpensePortion != null
           ? savedGoal.clientRetiredExpensePortion
           : 1
-      setRetiredExpensePortion(updatedPortion)
 
-      // Recalculate with the saved portion
-      performCalculation(savedGoal, updatedPortion)
+      // Only update if there's a change
+      if (updatedPortion !== portion) {
+        setRetiredExpensePortion(updatedPortion)
+        setLocalPortionPercent(updatedPortion * 100)
+        performCalculation(savedGoal, updatedPortion)
+      }
     } catch (error) {
       console.error("Error updating retired expense portion:", error)
       // Optionally, revert the slider or notify the user
@@ -195,11 +204,12 @@ export default function RetirementGoalCalculated() {
                   <input
                     type="range"
                     min="0"
-                    max="100"
-                    value={portionPercent}
+                    max="200"
+                    value={localPortionPercent}
                     onChange={handlePortionChange}
                     className="w-64"
                   />
+
                   <div className="bg-tfpa_blue text-white px-2 py-1 rounded-full">
                     {portionPercent}%
                   </div>

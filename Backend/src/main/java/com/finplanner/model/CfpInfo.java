@@ -1,5 +1,7 @@
 package com.finplanner.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -8,8 +10,11 @@ public class CfpInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cfp_id")
+    @Column(name = "cfp_id", insertable = false, updatable = false)
     private Integer cfpId;
+
+    @Column(name = "cfp_uuid", columnDefinition = "uuid", updatable = false)
+    private UUID cfpUuid;
 
     @Column(name = "cfp_firstname", nullable = false, length = 50)
     private String cfpFirstName;
@@ -69,6 +74,13 @@ public class CfpInfo {
     private String cfpLanguages;
 
     // Getters and Setters for all fields
+
+    @PrePersist
+    public void prePersist() {
+        if (cfpUuid == null) {
+            cfpUuid = UUID.randomUUID();
+        }
+    }
 
     public Integer getCfpId() {
         return cfpId;
@@ -228,5 +240,13 @@ public class CfpInfo {
 
     public void setCfpLanguages(String cfpLanguages) {
         this.cfpLanguages = cfpLanguages;
+    }
+
+    public UUID getCfpUuid() {
+        return cfpUuid;
+    }
+
+    public void setCfpUuid(UUID cfpUuid) {
+        this.cfpUuid = cfpUuid;
     }
 }

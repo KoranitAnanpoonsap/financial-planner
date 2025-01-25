@@ -1,6 +1,6 @@
 package com.finplanner.model;
 
-public interface ClientInfoBluePanel {
+public interface CfpClientInfoSidePanel {
     String getClientFirstName();
 
     String getClientLastName();
