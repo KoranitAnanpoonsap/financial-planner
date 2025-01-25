@@ -37,31 +37,37 @@ public class ClientInfoService {
          * @return A map containing the paginated list of clients and pagination
          *         metadata.
          */
-        public Map<String, Object> getFilteredClients(UUID cfpUuid, String search, String filterStatus, int page,
+        public Map<String, Object> getFilteredClients(
+                        UUID cfpUuid,
+                        String search,
+                        String filterStatus,
+                        int page,
                         int size,
-                        String sortBy, String sortDir) {
+                        String sortBy,
+                        String sortDir) {
+
                 List<ClientInfo> clients = clientInfoRepository.findByCfpOfThisClient_CfpUuid(cfpUuid);
 
-                // Filter based on search query if provided
+                // 1. Optional filtering by search
                 if (search != null && !search.trim().isEmpty()) {
                         String searchLower = search.toLowerCase();
                         clients = clients.stream()
                                         .filter(client -> client.getClientFormatId().toLowerCase().contains(searchLower)
-                                                        ||
-                                                        client.getClientFirstName().toLowerCase().contains(searchLower)
-                                                        ||
-                                                        client.getClientLastName().toLowerCase().contains(searchLower))
+                                                        || client.getClientFirstName().toLowerCase()
+                                                                        .contains(searchLower)
+                                                        || client.getClientLastName().toLowerCase()
+                                                                        .contains(searchLower))
                                         .collect(Collectors.toList());
                 }
 
-                // Filter based on status if provided
+                // 2. Optional filtering by status
                 if (filterStatus != null && !filterStatus.trim().isEmpty()) {
                         clients = clients.stream()
                                         .filter(client -> client.getClientStatus().equals(filterStatus))
                                         .collect(Collectors.toList());
                 }
 
-                // Separate clients with and without start dates
+                // 3. Separate lists: those with date vs. those without date
                 List<ClientInfo> clientsWithStartDate = clients.stream()
                                 .filter(client -> client.getClientStartDate() != null)
                                 .collect(Collectors.toList());
@@ -70,45 +76,53 @@ public class ClientInfoService {
                                 .filter(client -> client.getClientStartDate() == null)
                                 .collect(Collectors.toList());
 
-                // Define the comparator based on sortBy and sortDir
-                Comparator<ClientInfo> comparator = Comparator.comparing(ClientInfo::getClientStartDate,
-                                Comparator.nullsLast(Comparator.naturalOrder())); // Default natural order
-
+                // 4. Sort clients with date
+                // Default to sorting by date ascending unless sortBy/sortDir indicate otherwise
+                Comparator<ClientInfo> comparatorWithDate = Comparator.comparing(
+                                ClientInfo::getClientStartDate,
+                                Comparator.nullsLast(Comparator.naturalOrder()));
                 if ("clientStartDate".equalsIgnoreCase(sortBy)) {
                         if ("desc".equalsIgnoreCase(sortDir)) {
-                                comparator = Comparator.comparing(ClientInfo::getClientStartDate,
+                                comparatorWithDate = Comparator.comparing(
+                                                ClientInfo::getClientStartDate,
                                                 Comparator.nullsLast(Comparator.reverseOrder()));
                         } else {
-                                comparator = Comparator.comparing(ClientInfo::getClientStartDate,
+                                comparatorWithDate = Comparator.comparing(
+                                                ClientInfo::getClientStartDate,
                                                 Comparator.nullsLast(Comparator.naturalOrder()));
                         }
                 }
-                // Add more sortBy conditions here if needed
 
-                // Sort the clients with start dates
+                // Apply the comparator to the with-date list
                 clientsWithStartDate = clientsWithStartDate.stream()
-                                .sorted(comparator)
+                                .sorted(comparatorWithDate)
                                 .collect(Collectors.toList());
 
-                // Combine both lists: sorted with start dates first, then without
-                List<ClientInfo> sortedClients = Stream.concat(clientsWithStartDate.stream(),
-                                clientsWithoutStartDate.stream())
+                // 5. Sort clients without date by clientFormatId (ascending by default)
+                Comparator<ClientInfo> comparatorWithoutDate = Comparator.comparing(ClientInfo::getClientFormatId);
+
+                clientsWithoutStartDate = clientsWithoutStartDate.stream()
+                                .sorted(comparatorWithoutDate)
                                 .collect(Collectors.toList());
 
-                // Pagination
+                // 6. Combine both lists (with-date first, then no-date)
+                List<ClientInfo> sortedClients = Stream.concat(
+                                clientsWithStartDate.stream(),
+                                clientsWithoutStartDate.stream()).collect(Collectors.toList());
+
+                // 7. Handle pagination
                 int totalItems = sortedClients.size();
                 int totalPages = (int) Math.ceil((double) totalItems / size);
 
                 int fromIndex = page * size;
                 int toIndex = Math.min(fromIndex + size, totalItems);
-
                 if (fromIndex > toIndex) {
                         fromIndex = toIndex;
                 }
 
                 List<ClientInfo> paginatedClients = sortedClients.subList(fromIndex, toIndex);
 
-                // Prepare response
+                // 8. Build response map
                 Map<String, Object> response = new HashMap<>();
                 response.put("clients", paginatedClients.stream()
                                 .map(client -> {

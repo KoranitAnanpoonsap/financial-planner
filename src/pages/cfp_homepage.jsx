@@ -224,7 +224,7 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
         <CfpSidePanel />
