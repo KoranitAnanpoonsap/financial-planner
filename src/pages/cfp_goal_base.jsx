@@ -3,8 +3,6 @@ import { useNavigate, useParams } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
-import PortfolioPieChart from "../components/portfolioPieChart.jsx"
-import { calculatePortfolioSummary } from "../utils/calculations.js"
 import { motion } from "framer-motion"
 
 const pageVariants = {
