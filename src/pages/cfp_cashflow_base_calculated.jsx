@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
-import Header from "../components/header.jsx"
-import ClientBluePanel from "../components/clientBluePanel.jsx"
+import Header from "../components/cfpHeader.jsx"
+import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
+import { motion } from "framer-motion"
 
 // Import the calculation functions
 import {
@@ -12,9 +13,20 @@ import {
   calculateGoalPayments,
 } from "../utils/calculations.js"
 
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
+
 export default function CFPCashflowBaseCalculated() {
-  const { clientId } = useParams()
-  const { cfpId } = useParams()
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
@@ -26,15 +38,16 @@ export default function CFPCashflowBaseCalculated() {
 
   useEffect(() => {
     fetchAllData()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
       const [incomesRes, expensesRes, goalsRes, assetsRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/clientincome/${clientId}`),
-        fetch(`http://localhost:8080/api/clientexpense/${clientId}`),
-        fetch(`http://localhost:8080/api/cashflow/${clientId}`),
-        fetch(`http://localhost:8080/api/portassets/${clientId}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/cashflow/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`),
       ])
 
       if (!incomesRes.ok || !expensesRes.ok || !goalsRes.ok || !assetsRes.ok) {
@@ -70,7 +83,13 @@ export default function CFPCashflowBaseCalculated() {
     )
     const netIncome = totalIncome - totalExpense
 
-    const goalPayments = calculateGoalPayments(goals, portfolioReturn, year)
+    // Pass 'expenses' as an additional argument to calculateGoalPayments
+    const goalPayments = calculateGoalPayments(
+      goals,
+      portfolioReturn,
+      expenses,
+      year
+    )
     const totalGoalPayments = goalPayments.reduce(
       (sum, g) => sum + parseFloat(Object.values(g)[0]),
       0
@@ -91,207 +110,236 @@ export default function CFPCashflowBaseCalculated() {
 
   const handleDashboard = () => {
     // Navigate to a dashboard page
-    navigate(`/${cfpId}/dashboard`)
+    navigate(`/cashflow-base-dashboard`)
   }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-4 space-y-8">
-          <div className="overflow-x-auto mt-16">
-            <table className="min-w-full bg-white border border-gray-300 text-sm">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                    (บาท)
-                  </th>
-                  {calculationResults.map((r) => (
-                    <th
-                      key={r.year}
-                      className="py-2 px-4 border font-ibm font-bold text-tfpa_blue"
-                    >
-                      ปี {r.year}
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <div className="overflow-x-auto mt-4">
+              <table className="min-w-full bg-white border border-gray-300 text-sm">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border text-left font-ibm font-bold text-tfpa_blue">
+                      (บาท)
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {/* Incomes */}
-                <tr>
-                  <td
-                    className="py-2 px-4 border text-lg font-ibm font-extrabold text-tfpa_blue"
-                    colSpan={1}
-                  >
-                    รายได้
-                  </td>
-                  {calculationResults.map((r, i) => (
-                    <td key={i} className="border"></td>
-                  ))}
-                </tr>
-                {incomes.map((inc) => (
-                  <tr key={inc.id.clientIncomeName}>
-                    <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue">
-                      {inc.id.clientIncomeName}
-                    </td>
-                    {calculationResults.map((r, i) => {
-                      // find inc amount
-                      const detail = r.incomeDetails.find(
-                        (d) => Object.keys(d)[0] === inc.id.clientIncomeName
-                      )
-                      const val = detail
-                        ? detail[inc.id.clientIncomeName]
-                        : "0.00"
-                      return (
-                        <td
-                          key={i}
-                          className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
-                        >
-                          {parseFloat(val).toLocaleString()}
-                        </td>
-                      )
-                    })}
+                    {calculationResults.map((r) => (
+                      <th
+                        key={r.year}
+                        className="py-2 px-4 border text-right font-ibm font-bold text-tfpa_blue"
+                      >
+                        ปี {r.year}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-                {/* Total Income */}
-                <tr className="border-t-2">
-                  <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
-                    รวมรายได้
-                  </td>
-                  {calculationResults.map((r, i) => (
+                </thead>
+                <tbody>
+                  {/* Incomes */}
+                  <tr>
                     <td
-                      key={i}
-                      className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
-                      style={{ color: "#d4a017" }}
+                      className="py-2 px-4 border text-lg font-ibm font-extrabold text-tfpa_blue"
+                      colSpan={1}
                     >
-                      {r.totalIncome.toLocaleString()}
+                      รายได้
                     </td>
-                  ))}
-                </tr>
-
-                {/* Expenses */}
-                <tr>
-                  <td
-                    className="py-2 px-4 border text-lg font-ibm font-bold text-tfpa_blue"
-                    colSpan={1}
-                  >
-                    รายจ่าย
-                  </td>
-                  {calculationResults.map((r, i) => (
-                    <td key={i} className="border"></td>
-                  ))}
-                </tr>
-                {expenses.map((exp) => (
-                  <tr key={exp.id.clientExpenseName}>
-                    <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue">
-                      {exp.id.clientExpenseName}
-                    </td>
-                    {calculationResults.map((r, i) => {
-                      const detail = r.expenseDetails.find(
-                        (d) => Object.keys(d)[0] === exp.id.clientExpenseName
-                      )
-                      const val = detail
-                        ? detail[exp.id.clientExpenseName]
-                        : "0.00"
-                      return (
-                        <td
-                          key={i}
-                          className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
-                        >
-                          {parseFloat(val).toLocaleString()}
-                        </td>
-                      )
-                    })}
+                    {calculationResults.map((r, i) => (
+                      <td key={i} className="border"></td>
+                    ))}
                   </tr>
-                ))}
-                {/* Total Expense */}
-                <tr className="border-t-2">
-                  <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
-                    รวมรายจ่าย
-                  </td>
-                  {calculationResults.map((r, i) => (
-                    <td
-                      key={i}
-                      className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
-                      style={{ color: "#d4a017" }}
-                    >
-                      {r.totalExpense.toLocaleString()}
-                    </td>
+                  {incomes.map((inc) => (
+                    <tr key={inc.clientIncomeName}>
+                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
+                        {inc.clientIncomeName}
+                      </td>
+                      {calculationResults.map((r, i) => {
+                        // find inc amount
+                        const detail = r.incomeDetails.find(
+                          (d) => Object.keys(d)[0] === inc.clientIncomeName
+                        )
+                        const val = detail
+                          ? detail[inc.clientIncomeName]
+                          : "0.00"
+                        return (
+                          <td
+                            key={i}
+                            className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue_panel_select"
+                          >
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        )
+                      })}
+                    </tr>
                   ))}
-                </tr>
-
-                {/* Net Income */}
-                <tr className="border-t-2">
-                  <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_gold">
-                    กระแสนเงินสดสุทธิ
-                  </td>
-                  {calculationResults.map((r, i) => (
-                    <td
-                      key={i}
-                      className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_gold"
-                    >
-                      {r.netIncome.toLocaleString()}
+                  {/* Total Income */}
+                  <tr className="border-t-2">
+                    <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
+                      รวมรายได้
                     </td>
-                  ))}
-                </tr>
-
-                {/* Goals */}
-                {goals.map((goal) => (
-                  <tr key={goal.id.clientGoalName}>
-                    <td className="py-2 px-4 border text-lg text-red-600 font-ibm font-semibold">
-                      การออมเพื่อเป้าหมาย {goal.id.clientGoalName}
-                    </td>
-                    {calculationResults.map((r, i) => {
-                      const pay = r.goalPayments.find(
-                        (g) => Object.keys(g)[0] === goal.id.clientGoalName
-                      )
-                      const val = pay ? pay[goal.id.clientGoalName] : "0.00"
-                      return (
-                        <td
-                          key={i}
-                          className="py-2 px-4 border text-center text-red-600 font-ibm font-semibold"
-                        >
-                          {parseFloat(val).toLocaleString()}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-
-                {/* Net Income After Goals */}
-                <tr className="border-t-2">
-                  <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
-                    กระแสนเงินสดสุทธิหลังเป้าหมาย
-                  </td>
-                  {calculationResults.map((r, i) => {
-                    const style = {}
-                    if (r.netIncomeAfterGoals < 0) {
-                      style.backgroundColor = "#f28b82" // Light red
-                    }
-                    return (
+                    {calculationResults.map((r, i) => (
                       <td
                         key={i}
-                        className="py-2 px-4 border text-center font-ibm font-semibold text-tfpa_blue"
-                        style={style}
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_gold"
+                        style={{ color: "#d4a017" }}
                       >
-                        {r.netIncomeAfterGoals.toLocaleString()}
+                        {r.totalIncome.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </td>
-                    )
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                    ))}
+                  </tr>
 
-          <div className="flex justify-center">
-            <button
-              onClick={handleDashboard}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Dashboard
-            </button>
-          </div>
+                  {/* Expenses */}
+                  <tr>
+                    <td
+                      className="py-2 px-4 border text-lg font-ibm font-bold text-tfpa_blue"
+                      colSpan={1}
+                    >
+                      รายจ่าย
+                    </td>
+                    {calculationResults.map((r, i) => (
+                      <td key={i} className="border"></td>
+                    ))}
+                  </tr>
+                  {expenses.map((exp) => (
+                    <tr key={exp.clientExpenseName}>
+                      <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_blue_panel_select">
+                        {exp.clientExpenseName}
+                      </td>
+                      {calculationResults.map((r, i) => {
+                        const detail = r.expenseDetails.find(
+                          (d) => Object.keys(d)[0] === exp.clientExpenseName
+                        )
+                        const val = detail
+                          ? detail[exp.clientExpenseName]
+                          : "0.00"
+                        return (
+                          <td
+                            key={i}
+                            className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue_panel_select"
+                          >
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                  {/* Total Expense */}
+                  <tr className="border-t-2">
+                    <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
+                      รวมรายจ่าย
+                    </td>
+                    {calculationResults.map((r, i) => (
+                      <td
+                        key={i}
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_gold"
+                        style={{ color: "#d4a017" }}
+                      >
+                        {r.totalExpense.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {/* Net Income */}
+                  <tr className="border-t-2">
+                    <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
+                      กระแสเงินสดสุทธิ
+                    </td>
+                    {calculationResults.map((r, i) => (
+                      <td
+                        key={i}
+                        className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue"
+                      >
+                        {r.netIncome.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {/* Goals */}
+                  {goals.map((goal) => (
+                    <tr key={goal.clientGoalName}>
+                      <td className="py-2 px-4 border text-lg text-red-600 font-ibm font-semibold">
+                        การออมเพื่อเป้าหมาย {goal.clientGoalName}
+                      </td>
+                      {calculationResults.map((r, i) => {
+                        const pay = r.goalPayments.find(
+                          (g) => Object.keys(g)[0] === goal.clientGoalName
+                        )
+                        const val = pay ? pay[goal.clientGoalName] : "0.00"
+                        return (
+                          <td
+                            key={i}
+                            className="py-2 px-4 border text-right text-red-600 font-ibm font-semibold"
+                          >
+                            {Number(val).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+
+                  {/* Net Income After Goals */}
+                  <tr className="border-t-2">
+                    <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
+                      กระแสเงินสดสุทธิหลังเป้าหมาย
+                    </td>
+                    {calculationResults.map((r, i) => {
+                      const style = {}
+                      if (r.netIncomeAfterGoals < 0) {
+                        style.backgroundColor = "#f28b82" // Light red
+                      }
+                      return (
+                        <td
+                          key={i}
+                          className="py-2 px-4 border text-right font-ibm font-semibold text-tfpa_blue"
+                          style={style}
+                        >
+                          {r.netIncomeAfterGoals.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleDashboard}
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded"
+              >
+                Dashboard
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

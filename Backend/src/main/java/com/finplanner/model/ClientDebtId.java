@@ -5,12 +5,16 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Embeddable
 public class ClientDebtId implements Serializable {
 
-    @Column(name = "client_id")
-    private Integer clientId;
+    @Column(name = "client_uuid")
+    @JsonProperty("clientUuid")
+    private UUID clientUuid;
 
     @Column(name = "client_debt_name", length = 100)
     private String clientDebtName;
@@ -20,18 +24,18 @@ public class ClientDebtId implements Serializable {
     }
 
     // Parameterized constructor
-    public ClientDebtId(Integer clientId, String clientDebtName) {
-        this.clientId = clientId;
+    public ClientDebtId(UUID clientUuid, String clientDebtName) {
+        this.clientUuid = clientUuid;
         this.clientDebtName = clientDebtName;
     }
 
     // Getters and Setters
-    public Integer getClientId() {
-        return clientId;
+    public UUID getClientUuid() {
+        return clientUuid;
     }
 
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
     }
 
     public String getClientDebtName() {
@@ -50,12 +54,12 @@ public class ClientDebtId implements Serializable {
         if (o == null || getClass() != o.getClass())
             return false;
         ClientDebtId that = (ClientDebtId) o;
-        return Objects.equals(clientId, that.clientId) &&
+        return Objects.equals(clientUuid, that.clientUuid) &&
                 Objects.equals(clientDebtName, that.clientDebtName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientId, clientDebtName);
+        return Objects.hash(clientUuid, clientDebtName);
     }
 }

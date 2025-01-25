@@ -28,6 +28,7 @@ export default function PlannerLogin() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [formError, setFormError] = useState("")
 
   // Handlers
   const handleEmailChange = (e) => setEmail(e.target.value)
@@ -40,30 +41,33 @@ export default function PlannerLogin() {
   }
 
   const handleLogin = async () => {
+    setFormError("") // Clear any previous error message
     const formData = new FormData()
     formData.append("email", email)
     formData.append("password", password)
 
     try {
-      const response = await fetch("http://localhost:8080/api/cfp/login", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/cfp/login",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
 
-      // Check if the response is okay
       if (response.ok) {
         const data = await response.json()
-        console.log("Login successful:", data) // Log data to check its structure
-        const cfpId = data.cfpId
-        navigate(`/cfp-homepage/${cfpId}`)
+        const cfpUuid = data.cfpUuid
+        localStorage.setItem("cfpUuid", cfpUuid)
+        navigate(`/cfp-homepage/`)
       } else {
         const errorMessage = await response.text()
-        console.error("Error during login:", errorMessage) // Log error message
-        setFormError(errorMessage)
+        console.error("Error during login:", errorMessage)
+        setFormError("อีเมลหรือรหัสผ่านไม่ถูกต้อง") // Set error message in Thai
       }
     } catch (error) {
-      console.error("Fetch error:", error) // Log the error
-      alert(error) // Alert error
+      console.error("Fetch error:", error)
+      setFormError("เกิดข้อผิดพลาดในระบบ กรุณาลองอีกครั้ง") // Set generic error message in Thai
     }
   }
 
@@ -84,6 +88,13 @@ export default function PlannerLogin() {
           <h1 className="text-tfpa_blue font-bold text-3xl px-28 mb-8 uppercase font-ibm">
             เข้าสู่ระบบ
           </h1>
+
+          {/* Display error message if exists */}
+          {formError && (
+            <div className="mb-4 text-red-600 font-ibm text-sm">
+              {formError}
+            </div>
+          )}
 
           {/* Email Input */}
           <div className="relative mb-4">
@@ -129,7 +140,7 @@ export default function PlannerLogin() {
           {/* Login Button */}
           <button
             className="w-full py-4 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white rounded-3xl transition-colors mb-4 font-ibm"
-            onClick={handleLogin} // Call handleLogin on click
+            onClick={handleLogin}
           >
             เข้าสู่ระบบ
           </button>

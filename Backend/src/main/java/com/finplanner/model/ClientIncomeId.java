@@ -5,12 +5,16 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Embeddable
 public class ClientIncomeId implements Serializable {
 
-    @Column(name = "client_id")
-    private Integer clientId;
+    @Column(name = "client_uuid")
+    @JsonProperty("clientUuid")
+    private UUID clientUuid;
 
     @Column(name = "client_income_name", length = 100)
     private String clientIncomeName;
@@ -19,9 +23,9 @@ public class ClientIncomeId implements Serializable {
     public ClientIncomeId() {
     }
 
-    public ClientIncomeId(String clientIncomeName, Integer clientId) {
+    public ClientIncomeId(String clientIncomeName, UUID clientUuid) {
         this.clientIncomeName = clientIncomeName;
-        this.clientId = clientId;
+        this.clientUuid = clientUuid;
     }
 
     // Getters and Setters
@@ -33,12 +37,12 @@ public class ClientIncomeId implements Serializable {
         this.clientIncomeName = clientIncomeName;
     }
 
-    public Integer getClientId() {
-        return clientId;
+    public UUID getClientUuid() {
+        return clientUuid;
     }
 
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
     }
 
     // Override equals() and hashCode()
@@ -50,11 +54,11 @@ public class ClientIncomeId implements Serializable {
             return false;
         ClientIncomeId that = (ClientIncomeId) o;
         return Objects.equals(clientIncomeName, that.clientIncomeName) &&
-                Objects.equals(clientId, that.clientId);
+                Objects.equals(clientUuid, that.clientUuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clientIncomeName, clientId);
+        return Objects.hash(clientIncomeName, clientUuid);
     }
 }

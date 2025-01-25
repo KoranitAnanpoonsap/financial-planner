@@ -1,81 +1,140 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import { useNavigate } from "react-router-dom"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
-import ClientBluePanel from "../components/clientBluePanel"
+import CfpClientSidePanel from "../components/cfpClientSidePanel"
+import { motion } from "framer-motion"
+
+// Define mappings for asset types, invest types, and invest risks
+const assetTypes = [
+  { value: 1, label: "สินทรัพย์สภาพคล่อง" },
+  { value: 2, label: "สินทรัพย์ส่วนตัว" },
+  { value: 3, label: "สินทรัพย์ลงทุนปัจจุบัน" },
+  { value: 4, label: "สินทรัพย์อื่นๆ" },
+]
+
+const investTypes = [
+  { value: 1, label: "หุ้นไทย" },
+  { value: 2, label: "หุ้นต่างประเทศ" },
+  { value: 3, label: "หุ้นกู้" },
+  { value: 4, label: "ตราสารหนี้" },
+  { value: 5, label: "ทองคำ" },
+  { value: 6, label: "เงินฝาก" },
+  { value: 7, label: "การลงทุนอื่นๆ" },
+]
+
+const investRisks = [
+  { value: 1, label: "เสี่ยงสูง" },
+  { value: 2, label: "เสี่ยงปานกลาง" },
+  { value: 3, label: "เสี่ยงต่ำ" },
+]
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 export default function CFPClientAssetPage() {
-  const { clientId, cfpId } = useParams()
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [assets, setAssets] = useState([])
   const [editMode, setEditMode] = useState(false)
   const [editingAsset, setEditingAsset] = useState(null)
 
-  const [assetType, setAssetType] = useState("เลือก")
+  const [assetType, setAssetType] = useState(0) // 0 represents "เลือก"
   const [assetName, setAssetName] = useState("")
   const [assetAmount, setAssetAmount] = useState("")
   const [buyDate, setBuyDate] = useState("") // for personal asset
-  const [investType, setInvestType] = useState("หุ้นไทย") // default for invest asset
-  const [investRisk, setInvestRisk] = useState("เสี่ยงปานกลาง") // default for invest asset
-
-  const assetTypes = [
-    "สินทรัพย์สภาพคล่อง",
-    "สินทรัพย์ส่วนตัว",
-    "สินทรัพย์ลงทุนปัจจุบัน",
-    "สินทรัพย์อื่นๆ",
-  ]
-
-  const investTypes = [
-    "หุ้นไทย",
-    "หุ้นต่างประเทศ",
-    "หุ้นกู้",
-    "ตราสารหนี้",
-    "ทองคำ",
-    "เงินฝาก",
-    "การลงทุนอื่นๆ",
-  ]
-
-  const investRisks = ["เสี่ยงสูง", "เสี่ยงต่ำ", "เสี่ยงปานกลาง"]
+  const [investType, setInvestType] = useState(1) // default for invest asset (หุ้นไทย)
+  const [investRisk, setInvestRisk] = useState(2) // default for invest asset (เสี่ยงปานกลาง)
 
   useEffect(() => {
     fetchAssets()
-  }, [clientId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchAssets = async () => {
-    const res = await fetch(
-      `http://localhost:8080/api/clientassets/${clientId}`
-    )
-    if (!res.ok) {
-      console.error("Failed to fetch assets")
-      return
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}`
+      )
+      if (!res.ok) {
+        console.error("Failed to fetch assets")
+        return
+      }
+      const data = await res.json()
+      setAssets(data)
+    } catch (error) {
+      console.error("Error fetching assets:", error)
     }
-    const data = await res.json()
-    setAssets(data)
+  }
+
+  // Helper functions to get labels from values
+  const getAssetTypeLabel = (typeValue) => {
+    const type = assetTypes.find((t) => t.value === typeValue)
+    return type ? type.label : "ไม่ระบุ"
+  }
+
+  const getInvestTypeLabel = (investTypeValue) => {
+    const invest = investTypes.find((it) => it.value === investTypeValue)
+    return invest ? invest.label : "ไม่ระบุ"
+  }
+
+  const getInvestRiskLabel = (investRiskValue) => {
+    const risk = investRisks.find((ir) => ir.value === investRiskValue)
+    return risk ? risk.label : "ไม่ระบุ"
   }
 
   const handleCreateOrUpdateAsset = async () => {
     const newAsset = {
-      id: {
-        clientId: parseInt(clientId),
-        clientAssetName: assetName,
-      },
+      clientUuid: clientUuid,
+      clientAssetName: assetName,
       clientAssetType: assetType,
       clientAssetAmount: parseFloat(assetAmount),
       // For personal asset
       clientAssetBuyDate: buyDate ? buyDate : null,
       // For invest asset
-      clientAssetInvestType:
-        assetType === "สินทรัพย์ลงทุนปัจจุบัน" ? investType : null,
-      clientAssetInvestRisk:
-        assetType === "สินทรัพย์ลงทุนปัจจุบัน" ? investRisk : null,
+      clientAssetInvestType: assetType === 3 ? investType : null,
+      clientAssetInvestRisk: assetType === 3 ? investRisk : null,
     }
 
-    let url = `http://localhost:8080/api/clientassets`
+    let url = `${import.meta.env.VITE_API_KEY}api/clientassets`
     let method = "POST"
+
     if (editMode && editingAsset) {
-      url = `http://localhost:8080/api/clientassets/${clientId}/${editingAsset.id.clientAssetName}`
-      method = "PUT"
+      const originalName = editingAsset.clientAssetName
+
+      // If the name was changed, delete the old asset and create a new one
+      if (originalName !== assetName) {
+        // Delete the original asset
+        const deleteRes = await fetch(
+          `${
+            import.meta.env.VITE_API_KEY
+          }api/clientassets/${clientUuid}/${originalName}`,
+          { method: "DELETE" }
+        )
+        if (!deleteRes.ok) {
+          console.error("Failed to delete old asset")
+          return
+        }
+
+        // Use POST to create the new asset with the updated name
+        method = "POST"
+      } else {
+        // If the name wasn't changed, just update the asset
+        url = `${
+          import.meta.env.VITE_API_KEY
+        }api/clientassets/${clientUuid}/${originalName}`
+        method = "PUT"
+      }
     }
 
     const res = await fetch(url, {
@@ -91,17 +150,16 @@ export default function CFPClientAssetPage() {
 
     await res.json()
 
-    // Refresh list
+    // Refresh the asset list and reset fields
     await fetchAssets()
-
-    // Reset fields
     resetFields()
   }
 
   const handleDeleteAsset = async (ast) => {
-    const { clientId: cId, clientAssetName } = ast.id
     const res = await fetch(
-      `http://localhost:8080/api/clientassets/${cId}/${clientAssetName}`,
+      `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}/${
+        ast.clientAssetName
+      }`,
       { method: "DELETE" }
     )
     if (!res.ok) {
@@ -117,16 +175,16 @@ export default function CFPClientAssetPage() {
     setEditMode(true)
     setEditingAsset(ast)
     setAssetType(ast.clientAssetType)
-    setAssetName(ast.id.clientAssetName)
+    setAssetName(ast.clientAssetName)
     setAssetAmount(ast.clientAssetAmount.toString())
     setBuyDate(ast.clientAssetBuyDate || "")
 
-    if (ast.clientAssetType === "สินทรัพย์ลงทุนปัจจุบัน") {
-      setInvestType(ast.clientAssetInvestType || "หุ้นไทย")
-      setInvestRisk(ast.clientAssetInvestRisk || "เสี่ยงปานกลาง")
+    if (ast.clientAssetType === 3) {
+      setInvestType(ast.clientAssetInvestType || 1)
+      setInvestRisk(ast.clientAssetInvestRisk || 2)
     } else {
-      setInvestType("หุ้นไทย")
-      setInvestRisk("เสี่ยงปานกลาง")
+      setInvestType(1)
+      setInvestRisk(2)
     }
   }
 
@@ -137,256 +195,296 @@ export default function CFPClientAssetPage() {
   const resetFields = () => {
     setEditMode(false)
     setEditingAsset(null)
-    setAssetType("เลือก")
+    setAssetType(0)
     setAssetName("")
     setAssetAmount("")
     setBuyDate("")
-    setInvestType("หุ้นไทย")
-    setInvestRisk("เสี่ยงปานกลาง")
+    setInvestType(1)
+    setInvestRisk(2)
   }
 
   const handleBack = () => {
     // Navigate back to client expense page
-    navigate(`/${cfpId}/client-expense/${clientId}`)
+    navigate(`/client-expense/`)
   }
 
   const handleNext = () => {
     // navigate to client debt page
-    navigate(`/${cfpId}/client-debt/${clientId}`)
+    navigate(`/client-debt/`)
   }
 
   return (
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-8 space-y-8">
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-info/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 1
               </div>
-              <span className="font-bold">ข้อมูลส่วนตัว</span>
-            </div>
+              <span className="font-bold mt-1">ข้อมูลส่วนตัว</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-income/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
-            </div>
+              <span className="font-bold mt-1">รายได้</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-expense/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
-            </div>
+              <span className="font-bold mt-1">รายจ่าย</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
+            <button
+              onClick={() => navigate(`/client-asset/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
+              <div className="w-10 h-10 bg-tfpa_gold text-white rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold text-tfpa_blue">สินทรัพย์</span>
-            </div>
+              <span className="font-bold text-tfpa_blue mt-1">สินทรัพย์</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-debt/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
-            </div>
+              <span className="font-bold mt-1">หนี้สิน</span>
+            </button>
           </div>
-
-          <h3 className="text-tfpa_blue font-bold text-lg">4. สินทรัพย์</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                ประเภทสินทรัพย์
-              </label>
-              <select
-                value={assetType}
-                onChange={(e) => setAssetType(e.target.value)}
-                className="border rounded p-2 w-full"
-              >
-                <option value="เลือก">เลือก</option>
-                {assetTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-tfpa_blue font-bold mb-2">
-                ชื่อสินทรัพย์
-              </label>
-              <input
-                type="text"
-                value={assetName}
-                onChange={(e) => setAssetName(e.target.value)}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            {assetType !== "เลือก" && (
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h3 className="text-tfpa_blue font-bold text-lg mb-4">
+              4. สินทรัพย์
+            </h3>
+            <div className="space-y-4">
+              {/* Asset Type */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
-                  มูลค่าปัจจุบัน (บาท)
+                  ประเภทสินทรัพย์
                 </label>
-                <input
-                  type="number"
-                  value={assetAmount}
-                  onChange={(e) => setAssetAmount(e.target.value)}
-                  className="border rounded p-2 w-full"
-                />
+                <select
+                  value={assetType}
+                  onChange={(e) => setAssetType(parseInt(e.target.value, 10))}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                >
+                  <option value={0}>เลือก</option>
+                  {assetTypes.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
 
-            {assetType === "สินทรัพย์ส่วนตัว" && (
+              {/* Asset Name */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
-                  วันที่ซื้อสินทรัพย์ (YYYY-MM-DD)
+                  ชื่อสินทรัพย์
                 </label>
                 <input
                   type="text"
-                  value={buyDate}
-                  onChange={(e) => setBuyDate(e.target.value)}
-                  className="border rounded p-2 w-full"
+                  value={assetName}
+                  onChange={(e) => setAssetName(e.target.value)}
+                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 />
               </div>
-            )}
 
-            {assetType === "สินทรัพย์ลงทุนปัจจุบัน" && (
-              <>
+              {/* Asset Amount */}
+              {assetType !== 0 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
-                    ประเภทการลงทุน
+                    มูลค่าปัจจุบัน (บาท)
                   </label>
-                  <select
-                    value={investType}
-                    onChange={(e) => setInvestType(e.target.value)}
-                    className="border rounded p-2 w-full"
-                  >
-                    {investTypes.map((it) => (
-                      <option key={it} value={it}>
-                        {it}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    type="number"
+                    value={assetAmount}
+                    onWheel={(e) => e.target.blur()}
+                    onChange={(e) => setAssetAmount(e.target.value)}
+                    className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                  />
                 </div>
+              )}
 
+              {/* Buy Date for Personal Asset */}
+              {assetType === 2 && (
                 <div>
                   <label className="block text-tfpa_blue font-bold mb-2">
-                    ความเสี่ยงในการลงทุน
+                    วันที่ซื้อสินทรัพย์
                   </label>
-                  <select
-                    value={investRisk}
-                    onChange={(e) => setInvestRisk(e.target.value)}
-                    className="border rounded p-2 w-full"
-                  >
-                    {investRisks.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    type="date"
+                    value={buyDate}
+                    onChange={(e) => setBuyDate(e.target.value)}
+                    className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                    placeholder="mm/dd/yyyy"
+                  />
                 </div>
-              </>
-            )}
+              )}
 
-            <div className="flex space-x-4 mt-4">
-              {editMode ? (
+              {/* Invest Type and Risk for Invest Asset */}
+              {assetType === 3 && (
                 <>
+                  <div>
+                    <label className="block text-tfpa_blue font-bold mb-2">
+                      ประเภทการลงทุน
+                    </label>
+                    <select
+                      value={investType}
+                      onChange={(e) =>
+                        setInvestType(parseInt(e.target.value, 10))
+                      }
+                      className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                    >
+                      {investTypes.map((it) => (
+                        <option key={it.value} value={it.value}>
+                          {it.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-tfpa_blue font-bold mb-2">
+                      ความเสี่ยงในการลงทุน
+                    </label>
+                    <select
+                      value={investRisk}
+                      onChange={(e) =>
+                        setInvestRisk(parseInt(e.target.value, 10))
+                      }
+                      className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                    >
+                      {investRisks.map((ir) => (
+                        <option key={ir.value} value={ir.value}>
+                          {ir.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4 mt-4">
+                {editMode ? (
+                  <>
+                    <button
+                      onClick={handleCreateOrUpdateAsset}
+                      className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded font-ibm font-bold"
+                    >
+                      แก้ไข
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+                    >
+                      ยกเลิก
+                    </button>
+                  </>
+                ) : (
                   <button
                     onClick={handleCreateOrUpdateAsset}
-                    className="bg-red-500 text-white px-4 py-2 rounded font-ibm font-bold"
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-ibm font-bold"
                   >
-                    แก้ไข
+                    เพิ่ม
                   </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
-                  >
-                    ยกเลิก
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleCreateOrUpdateAsset}
-                  className="bg-green-500 text-white px-4 py-2 rounded font-ibm font-bold"
-                >
-                  เพิ่ม
-                </button>
-              )}
+                )}
+              </div>
             </div>
-          </div>
 
-          <h3 className="text-tfpa_blue font-bold text-lg">
-            สินทรัพย์ที่มีอยู่
-          </h3>
-          <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ประเภทสินทรัพย์
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  ชื่อสินทรัพย์
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  มูลค่าปัจจุบัน (บาท)
-                </th>
-                <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
-                  จัดการ
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {assets.map((ast) => (
-                <tr key={`${ast.id.clientId}-${ast.id.clientAssetName}`}>
-                  <td className="py-2 px-4 border">{ast.clientAssetType}</td>
-                  <td className="py-2 px-4 border">{ast.id.clientAssetName}</td>
-                  <td className="py-2 px-4 border text-right">
-                    {ast.clientAssetAmount.toLocaleString()}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    <div className="flex space-x-4">
-                      <button
-                        onClick={() => handleEdit(ast)}
-                        className="bg-blue-500 text-white px-4 py-1 rounded font-ibm"
-                      >
-                        แก้ไข
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAsset(ast)}
-                        className="bg-red-500 text-white px-4 py-1 rounded font-ibm"
-                      >
-                        ลบ
-                      </button>
-                    </div>
-                  </td>
+            {/* Existing Assets Table */}
+            <h3 className="text-tfpa_blue font-bold text-lg mt-4">
+              สินทรัพย์ที่มีอยู่
+            </h3>
+            <table className="min-w-full bg-white border border-gray-300 mt-4 mb-4">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ประเภทสินทรัพย์
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    ชื่อสินทรัพย์
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    มูลค่าปัจจุบัน (บาท)
+                  </th>
+                  <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                    จัดการ
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {assets.map((ast) => (
+                  <tr key={`${ast.clientUuid}-${ast.clientAssetName}`}>
+                    <td className="py-2 px-4 border">
+                      {getAssetTypeLabel(ast.clientAssetType)}
+                    </td>
+                    <td className="py-2 px-4 border">{ast.clientAssetName}</td>
+                    <td className="py-2 px-4 border text-right">
+                      {ast.clientAssetAmount.toLocaleString()}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => handleEdit(ast)}
+                          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-1 rounded font-ibm"
+                        >
+                          แก้ไข
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAsset(ast)}
+                          className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded font-ibm"
+                        >
+                          ลบ
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-          <div className="flex justify-between">
-            <button
-              onClick={handleBack}
-              className="bg-gray-300 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
-            >
-              กลับ
-            </button>
-            <button
-              onClick={handleNext}
-              className="bg-blue-500 text-white px-4 py-2 rounded font-ibm font-bold"
-            >
-              ถัดไป
-            </button>
-          </div>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
+              <button
+                onClick={handleBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+              >
+                กลับ
+              </button>
+              <button
+                onClick={handleNext}
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-ibm font-bold"
+              >
+                ถัดไป
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

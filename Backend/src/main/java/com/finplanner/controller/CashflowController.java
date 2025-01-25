@@ -1,7 +1,6 @@
 package com.finplanner.controller;
 
 import com.finplanner.model.CashflowGoal;
-import com.finplanner.model.CashflowGoalId;
 import com.finplanner.repository.CashflowGoalRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cashflow")
@@ -18,9 +18,10 @@ public class CashflowController {
     private CashflowGoalRepository cashflowGoalRepository;
 
     // Get all goals for a given clientId
-    @GetMapping("/{clientId}")
-    public List<CashflowGoal> getGoalsByClientId(@PathVariable("clientId") Integer clientId) {
-        return cashflowGoalRepository.findById_ClientId(clientId);
+    @GetMapping("/{clientUuid}")
+    public List<CashflowGoal> getGoalsByClientId(@PathVariable String clientUuid) {
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return cashflowGoalRepository.findByClientUuid(uuid);
     }
 
     // Create a new goal record
@@ -31,26 +32,29 @@ public class CashflowController {
     }
 
     // Delete a goal by clientId and clientGoalName
-    @DeleteMapping("/{clientId}/{clientGoalName}")
-    public ResponseEntity<Void> deleteGoal(@PathVariable("clientId") Integer clientId,
+    @DeleteMapping("/{clientUuid}/{clientGoalName}")
+    public ResponseEntity<Object> deleteGoal(@PathVariable String clientUuid,
             @PathVariable("clientGoalName") String clientGoalName) {
-        CashflowGoalId id = new CashflowGoalId(clientId, clientGoalName);
-        cashflowGoalRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return cashflowGoalRepository.findByClientUuidAndClientGoalName(uuid, clientGoalName)
+                .map(existing -> {
+                    cashflowGoalRepository.delete(existing);
+                    return ResponseEntity.noContent().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // Update a goal by clientId and clientGoalName
-    @PutMapping("/{clientId}/{clientGoalName}")
-    public ResponseEntity<CashflowGoal> updateGoal(@PathVariable("clientId") Integer clientId,
+    @PutMapping("/{clientUuid}/{clientGoalName}")
+    public ResponseEntity<CashflowGoal> updateGoal(@PathVariable String clientUuid,
             @PathVariable("clientGoalName") String clientGoalName,
             @RequestBody CashflowGoal updatedGoal) {
-        CashflowGoalId id = new CashflowGoalId(clientId, clientGoalName);
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
 
-        return cashflowGoalRepository.findById(id)
+        return cashflowGoalRepository.findByClientUuidAndClientGoalName(uuid, clientGoalName)
                 .map(existingGoal -> {
                     // Update the fields as needed. Assuming the PUT request provides all fields:
                     existingGoal.setClientGoalPeriod(updatedGoal.getClientGoalPeriod());
-                    existingGoal.setClientSavingGrowth(updatedGoal.getClientSavingGrowth());
                     existingGoal.setClientGoalValue(updatedGoal.getClientGoalValue());
                     // Save the updated entity
                     CashflowGoal savedGoal = cashflowGoalRepository.save(existingGoal);

@@ -1,5 +1,7 @@
 package com.finplanner.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -7,12 +9,12 @@ import jakarta.persistence.*;
 public class RetirementGoal {
 
     @Id
-    private Integer clientId; // This matches ClientInfo's primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "retirement_goal_id", insertable = false, updatable = false)
+    private Integer reitrementGoalId;
 
-    @MapsId("clientId") // This tells JPA that clientId in TaxPlan maps to ClientInfo's primary key
-    @OneToOne
-    @JoinColumn(name = "client_id", referencedColumnName = "client_id")
-    private ClientInfo clientInfo;
+    @Column(name = "client_uuid", columnDefinition = "uuid")
+    private UUID clientUuid; // This matches ClientInfo's uuid
 
     @Column(name = "client_current_age", nullable = false)
     private Integer clientCurrentAge;
@@ -37,12 +39,20 @@ public class RetirementGoal {
 
     // Getters and Setters
 
-    public Integer getClientId() {
-        return clientId;
+    public Integer getRetirementGoalId() {
+        return reitrementGoalId;
     }
 
-    public void setClientId(Integer clientId) {
-        this.clientId = clientId;
+    public void setRetirementGoalId(Integer reitrementGoalId) {
+        this.reitrementGoalId = reitrementGoalId;
+    }
+
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
     }
 
     public Integer getClientCurrentAge() {

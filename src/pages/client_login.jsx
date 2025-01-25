@@ -25,28 +25,56 @@ const pageTransition = {
 
 export default function ClientLogin() {
   const navigate = useNavigate()
-
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [formError, setFormError] = useState("")
 
   // Handlers
   const handleEmailChange = (e) => setEmail(e.target.value)
   const handlePasswordChange = (e) => setPassword(e.target.value)
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
 
-  // Navigation handlers
+  const handleLogin = async () => {
+    setFormError("") // Clear any previous error message
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
+
+    try {
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/clients/login",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        const clientId = data.clientId
+        navigate(`/client-homepage/${clientId}`)
+      } else {
+        const errorMessage = await response.text()
+        console.error("Error during login:", errorMessage)
+        setFormError("อีเมลหรือรหัสผ่านไม่ถูกต้อง") // Set error message in Thai
+      }
+    } catch (error) {
+      console.error("Fetch error:", error)
+      setFormError("เกิดข้อผิดพลาดในระบบ กรุณาลองอีกครั้ง") // Set generic error message in Thai
+    }
+  }
+
+  const handleBack = () => {
+    navigate("/")
+  }
+
   const handleRegister = () => {
     navigate("/register")
   }
 
   const handleHomePage = () => {
     navigate("/homepage")
-  }
-
-  // Back button handler
-  const handleBack = () => {
-    navigate("/")
   }
 
   return (
@@ -59,15 +87,19 @@ export default function ClientLogin() {
         transition={pageTransition}
       >
         <div
-          className="bg-white rounded-[25px] p-10 shadow-lg max-w-md w-max text-center"
+          className="bg-white rounded-[25px] p-10 shadow-lg max-w-md w-full text-center"
           style={{ marginTop: "-50px" }}
         >
-          {/* Login Title */}
           <h1 className="text-tfpa_blue font-bold text-3xl px-28 mb-8 uppercase font-ibm">
             เข้าสู่ระบบ
           </h1>
 
-          {/* Email Input */}
+          {formError && (
+            <div className="mb-4 text-red-600 font-ibm text-sm">
+              {formError}
+            </div>
+          )}
+
           <div className="relative mb-4">
             <img
               src={emailIcon}
@@ -83,7 +115,6 @@ export default function ClientLogin() {
             />
           </div>
 
-          {/* Password Input */}
           <div className="relative mb-4">
             <img
               src={passwordIcon}
@@ -108,10 +139,9 @@ export default function ClientLogin() {
             </button>
           </div>
 
-          {/* Login Button */}
           <button
             className="w-full py-4 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white rounded-3xl transition-colors mb-4 font-ibm"
-            onClick={() => navigate("/homepage")} // Placeholder for future DB check
+            onClick={handleLogin}
           >
             เข้าสู่ระบบ
           </button>
@@ -134,7 +164,6 @@ export default function ClientLogin() {
             </div>
           </div>
 
-          {/* Back Button */}
           <button
             onClick={handleBack}
             className="mt-4 px-5 py-2 bg-gray-200 rounded-3xl text-tfpa_blue font-ibm transition-colors duration-300 hover:bg-gray-300"

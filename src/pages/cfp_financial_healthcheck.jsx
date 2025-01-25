@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
-import ClientBluePanel from "../components/clientBluePanel"
+import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { computeVariables, computeRatios } from "../utils/calculations"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 function FractionDisplay({ topLabel, bottomLabel }) {
   // If value is numeric zero, we show "-" else show the formatted number
@@ -18,7 +30,7 @@ function FractionDisplay({ topLabel, bottomLabel }) {
 }
 
 export default function CFPFinancialHealthCheck() {
-  const { clientId, cfpId } = useParams()
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
 
   const [ratios, setRatios] = useState({
     liquidity: 0,
@@ -53,26 +65,26 @@ export default function CFPFinancialHealthCheck() {
 
   useEffect(() => {
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchData = async () => {
     const incomeRes = await fetch(
-      `http://localhost:8080/api/clientincome/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
     )
     const incomes = await incomeRes.json()
 
     const expenseRes = await fetch(
-      `http://localhost:8080/api/clientexpense/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`
     )
     const expenses = await expenseRes.json()
 
     const assetRes = await fetch(
-      `http://localhost:8080/api/clientassets/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientassets/${clientUuid}`
     )
     const assets = await assetRes.json()
 
     const debtRes = await fetch(
-      `http://localhost:8080/api/clientdebt/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clientdebt/${clientUuid}`
     )
     const debts = await debtRes.json()
 
@@ -242,71 +254,76 @@ export default function CFPFinancialHealthCheck() {
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-8 space-y-8">
-          <h2 className="text-xl font-bold text-tfpa_blue">
-            ตรวจสุขภาพทางการเงิน
-          </h2>
-          <table
-            className="min-w-full border-collapse font-bold"
-            style={{ borderCollapse: "collapse" }}
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
           >
-            <thead>
-              <tr className="text-tfpa_blue font-bold text-2xl">
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  อัตราส่วน
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  วิธีการคำนวณ
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  การคำนวณ
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2">
-                  ผลลัพธ์
-                </th>
-                <th className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
-                  มาตรฐาน
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => {
-                const colorClass = getResultColor(r.result, r.check)
-                return (
-                  <tr key={i} className="text-tfpa_blue">
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      {r.name}
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      <FractionDisplay
-                        topLabel={r.calcTop}
-                        bottomLabel={r.calcBottom}
-                      />
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2">
-                      <FractionDisplay
-                        topLabel={
-                          r.valTop === 0 ? 0 : r.valTop.toLocaleString()
-                        }
-                        bottomLabel={
-                          r.valBottom === 0 ? 0 : r.valBottom.toLocaleString()
-                        }
-                      />
-                    </td>
-                    <td
-                      className={`border-dotted border-b border-gray-300 p-2 ${colorClass}`}
-                    >
-                      {r.result.toFixed(2)} {r.unit}
-                    </td>
-                    <td className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
-                      {r.standard}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+            <table
+              className="min-w-full border-collapse font-bold"
+              style={{ borderCollapse: "collapse" }}
+            >
+              <thead>
+                <tr className="text-tfpa_blue font-bold text-2xl">
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    อัตราส่วน
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    วิธีการคำนวณ
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    การคำนวณ
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2">
+                    ผลลัพธ์
+                  </th>
+                  <th className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
+                    มาตรฐาน
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => {
+                  const colorClass = getResultColor(r.result, r.check)
+                  return (
+                    <tr key={i} className="text-tfpa_blue">
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        {r.name}
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        <FractionDisplay
+                          topLabel={r.calcTop}
+                          bottomLabel={r.calcBottom}
+                        />
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2">
+                        <FractionDisplay
+                          topLabel={
+                            r.valTop === 0 ? 0 : r.valTop.toLocaleString()
+                          }
+                          bottomLabel={
+                            r.valBottom === 0 ? 0 : r.valBottom.toLocaleString()
+                          }
+                        />
+                      </td>
+                      <td
+                        className={`border-dotted border-b border-gray-300 p-2 ${colorClass}`}
+                      >
+                        {r.result.toFixed(2)} {r.unit}
+                      </td>
+                      <td className="border-dotted border-b border-gray-300 p-2 text-tfpa_gold">
+                        {r.standard}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </motion.div>
         </div>
       </div>
       <Footer />

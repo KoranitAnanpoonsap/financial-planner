@@ -18,24 +18,52 @@ const pageVariants = {
 }
 
 const pageTransition = {
-  type: "tween", // Smooth tweening for more fluid motion
-  ease: "easeInOut", // Easing function for a smoother transition
-  duration: 0.3, // Longer duration for a more relaxed effect
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
 }
 
 export default function AdminLogin() {
   const navigate = useNavigate()
-
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [formError, setFormError] = useState("")
 
-  // Handlers
   const handleEmailChange = (e) => setEmail(e.target.value)
   const handlePasswordChange = (e) => setPassword(e.target.value)
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
 
-  // Back button handler
+  const handleLogin = async () => {
+    setFormError("")
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
+
+    try {
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/admins/login",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        const adminEmail = data.adminEmail
+        navigate(`/admin-homepage/${adminEmail}`)
+      } else {
+        const errorMessage = await response.text()
+        console.error("Error during login:", errorMessage)
+        setFormError("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
+      }
+    } catch (error) {
+      console.error("Fetch error:", error)
+      setFormError("เกิดข้อผิดพลาดในระบบ กรุณาลองอีกครั้ง")
+    }
+  }
+
   const handleBack = () => {
     navigate("/")
   }
@@ -53,12 +81,16 @@ export default function AdminLogin() {
           className="bg-white rounded-[25px] p-10 shadow-lg max-w-md w-full text-center"
           style={{ marginTop: "-50px" }}
         >
-          {/* Login Title */}
           <h1 className="text-tfpa_blue font-bold text-3xl px-28 mb-8 uppercase font-ibm">
             เข้าสู่ระบบ
           </h1>
 
-          {/* Email Input */}
+          {formError && (
+            <div className="mb-4 text-red-600 font-ibm text-sm">
+              {formError}
+            </div>
+          )}
+
           <div className="relative mb-4">
             <img
               src={emailIcon}
@@ -74,7 +106,6 @@ export default function AdminLogin() {
             />
           </div>
 
-          {/* Password Input */}
           <div className="relative mb-4">
             <img
               src={passwordIcon}
@@ -99,15 +130,13 @@ export default function AdminLogin() {
             </button>
           </div>
 
-          {/* Login Button */}
           <button
             className="w-full py-4 bg-tfpa_blue hover:bg-tfpa_blue_hover text-white rounded-3xl transition-colors mb-4 font-ibm"
-            onClick={() => navigate("/homepage")}
+            onClick={handleLogin}
           >
             เข้าสู่ระบบ
           </button>
 
-          {/* Back Button */}
           <button
             onClick={handleBack}
             className="mt-4 px-5 py-2 bg-gray-200 rounded-3xl text-tfpa_blue font-ibm transition-colors duration-300 hover:bg-gray-300"

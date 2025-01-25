@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams, useLocation } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 import personIcon from "../assets/person.png"
 import personListIcon from "../assets/personlist.png"
@@ -7,94 +7,109 @@ import newIcon from "../assets/new.png"
 import loadingIcon from "../assets/loading.png"
 import checkIcon from "../assets/check.png"
 
-export default function ClientBluePanel() {
-  const { clientId } = useParams()
-  const { cfpId } = useParams()
+const pageVariants = {
+  initial: {
+    opacity: 0,
+  },
+  in: {
+    opacity: 1,
+  },
+  out: {
+    opacity: 1,
+  },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3,
+}
+
+export default function CfpSidePanel() {
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [clientFullName, setClientFullName] = useState("")
-  const [clientFormatId, setClientFormatId] = useState("")
+  const [clientFullName, setClientFullName] = useState(
+    localStorage.getItem("clientFullName") || ""
+  )
+  const [clientFormatId, setClientFormatId] = useState(
+    localStorage.getItem("clientFormatId") || ""
+  )
 
   useEffect(() => {
     const fetchClientDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/clients/${clientId}`
+          `${import.meta.env.VITE_API_KEY}api/clients/${clientUuid}`
         )
         if (!response.ok) {
           throw new Error("Network response was not ok")
         }
         const clientData = await response.json()
-        setClientFullName(
-          `${clientData.clientFirstName} ${clientData.clientLastName}`
-        )
-        setClientFormatId(clientData.clientFormatId)
+        const fullName = `${clientData.clientFirstName} ${clientData.clientLastName}`
+        const formatId = clientData.clientFormatId
+
+        setClientFullName(fullName)
+        setClientFormatId(formatId)
+
+        // Update localStorage
+        localStorage.setItem("clientFullName", fullName)
+        localStorage.setItem("clientFormatId", formatId)
       } catch (error) {
         console.error("Error fetching client details:", error)
       }
     }
 
     fetchClientDetails()
-  }, [clientId])
+  }, [clientUuid]) // Only re-run the effect when clientId changes
 
-  // Define menu items with multiple routes per item if needed
+  const currentPath = location.pathname
+
   const menuItems = [
     {
       label: "ข้อมูลลูกค้า",
       icon: personListIcon,
-      // Suppose these pages also count as "client-info" pages
       routes: [
-        `/${cfpId}/client-info/${clientId}`,
-        `/${cfpId}/client-income/${clientId}`,
-        `/${cfpId}/client-expense/${clientId}`,
-        `/${cfpId}/client-asset/${clientId}`,
-        `/${cfpId}/client-debt/${clientId}`,
+        `/client-info/`,
+        `/client-income/`,
+        `/client-expense/`,
+        `/client-asset/`,
+        `/client-debt/`,
       ],
     },
     {
       label: "พอร์ตการลงทุน",
       icon: newIcon,
-      routes: [
-        `/${cfpId}/portfolio-selection/${clientId}`,
-        `/${cfpId}/portfolio-chart/${clientId}`, // highlight also on chart page
-      ],
+      routes: [`/portfolio-selection/`, `/portfolio-chart/`],
     },
     {
-      label: "การวางแผนเป้าหมายเดียว",
+      label: "การคำนวณเป้าหมาย",
       icon: loadingIcon,
       routes: [
-        `/${cfpId}/goal-base/${clientId}`,
-        `/${cfpId}/goal-base-calculated/${clientId}`,
-        `/${cfpId}/retirement-goal/${clientId}`,
-        `/${cfpId}/retirement-goal-calculated/${clientId}`,
+        `/goal-base/`,
+        `/goal-base-calculated/`,
+        `/goal-base-dashboard/`,
+        `/retirement-goal/`,
+        `/retirement-goal-calculated/`,
       ],
     },
     {
       label: "การวางแผนหลายเป้าหมาย",
       icon: checkIcon,
-      routes: [
-        `/${cfpId}/cashflow-base/${clientId}`,
-        `/${cfpId}/cashflow-base-calculated/${clientId}`, // also highlight on calculated page
-      ],
+      routes: [`/cashflow-base/`, `/cashflow-base-calculated/`],
     },
     {
       label: "ตรวจสุขภาพทางการเงิน",
       icon: checkIcon,
-      routes: [`/${cfpId}/financial-healthcheck/${clientId}`],
+      routes: [`/financial-healthcheck/`],
     },
     {
       label: "การคำนวณภาษี",
       icon: checkIcon,
-      routes: [
-        `/${cfpId}/tax-income/${clientId}`,
-        `/${cfpId}/tax-deduction/${clientId}`,
-        `/${cfpId}/tax-calculation/${clientId}`,
-      ],
+      routes: [`/tax-income/`, `/tax-deduction/`, `/tax-calculation/`],
     },
   ]
-
-  const currentPath = location.pathname
 
   return (
     <div className="bg-tfpa_blue w-60 p-1 flex flex-col text-white">
@@ -109,17 +124,15 @@ export default function ClientBluePanel() {
           </div>
         </div>
       </div>
-      {/* Menu items */}
       <div className="flex flex-col space-y-2">
         {menuItems.map((item) => {
-          // Check if currentPath starts with or includes any route in item.routes
           const isActive = item.routes.some((route) =>
             currentPath.startsWith(route)
           )
           return (
             <button
               key={item.label}
-              onClick={() => navigate(item.routes[0])} // navigate to the first route in the array
+              onClick={() => navigate(item.routes[0])}
               className={`flex items-center space-x-2 px-2 py-2 rounded-2xl ${
                 isActive
                   ? "bg-tfpa_blue_panel_select"

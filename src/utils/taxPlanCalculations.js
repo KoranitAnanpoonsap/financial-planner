@@ -1,4 +1,4 @@
-export async function fetchAndCalculateTaxForClient(clientUuid) {
+export async function fetchAndCalculateTaxPlanForClient(clientUuid, totalPlan) {
   // Fetch incomes
   const incomesRes = await fetch(
     `${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`
@@ -15,10 +15,10 @@ export async function fetchAndCalculateTaxForClient(clientUuid) {
     tdData = await tdRes.json()
   }
 
-  return calculateTaxForClient(incomesData, tdData)
+  return calculateTaxPlanForClient(incomesData, tdData, totalPlan)
 }
 
-export function calculateTaxForClient(incomes, td) {
+export function calculateTaxPlanForClient(incomes, td, totalPlan) {
   // 1) Adjust incomes to yearly if frequency == "ทุกเดือน".
   const adjustedIncomes = incomes.map((inc) => {
     // If income is monthly, multiply by 12
@@ -27,6 +27,7 @@ export function calculateTaxForClient(incomes, td) {
     }
     return inc
   })
+
 
   // 2) Calculate total income
   const totalIncome = adjustedIncomes.reduce(
@@ -237,13 +238,11 @@ export function calculateTaxForClient(incomes, td) {
     totalTaxDeductions += td.generalDonation
     totalTaxDeductions += td.eduDonation * 2
     totalTaxDeductions += td.politicalPartyDonation
+    totalTaxDeductions += totalPlan
 
     let portion_pensionIns = 0
     if (td.lifeInsurance + td.healthInsurance < 100000) {
-      if (
-        100000 - (td.lifeInsurance + td.healthInsurance) >
-        td.pensionInsurance
-      ) {
+      if (100000 - (td.lifeInsurance + td.healthInsurance) > td.pensionInsurance) {
         portion_pensionIns = td.pensionInsurance
       } else {
         portion_pensionIns = 100000 - (td.lifeInsurance + td.healthInsurance)
@@ -253,24 +252,6 @@ export function calculateTaxForClient(incomes, td) {
     }
 
     totalTaxDeductions += portion_pensionIns
-
-    let newPensionIns = Math.min(
-      td.pensionInsurance - portion_pensionIns,
-      0.15 * totalIncome,
-      200000
-    )
-
-    // Check pension group sum limit of 500,000
-    const pensionGroupSum = Math.min(
-      newPensionIns +
-        td.rmf +
-        td.ssf +
-        td.govPensionFund +
-        td.pvd +
-        td.nationSavingsFund,
-      500000
-    )
-    totalTaxDeductions += pensionGroupSum
   }
 
   // income after deductions

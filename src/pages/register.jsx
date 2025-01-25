@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import InputField from "../components/inputField.jsx"
-import RadioButtonGroup from "../components/radioButtonGroup.jsx"
-import DateInput from "../components/dateInput.jsx"
-import FileUpload from "../components/fileUpload.jsx"
+import InputField from "../components/registertInputField.jsx"
+import RadioButtonGroup from "../components/registerRadioButtonGroup.jsx"
+import DateInput from "../components/registerDateInput.jsx"
 import Footer from "../components/footer.jsx"
 import Header from "../components/headerLogin.jsx"
 import { motion } from "framer-motion"
@@ -101,23 +100,35 @@ export default function RegisterPage() {
   }
 
   const handleConfirmPrivacy = async () => {
+    if (!acceptedPrivacy) {
+      setFormError("คุณต้องยอมรับข้อกำหนดและเงื่อนไขก่อน")
+      return
+    }
+
     // User confirmed privacy, now proceed with register
-    const formData = new FormData()
-    formData.append("email", email)
-    formData.append("password", password)
-    formData.append("nationalId", idNumber)
-    formData.append("title", title)
-    formData.append("firstName", firstName)
-    formData.append("lastName", lastName)
-    formData.append("gender", gender)
-    formData.append("phoneNumber", phone)
-    formData.append("dateOfBirth", birthdate)
+    const payload = {
+      clientEmail: email,
+      clientPassword: password,
+      clientNationalId: idNumber,
+      clientTitle: title,
+      clientFirstName: firstName,
+      clientLastName: lastName,
+      clientGender: gender,
+      clientPhoneNumber: phone,
+      clientDateOfBirth: birthdate, // Ensure it's in 'YYYY-MM-DD' format
+    }
 
     try {
-      const response = await fetch("http://localhost:8080/api/register", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await fetch(
+        import.meta.env.VITE_API_KEY + "api/clients",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      )
 
       if (response.ok) {
         navigate("/client-login")
@@ -128,6 +139,10 @@ export default function RegisterPage() {
     } catch (error) {
       setFormError("เกิดข้อผิดพลาดในการลงทะเบียน")
     }
+  }
+
+  const handleClosePrivacyModal = () => {
+    setShowPrivacyModal(false)
   }
 
   return (
@@ -171,10 +186,8 @@ export default function RegisterPage() {
               />
               <button
                 type="button"
-                onMouseDown={togglePasswordVisibility}
-                onMouseUp={togglePasswordVisibility}
-                onMouseLeave={() => setShowPassword(false)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-ibm"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
               >
                 {showPassword ? "ซ่อน" : "แสดง"}
               </button>
@@ -193,10 +206,8 @@ export default function RegisterPage() {
               />
               <button
                 type="button"
-                onMouseDown={toggleConfirmPasswordVisibility}
-                onMouseUp={toggleConfirmPasswordVisibility}
-                onMouseLeave={() => setShowConfirmPassword(false)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-ibm"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
               >
                 {showConfirmPassword ? "ซ่อน" : "แสดง"}
               </button>
@@ -344,7 +355,14 @@ export default function RegisterPage() {
                 ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขทั้งหมด
               </span>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={handleClosePrivacyModal}
+                className="px-4 py-2 rounded font-bold bg-gray-300 text-gray-700"
+              >
+                ปิด
+              </button>
               <button
                 disabled={!acceptedPrivacy}
                 onClick={handleConfirmPrivacy}

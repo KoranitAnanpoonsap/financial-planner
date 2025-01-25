@@ -17,7 +17,6 @@ public class ClientInfoDTO {
     private String clientGender;
     private String clientPhoneNumber;
     private LocalDate clientDateOfBirth;
-    private String pdpa;
 
     public Integer getClientId() {
         return clientId;
@@ -121,13 +120,5 @@ public class ClientInfoDTO {
 
     public void setClientDateOfBirth(LocalDate clientDateOfBirth) {
         this.clientDateOfBirth = clientDateOfBirth;
-    }
-
-    public String getPdpa() {
-        return pdpa;
-    }
-
-    public void setPdpa(String pdpa) {
-        this.pdpa = pdpa;
     }
 }

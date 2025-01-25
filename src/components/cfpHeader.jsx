@@ -1,42 +1,51 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import logo from "../assets/TFPA_logo.png"
 
 export default function Header() {
-  const [cfpFirstName, setCfpFirstName] = useState("")
+  const [cfpFirstName, setCfpFirstName] = useState(
+    localStorage.getItem("cfpFirstName") || ""
+  )
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const { cfpId } = useParams()
+  const [cfpUuid] = useState(localStorage.getItem("cfpUuid") || "")
   const navigate = useNavigate()
 
-  // Fetch CFP first name based on cfpId
+  // Fetch CFP first name based on cfpUuid only if not already stored
   useEffect(() => {
     const fetchCfpInfo = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/api/cfp/${cfpId}`)
-        if (!response.ok) {
-          throw new Error("Error fetching CFP information")
-        }
+      if (!cfpFirstName) {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_KEY}api/cfp/${cfpUuid}`
+          )
+          if (!response.ok) {
+            throw new Error("Error fetching CFP information")
+          }
 
-        const firstName = await response.text()
-        setCfpFirstName(firstName)
-      } catch (error) {
-        console.error("Error fetching CFP info:", error)
+          const firstName = await response.text()
+          setCfpFirstName(firstName)
+          localStorage.setItem("cfpFirstName", firstName) // Store in localStorage
+        } catch (error) {
+          console.error("Error fetching CFP info:", error)
+        }
       }
     }
 
     fetchCfpInfo()
-  }, [cfpId])
+  }, [cfpUuid, cfpFirstName])
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen)
   }
 
   const handleHomePage = () => {
-    navigate(`/cfp-homepage/${cfpId}`)
+    navigate(`/cfp-homepage/`)
   }
 
   const handleLogout = () => {
-    // Implement logout logic if needed (e.g., clear tokens)
+    // Clear data on logout
+    localStorage.removeItem("cfpFirstName")
+    setCfpFirstName("")
     navigate("/")
   }
 

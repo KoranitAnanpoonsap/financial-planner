@@ -1,16 +1,26 @@
 package com.finplanner.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "cfp_client_portfolio_assets")
 public class CfpClientPortfolioAssets {
 
-    @EmbeddedId
-    private CfpClientPortfolioAssetsId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cfp_client_portfolio_assets_id", insertable = false, updatable = false)
+    private Integer cfpClientPortfolioAssetsId;
 
-    @Column(name = "invest_type", nullable = false, length = 25)
-    private String investType;
+    @Column(name = "client_uuid", nullable = false)
+    private UUID clientUuid;
+
+    @Column(name = "invest_name", length = 100, nullable = false)
+    private String investName;
+
+    @Column(name = "invest_type", nullable = false)
+    private Integer investType;
 
     @Column(name = "invest_amount", nullable = false)
     private Integer investAmount;
@@ -19,19 +29,35 @@ public class CfpClientPortfolioAssets {
     private Float yearlyReturn;
 
     // Getters and Setters
-    public CfpClientPortfolioAssetsId getId() {
-        return id;
+    public Integer getCfpClientPortfolioAssetsId() {
+        return cfpClientPortfolioAssetsId;
     }
 
-    public void setId(CfpClientPortfolioAssetsId id) {
-        this.id = id;
+    public void setCfpClientPortfolioAssetsId(Integer cfpClientPortfolioAssetsId) {
+        this.cfpClientPortfolioAssetsId = cfpClientPortfolioAssetsId;
     }
 
-    public String getInvestType() {
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
+    }
+
+    public String getInvestName() {
+        return investName;
+    }
+
+    public void setInvestName(String investName) {
+        this.investName = investName;
+    }
+
+    public Integer getInvestType() {
         return investType;
     }
 
-    public void setInvestType(String investType) {
+    public void setInvestType(Integer investType) {
         this.investType = investType;
     }
 

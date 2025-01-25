@@ -25,13 +25,23 @@ export function calculateYearlyIncome(incomes, year) {
   const details = []
   for (const income of incomes) {
     let amount = income.clientIncomeAmount
-    if (income.clientIncomeFrequency === "ทุกเดือน") {
+
+    // If frequency is monthly, multiply by 12 to get annual amount
+    if (income.clientIncomeFrequency === 1) {
       amount *= 12
+    } else if (income.clientIncomeFrequency === 3) {
+      // If frequency is lump-sum, only year 1 has the income; other years are 0
+      amount = year === 1 ? amount : 0
     }
-    for (let y = 1; y < year; y++) {
-      amount = amount * (1 + income.clientIncomeAnnualGrowthRate)
+
+    // Apply annual growth rate for years beyond the first year
+    if (year > 1 && income.clientIncomeFrequency !== 3) {
+      for (let y = 1; y < year; y++) {
+        amount *= (1 + income.clientIncomeAnnualGrowthRate)
+      }
     }
-    details.push({ [income.id.clientIncomeName]: amount.toFixed(2) })
+
+    details.push({ [income.clientIncomeName]: amount.toFixed(2) })
   }
   return details
 }
@@ -40,23 +50,37 @@ export function calculateYearlyExpense(expenses, year) {
   const details = []
   for (const expense of expenses) {
     let amount = expense.clientExpenseAmount
-    if (expense.clientExpenseFrequency === "ทุกเดือน") {
+
+    // If frequency is monthly, multiply by 12 to get annual amount
+    if (expense.clientExpenseFrequency === 1) {
       amount *= 12
+    } else if (expense.clientExpenseFrequency === 3) {
+      // If frequency is lump-sum, only year 1 has the expense; other years are 0
+      amount = year === 1 ? amount : 0
     }
-    for (let y = 1; y < year; y++) {
-      amount = amount * (1 + expense.clientExpenseAnnualGrowthRate)
+
+    // Apply annual growth rate for years beyond the first year
+    if (year > 1 && expense.clientExpenseFrequency !== 3) {
+      for (let y = 1; y < year; y++) {
+        amount *= (1 + expense.clientExpenseAnnualGrowthRate)
+      }
     }
-    details.push({ [expense.id.clientExpenseName]: amount.toFixed(2) })
+
+    details.push({ [expense.clientExpenseName]: amount.toFixed(2) })
   }
   return details
 }
 
-export function calculateGoalPayments(goals, portfolioReturn, year) {
+export function calculateGoalPayments(goals, portfolioReturn, expenses, year) {
   const payments = []
   let anyPayment = false
+
+  // Find the annual growth rate from expenses where clientExpenseType is "รายจ่ายเพื่อการออม"
+  const savingExpense = expenses.find(exp => exp.clientExpenseType === 3)
+  const clientSavingGrowth = savingExpense ? savingExpense.clientExpenseAnnualGrowthRate : 0
+
   for (const goal of goals) {
     const clientGoalValue = goal.clientGoalValue
-    const clientSavingGrowth = goal.clientSavingGrowth
     const clientGoalPeriod = goal.clientGoalPeriod
 
     let payment = 0
@@ -70,66 +94,63 @@ export function calculateGoalPayments(goals, portfolioReturn, year) {
         anyPayment = true
       }
     }
-    payments.push({ [goal.id.clientGoalName]: payment.toFixed(2) })
+
+    for (let y = 1; y < year; y++) {
+      payment *= 1 + clientSavingGrowth
+    }
+
+    payments.push({ [goal.clientGoalName]: payment.toFixed(2) })
   }
 
   if (!anyPayment && goals.length === 0) {
-    // if no goals at all
+    // If no goals at all
     payments.push({ "No Payments": "0.00" })
   }
   return payments
 }
 
-export function calculateGeneralGoal(generalGoal, totalInvestAmount, portReturn) {
-  const period = generalGoal.clientGeneralGoalPeriod
-  const goalValue = generalGoal.clientGeneralGoalValue
-  const netIncomeGrowth = generalGoal.clientNetIncomeGrowth
 
-  const fvOfCurrentInvestment = totalInvestAmount * Math.pow(1 + portReturn, period)
-  // newGeneralGoalValue = goalValue - fvOfCurrentInvestment
-  const newGeneralGoalValue = goalValue - fvOfCurrentInvestment
+export function calculateGoal(Goal) {
+  const period = Goal.goalPeriod
+  const goalValue = Goal.goalValue
+  const netIncomeGrowth = Goal.netIncomeGrowth
+  const totalInvestment = Goal.totalInvestment
+  const portReturn = Goal.portReturn
+
+  const fvOfCurrentInvestment = totalInvestment * Math.pow(1 + portReturn, period)
+ 
+  const newGoalValue = goalValue - fvOfCurrentInvestment
 
   const numerator = portReturn - netIncomeGrowth
   const denominator = Math.pow(1 + portReturn, period) - Math.pow(1 + netIncomeGrowth, period)
 
-  let generalGoalAnnualSaving = 0
+  let GoalAnnualSaving = 0
   if (denominator !== 0) {
-    generalGoalAnnualSaving = newGeneralGoalValue * (numerator / denominator)
+    GoalAnnualSaving = newGoalValue * (numerator / denominator)
   }
 
   return {
     fvOfCurrentInvestment: parseFloat(fvOfCurrentInvestment.toFixed(2)),
-    generalGoalAnnualSaving: parseFloat(generalGoalAnnualSaving.toFixed(2))
+    GoalAnnualSaving: parseFloat(GoalAnnualSaving.toFixed(2))
   }
 }
 
 export function calculateRetirementGoal(retirementGoalInfo, retiredExpensePortion) {
   const { clientCurrentAge, clientRetirementAge, clientLifeExpectancy, clientCurrentYearlyExpense, clientExpectedRetiredPortReturn, inflationRate } = retirementGoalInfo
-  const currentAge = clientCurrentAge
-  const retirementAge = clientRetirementAge
-  const lifeExpectancy = clientLifeExpectancy
-  const currentYearlyExpense = clientCurrentYearlyExpense
-  const expectedRetPortReturn = clientExpectedRetiredPortReturn
-  const inflation = inflationRate
 
-  const yearsToRetirement = retirementAge - currentAge
-
-  const bdCurrentExpense = currentYearlyExpense
-  const bdInflationRate = inflation
-  const bdExpectedRetPortReturn = expectedRetPortReturn
-  const bdProportion = retiredExpensePortion
+  const yearsToRetirement = clientRetirementAge - clientCurrentAge
 
   // fvCurrentExpense = currentExpense * (1+inflation)^yearsToRetirement
-  const fvCurrentExpense = bdCurrentExpense * Math.pow(1+bdInflationRate, yearsToRetirement)
+  const fvCurrentExpense = clientCurrentYearlyExpense * Math.pow(1+inflationRate, yearsToRetirement)
 
   // discount_rate = ((1+expectedRetPortReturn)/(1+inflation)) - 1
-  const discountRate = ((1+bdExpectedRetPortReturn)/(1+bdInflationRate))-1
+  const discountRate = ((1+clientExpectedRetiredPortReturn)/(1+inflationRate))-1
 
   // newFvCurrentExpense = fvCurrentExpense * proportion
-  const newFvCurrentExpense = fvCurrentExpense * bdProportion
+  const newFvCurrentExpense = fvCurrentExpense * retiredExpensePortion
 
   // retirementDuration = lifeExpectancy - retirementAge
-  const retirementDuration = lifeExpectancy - retirementAge
+  const retirementDuration = clientLifeExpectancy - clientRetirementAge
   const onePlusDiscount = 1 + discountRate
 
   let retirementGoal
@@ -153,7 +174,8 @@ export function calculateRetirementGoal(retirementGoalInfo, retiredExpensePortio
 
 export function computeVariables(incomes, expenses, assets, debts) {
   const annualIncome = incomes.map((i) => {
-    const amt = i.clientIncomeFrequency === "ทุกเดือน"
+    // If frequency is monthly, multiply by 12 to get annual amount
+    const amt = i.clientIncomeFrequency === 1
       ? i.clientIncomeAmount * 12
       : i.clientIncomeAmount
     return { type: i.clientIncomeType, amt }
@@ -161,7 +183,8 @@ export function computeVariables(incomes, expenses, assets, debts) {
   const totalIncome = annualIncome.reduce((sum, a) => sum + a.amt, 0)
 
   const annualExpense = expenses.map((e) => {
-    const amt = e.clientExpenseFrequency === "ทุกเดือน"
+    // If frequency is monthly, multiply by 12 to get annual amount
+    const amt = e.clientExpenseFrequency === 1
       ? e.clientExpenseAmount * 12
       : e.clientExpenseAmount
     return { ...e, amt }
@@ -172,7 +195,8 @@ export function computeVariables(incomes, expenses, assets, debts) {
   let monthlyExpense = 0
   for (const e of expenses) {
     let amt = e.clientExpenseAmount
-    if (e.clientExpenseFrequency === "ทุกปี") amt = amt / 12
+    // If frequency is monthly, divide by 12 to get monthly amount
+    if (e.clientExpenseFrequency === 2) amt = amt / 12
     monthlyExpense += amt
   }
 
@@ -182,16 +206,19 @@ export function computeVariables(incomes, expenses, assets, debts) {
   const savings = savingExpenses + (netIncome > 0 ? netIncome : 0)
 
   const totalLiquidAssets = assets
-    .filter((a) => a.clientAssetType === "สินทรัพย์สภาพคล่อง")
+  // Filter out liquid assets
+    .filter((a) => a.clientAssetType === 1)
     .reduce((sum, a) => sum + a.clientAssetAmount, 0)
 
   const totalInvestAsset = assets
-    .filter((a) => a.clientAssetType === "สินทรัพย์ลงทุนปัจจุบัน")
+  // Filter out investment assets
+    .filter((a) => a.clientAssetType === 3)
     .reduce((sum, a) => sum + a.clientAssetAmount, 0)
 
   const totalAsset = assets.reduce((sum, a) => sum + a.clientAssetAmount, 0)
   const totalShortTermDebt = debts
-    .filter((d) => d.clientDebtTerm === "ระยะสั้น")
+  // Filter out short-term debts
+    .filter((d) => d.clientDebtTerm === 1)
     .reduce((sum, d) => sum + d.clientDebtAmount, 0)
   const totalDebt = debts.reduce((sum, d) => sum + d.clientDebtAmount, 0)
   const netWorth = totalAsset - totalDebt
@@ -207,7 +234,8 @@ export function computeVariables(incomes, expenses, assets, debts) {
   const totalNonMortgageDebtExpense = nonMortDebtExp
 
   const assetIncome = annualIncome
-    .filter((i) => i.type === "ดอกเบี้ย เงินปันผล")
+  // Filter out asset income
+    .filter((i) => i.type === 4)
     .reduce((sum, i) => sum + i.amt, 0)
   const totalAssetIncome = assetIncome
 

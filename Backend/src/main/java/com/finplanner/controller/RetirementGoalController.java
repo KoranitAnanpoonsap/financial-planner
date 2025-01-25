@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/retirementgoal")
@@ -17,9 +18,10 @@ public class RetirementGoalController {
     private RetirementGoalRepository retirementGoalRepository;
 
     // Get a RetirementGoal by clientId
-    @GetMapping("/{clientId}")
-    public ResponseEntity<RetirementGoal> getRetirementGoalByClientId(@PathVariable("clientId") Integer clientId) {
-        Optional<RetirementGoal> retirementGoalOpt = retirementGoalRepository.findById(clientId);
+    @GetMapping("/{clientUuid}")
+    public ResponseEntity<RetirementGoal> getRetirementGoalByClientId(@PathVariable String clientUuid) {
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        Optional<RetirementGoal> retirementGoalOpt = retirementGoalRepository.findByClientUuid(uuid);
         return retirementGoalOpt.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -32,22 +34,12 @@ public class RetirementGoalController {
         return ResponseEntity.ok(created);
     }
 
-    // Delete a RetirementGoal by clientId
-    @DeleteMapping("/{clientId}")
-    public ResponseEntity<Void> deleteRetirementGoal(@PathVariable("clientId") Integer clientId) {
-        if (retirementGoalRepository.existsById(clientId)) {
-            retirementGoalRepository.deleteById(clientId);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     // Update an existing RetirementGoal by clientId
-    @PutMapping("/{clientId}")
-    public ResponseEntity<RetirementGoal> updateRetirementGoal(@PathVariable("clientId") Integer clientId,
+    @PutMapping("/{clientUuid}")
+    public ResponseEntity<RetirementGoal> updateRetirementGoal(@PathVariable String clientUuid,
             @RequestBody RetirementGoal updatedGoal) {
-        return retirementGoalRepository.findById(clientId)
+        UUID uuid = UUID.fromString(clientUuid); // Convert String to UUID
+        return retirementGoalRepository.findByClientUuid(uuid)
                 .map(existingGoal -> {
                     // Update fields as needed
                     existingGoal.setClientCurrentAge(updatedGoal.getClientCurrentAge());

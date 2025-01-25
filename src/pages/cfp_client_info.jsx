@@ -1,22 +1,35 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import Header from "../components/header"
+import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
-import ClientBluePanel from "../components/clientBluePanel"
+import CfpClientSidePanel from "../components/cfpClientSidePanel"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 export default function CFPClientInfoPage() {
-  const { clientId, cfpId } = useParams()
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
   const [clientInfo, setClientInfo] = useState(null)
 
   useEffect(() => {
     fetchData()
-  }, [clientId])
+  }, [clientUuid])
 
   const fetchData = async () => {
     const res = await fetch(
-      `http://localhost:8080/api/clients/info/${clientId}`
+      `${import.meta.env.VITE_API_KEY}api/clients/info/${clientUuid}`
     )
     if (res.ok) {
       const data = await res.json()
@@ -27,7 +40,7 @@ export default function CFPClientInfoPage() {
   }
 
   const handleNext = () => {
-    navigate(`/${cfpId}/client-income/${clientId}`)
+    navigate(`/client-income/`)
   }
 
   // Helper to format date of birth
@@ -53,110 +66,136 @@ export default function CFPClientInfoPage() {
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
-        <ClientBluePanel />
+        <CfpClientSidePanel />
         <div className="flex-1 p-8 space-y-8">
           {/* Steps at the top */}
           <div className="flex items-center justify-center space-x-8 mb-8">
-            <div className="flex flex-col items-center">
+            <button
+              onClick={() => navigate(`/client-info/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-tfpa_gold rounded-full flex items-center justify-center text-white font-bold">
                 1
               </div>
-              <span className="font-bold text-tfpa_blue">ข้อมูลส่วนตัว</span>
-            </div>
+              <span className="font-bold text-tfpa_blue mt-1">
+                ข้อมูลส่วนตัว
+              </span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-income/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="font-bold">รายได้</span>
-            </div>
+              <span className="font-bold mt-1">รายได้</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-expense/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="font-bold">รายจ่าย</span>
-            </div>
+              <span className="font-bold mt-1">รายจ่าย</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-asset/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 4
               </div>
-              <span className="font-bold">สินทรัพย์</span>
-            </div>
+              <span className="font-bold mt-1">สินทรัพย์</span>
+            </button>
             <div className="h-px bg-gray-300 w-24"></div>
-            <div className="flex flex-col items-center text-gray-400">
+            <button
+              onClick={() => navigate(`/client-debt/`)}
+              className="flex flex-col items-center focus:outline-none text-gray-400"
+            >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
                 5
               </div>
-              <span className="font-bold">หนี้สิน</span>
-            </div>
-          </div>
-
-          {/* Personal Info Section */}
-          <h3 className="text-tfpa_blue font-bold text-lg">1. ข้อมูลส่วนตัว</h3>
-          <div className="mx-80 grid grid-cols-2">
-            <div className="text-tfpa_blue font-bold space-y-4">
-              <div>เลขประจำตัวประชาชน</div>
-              <div>คำนำหน้าชื่อ</div>
-              <div>ชื่อ</div>
-              <div>นามสกุล</div>
-              <div>เพศ</div>
-              <div>วัน/เดือน/ปีเกิด(พ.ศ.)</div>
-              <div>เบอร์โทรศัพท์</div>
-              <div>อีเมล</div>
-            </div>
-            <div className="text-tfpa_blue space-y-4">
-              <div>{clientInfo?.clientNationalId || "-"}</div>
-              <div>
-                {/* Display as radio-like but read-only */}
-                <div className="flex items-center space-x-4">
-                  {titleOptions.map((title) => (
-                    <div key={title} className="flex items-center space-x-2">
-                      <div
-                        className={`w-4 h-4 rounded-full ${
-                          clientInfo?.clientTitle === title
-                            ? "bg-tfpa_blue"
-                            : "border border-tfpa_blue"
-                        }`}
-                      ></div>
-                      <span>{title}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>{clientInfo?.clientFirstName || "-"}</div>
-              <div>{clientInfo?.clientLastName || "-"}</div>
-              <div>
-                <div className="flex items-center space-x-4">
-                  {genderOptions.map((g) => (
-                    <div key={g} className="flex items-center space-x-2">
-                      <div
-                        className={`w-4 h-4 rounded-full ${
-                          clientInfo?.clientGender === g
-                            ? "bg-tfpa_blue"
-                            : "border border-tfpa_blue"
-                        }`}
-                      ></div>
-                      <span>{g}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>{formatDateOfBirth(clientInfo?.clientDateOfBirth)}</div>
-              <div>{clientInfo?.clientPhoneNumber || "-"}</div>
-              <div>{clientInfo?.clientEmail || "-"}</div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleNext}
-              className="bg-blue-500 text-white px-4 py-2 rounded font-ibm font-bold"
-            >
-              ถัดไป
+              <span className="font-bold mt-1">หนี้สิน</span>
             </button>
           </div>
+          <motion.div
+            initial="initial"
+            animate="in"
+            exit="out"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            {/* Personal Info Section */}
+            <h3 className="text-tfpa_blue font-bold text-lg mb-4">
+              1. ข้อมูลส่วนตัว
+            </h3>
+            <div className="mx-80 grid grid-cols-2">
+              <div className="text-tfpa_blue font-bold space-y-4">
+                <div>เลขประจำตัวประชาชน</div>
+                <div>คำนำหน้าชื่อ</div>
+                <div>ชื่อ</div>
+                <div>นามสกุล</div>
+                <div>เพศ</div>
+                <div>วัน/เดือน/ปีเกิด(พ.ศ.)</div>
+                <div>เบอร์โทรศัพท์</div>
+                <div>อีเมล</div>
+              </div>
+              <div className="text-tfpa_blue space-y-4">
+                <div>{clientInfo?.clientNationalId || "-"}</div>
+                <div>
+                  {/* Display as radio-like but read-only */}
+                  <div className="flex items-center space-x-4">
+                    {titleOptions.map((title) => (
+                      <div key={title} className="flex items-center space-x-2">
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            clientInfo?.clientTitle === title
+                              ? "bg-tfpa_blue"
+                              : "border border-tfpa_blue"
+                          }`}
+                        ></div>
+                        <span>{title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>{clientInfo?.clientFirstName || "-"}</div>
+                <div>{clientInfo?.clientLastName || "-"}</div>
+                <div>
+                  <div className="flex items-center space-x-4">
+                    {genderOptions.map((g) => (
+                      <div key={g} className="flex items-center space-x-2">
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            clientInfo?.clientGender === g
+                              ? "bg-tfpa_blue"
+                              : "border border-tfpa_blue"
+                          }`}
+                        ></div>
+                        <span>{g}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>{formatDateOfBirth(clientInfo?.clientDateOfBirth)}</div>
+                <div>{clientInfo?.clientPhoneNumber || "-"}</div>
+                <div>{clientInfo?.clientEmail || "-"}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleNext}
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-ibm font-bold"
+              >
+                ถัดไป
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
       <Footer />

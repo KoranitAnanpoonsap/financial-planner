@@ -1,19 +1,29 @@
 package com.finplanner.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "client_expense")
 public class ClientExpense {
 
-    @EmbeddedId
-    private ClientExpenseId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "client_expense_id", insertable = false, updatable = false)
+    private Integer clientExpenseId;
 
-    @Column(name = "client_expense_type", nullable = false, length = 20)
-    private String clientExpenseType;
+    @Column(name = "client_uuid", nullable = false)
+    private UUID clientUuid;
 
-    @Column(name = "client_expense_frequency", nullable = false, length = 20)
-    private String clientExpenseFrequency;
+    @Column(name = "client_expense_name", length = 100, nullable = false)
+    private String clientExpenseName;
+
+    @Column(name = "client_expense_type", nullable = false)
+    private Integer clientExpenseType;
+
+    @Column(name = "client_expense_frequency", nullable = false)
+    private Integer clientExpenseFrequency;
 
     @Column(name = "client_expense_amount", nullable = false)
     private Integer clientExpenseAmount;
@@ -31,27 +41,43 @@ public class ClientExpense {
     private Boolean clientSavingExpense;
 
     // Getters and Setters
-    public ClientExpenseId getId() {
-        return id;
+    public Integer getClientExpenseId() {
+        return clientExpenseId;
     }
 
-    public void setId(ClientExpenseId id) {
-        this.id = id;
+    public void setClienExpenseId(Integer clientExpenseId) {
+        this.clientExpenseId = clientExpenseId;
     }
 
-    public String getClientExpenseType() {
+    public UUID getClientUuid() {
+        return clientUuid;
+    }
+
+    public void setClientUuid(UUID clientUuid) {
+        this.clientUuid = clientUuid;
+    }
+
+    public String getClientExpenseName() {
+        return clientExpenseName;
+    }
+
+    public void setClientExpenseName(String clientExpenseName) {
+        this.clientExpenseName = clientExpenseName;
+    }
+
+    public Integer getClientExpenseType() {
         return clientExpenseType;
     }
 
-    public void setClientExpenseType(String clientExpenseType) {
+    public void setClientExpenseType(Integer clientExpenseType) {
         this.clientExpenseType = clientExpenseType;
     }
 
-    public String getClientExpenseFrequency() {
+    public Integer getClientExpenseFrequency() {
         return clientExpenseFrequency;
     }
 
-    public void setClientExpenseFrequency(String clientExpenseFrequency) {
+    public void setClientExpenseFrequency(Integer clientExpenseFrequency) {
         this.clientExpenseFrequency = clientExpenseFrequency;
     }
 

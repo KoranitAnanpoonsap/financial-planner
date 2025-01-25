@@ -3,6 +3,18 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
+// Mapping numbers to text labels
+const investTypeLabels = {
+  1: "หุ้นไทย",
+  2: "หุ้นต่างประเทศ",
+  3: "หุ้นกู้",
+  4: "ตราสารหนี้",
+  5: "ทองคำ",
+  6: "เงินฝาก",
+  7: "การลงทุนอื่นๆ",
+}
+
+// Mapping text labels to colors
 const getColorForType = (type) => {
   switch (type) {
     case "หุ้นไทย":
@@ -18,7 +30,7 @@ const getColorForType = (type) => {
     case "หุ้นกู้":
       return "#FF9F40"
     case "การลงทุนอื่นๆ":
-      return "#FF6384"
+      return "#2B0B3F"
     default:
       return "#CCCCCC"
   }
@@ -33,7 +45,10 @@ export default function PortfolioPieChart({
   const dataMap = {}
   assets.forEach((asset) => {
     const { investType, investAmount } = asset
-    dataMap[investType] = (dataMap[investType] || 0) + investAmount
+    const label = investTypeLabels[investType] // Convert numeric type to text label
+    if (label) {
+      dataMap[label] = (dataMap[label] || 0) + investAmount
+    }
   })
 
   const chartData = {
