@@ -66,7 +66,7 @@ export default function CfpSidePanel() {
       routes: [`/portfolio-selection/`, `/portfolio-chart/`],
     },
     {
-      label: "การคำนวณเป้าหมาย",
+      label: "การคำนวณเป้าหมายอย่างง่าย",
       icon: loadingIcon,
       routes: [
         `/goal-base/`,
@@ -77,7 +77,7 @@ export default function CfpSidePanel() {
       ],
     },
     {
-      label: "การวางแผนหลายเป้าหมาย",
+      label: "การวางแผนเป้าหมายองค์รวม",
       icon: checkIcon,
       routes: [`/cashflow-base/`, `/cashflow-base-calculated/`],
     },
