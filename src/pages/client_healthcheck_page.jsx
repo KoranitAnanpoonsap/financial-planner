@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Header from "../components/clientHeader.jsx";
 import Footer from "../components/footer.jsx";
 
 export default function FinancialHealthForm() {
   const [formData, setFormData] = useState({
-    cashFlow: 0,
-    liquidAssets: 0,
-    annualIncome: 0,
-    debtPayments: 0,
-    annualSavings: 0,
+    cashFlow: "",
+    liquidAssets: "",
+    annualIncome: "",
+    debtPayments: "",
+    annualSavings: "",
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: Number(value),
-    });
+
+    // Allow only numbers (or an empty string) and update state
+    if (/^\d*$/.test(value)) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value, // Keep as a string to avoid React delays
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form data submitted:", formData);
+
+    // Convert strings to numbers when processing the form data
+    const numericData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [key, Number(value) || 0])
+    );
+
+    console.log("Form data submitted:", numericData);
     // Perform calculations or API calls here
   };
 
@@ -31,10 +41,10 @@ export default function FinancialHealthForm() {
         {label} <span className="text-gray-500">(ต่อเดือน)</span>
       </label>
       <input
-        type="number"
+        type="text" // Keep as text to handle input validation
         name={name}
         id={name}
-        value={formData[name] || 0}
+        value={formData[name]} // Controlled input
         onChange={handleInputChange}
         className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
       />

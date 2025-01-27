@@ -15,9 +15,12 @@ export default function FinancialHealthCheck() {
           <p className="text-gray-600 mb-4">
             สำรวจสุขภาพทางการเงินของคุณพร้อมรับคำแนะนำเบื้องต้น รู้จักการเงินตัวเองได้ง่าย ๆ ในไม่กี่นาที
           </p>
-          <Link to="/client-healthcheck-page" className="bg-blue-600 text-white py-2 px-4 rounded-full">
+          <a 
+            href="/client-healthcheck-page"
+            className="bg-blue-600 text-white py-2 px-4 rounded-full inline-block"
+          >
             เริ่มตรวจสุขภาพทางการเงินของคุณกันเถอะ
-          </Link>
+          </a>
         </div>
         <div className="lg:w-1/2 flex justify-center">
           <img
@@ -47,9 +50,12 @@ export default function FinancialHealthCheck() {
           <p className="text-gray-600 mb-4">
             สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำ นำไปปรับใช้ได้ทันที
           </p>
-          <Link to="/client-healthcheck-page" className="bg-blue-600 text-white py-2 px-4 rounded-full">
+          <a 
+            href="/client-healthcheck-page"
+            className="bg-blue-600 text-white py-2 px-4 rounded-full inline-block"
+          >
             เริ่มวิเคราะห์เป้าหมายของคุณกันเถอะ
-          </Link>
+          </a>
         </div>
       </div>
     </section>
