@@ -39,45 +39,45 @@ export default function CFPGoalBaseDashboard() {
     fetchAllData()
   }, [clientUuid])
 
-  const fetchAllData = async () => {
-    try {
-      // Fetch goal
-      const gResponse = await fetch(
-        `${import.meta.env.VITE_API_KEY}api/calculategoal/${clientUuid}`
-      )
-      if (!gResponse.ok) {
-        throw new Error("No goal data found")
-      }
-      const gData = await gResponse.json()
-      setGoal(gData)
-      setTotalInvestment(gData.totalInvestment?.toString() || "")
-      setPortfolioReturn(
-          gData.portReturn !== undefined ? (gData.portReturn * 100).toFixed(2) : ""
-      )
+    const fetchAllData = async () => {
+        try {
+            // Fetch goal
+            const gResponse = await fetch(
+                `${import.meta.env.VITE_API_KEY}api/calculategoal/${clientUuid}`
+            )
+            if (!gResponse.ok) {
+                throw new Error("No goal data found")
+            }
+            const gData = await gResponse.json()
+            setGoal(gData)
+            setTotalInvestment(gData.totalInvestment?.toString() || "")
+            setPortfolioReturn(
+                gData.portReturn !== undefined ? (gData.portReturn * 100).toFixed(2) : ""
+            )
 
-      const totalInvestAmount = gData.totalInvestment
-      const portReturn = gData.portReturn
+            const totalInvestAmount = gData.totalInvestment
+            const portReturn = gData.portReturn
 
-      // Fetch assets
-      const assetsResponse = await fetch(
-        `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
-      )
-      if (!assetsResponse.ok) {
-        throw new Error("Failed to fetch assets")
-      }
-      const assetsData = await assetsResponse.json()
-      setAssets(assetsData)
+            // Fetch assets
+            const assetsResponse = await fetch(
+                `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
+            )
+            if (!assetsResponse.ok) {
+                throw new Error("Failed to fetch assets")
+            }
+            const assetsData = await assetsResponse.json()
+            setAssets(assetsData)
 
-      // Calculate goal
-      const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
-        calculateGoal(gData, totalInvestAmount, portReturn)
-      setFvOfCurrentInvestment(fv)
-      setGoalAnnualSaving(saving)
-    } catch (error) {
-      console.error("Error fetching data:", error)
-      // Optionally, you can set default values or handle the error state here
+            // Calculate goal
+            const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
+                calculateGoal(gData, totalInvestAmount, portReturn)
+            setFvOfCurrentInvestment(fv)
+            setGoalAnnualSaving(saving)
+        } catch (error) {
+            console.error("Error fetching data:", error)
+            // Optionally, you can set default values or handle the error state here
+        }
     }
-  }
 
   const handleNavigateRetirement = () => {
     navigate(`/retirement-goal/`)
@@ -101,7 +101,7 @@ export default function CFPGoalBaseDashboard() {
     )
   }
 
-  const DashBoardGoalBasedGoalDetail = () => {
+    const DashBoardGoalBasedGoalDetail = () => {
     return (
         <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
           <div className="text-2xl mb-2">รายละเอียดเป้าหมาย</div>
@@ -118,20 +118,19 @@ export default function CFPGoalBaseDashboard() {
 
         </div>
     )
-  }
+    }
 
-  const DashBoardGoalBasedPortfolio = () => {
+    const DashBoardGoalBasedPortfolio = () => {
     return (
         <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
           <div className="text-2xl mb-2">สถานะการเงินในปัจจุบัน</div>
           <div className="m-2">กระเเสเงินสดสุทธิต่อปี: {Number(Goal.netIncome).toLocaleString('en-th', {minimumFractionDigits: 2, maximumFractionDigits: 2,})} บาท</div>
           <div className="m-2">เงินรวมปัจจุบันในการลงทุน: {Number(TotalInvestment).toLocaleString('en-th', {minimumFractionDigits: 2, maximumFractionDigits: 2,})} บาท</div>
           <div className="m-2">ผลตอบแทนต่อปีของพอร์ตที่ลงทุนปัจจุบัน: {Number(PortfolioReturn).toLocaleString('en-th', {minimumFractionDigits: 2, maximumFractionDigits: 2,})} %</div>
-
-
         </div>
     )
-  }
+    }
+
     function print(){
         const element = document.getElementById('print');
         html2canvas(element).then(canvas => {
@@ -144,8 +143,6 @@ export default function CFPGoalBaseDashboard() {
             link.click();
             document.delete(link)
         });
-
-        return true;
     }
 
   return (
@@ -173,11 +170,7 @@ export default function CFPGoalBaseDashboard() {
             {/* Blue Box with Goal Info */}
             {Goal && (
               <>
-                {/* Goal Name */}
-                {/*<h1 className="text-center text-4xl text-tfpa_blue font-bold">*/}
-                {/*  เป้าหมาย: {Goal.goalName}*/}
-                {/*</h1>*/}
-                    <div className="font-[prompt] font-[sans-serif] font-normal flex flex-wrap gap-2 w-full justify-center mx-3 p-8 text-tfpa_blue font-bold" id='print'>
+                    <div className="font-prompt font-normal flex flex-wrap gap-2 w-full justify-center mx-3 p-8 text-tfpa_blue font-bold" id='print'>
                         <DashBoardGoalBasedEfficient />
                         <div className="flex flex-row w-full gap-4 flex-wrap lg:flex-nowrap">
                           <DashBoardGoalBasedGoalDetail />
@@ -187,7 +180,7 @@ export default function CFPGoalBaseDashboard() {
                   <center>
                       <button
                           onClick={print}
-                          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 rounded font-[sans-serif] text-4xl mt-8 rounded-2xl"
+                          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 rounded text-2xl font-bold mt-8 rounded-2xl"
                       >
                           Print
                       </button>
