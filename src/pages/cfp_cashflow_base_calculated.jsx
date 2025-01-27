@@ -110,7 +110,11 @@ export default function CFPCashflowBaseCalculated() {
 
   const handleDashboard = () => {
     // Navigate to a dashboard page
-    navigate(`/cashflow-base-dashboard`)
+    navigate(`/cashflow-base-dashboard/`)
+  }
+  const handleNavigateBack = () => {
+    // Navigate to a dashboard page
+    navigate(`/cashflow-base/`)
   }
 
   return (
@@ -126,6 +130,14 @@ export default function CFPCashflowBaseCalculated() {
             variants={pageVariants}
             transition={pageTransition}
           >
+            <div className="flex space-x-4 justify-end">
+              <button
+                  onClick={handleNavigateBack}
+                  className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-6 py-2 rounded font-ibm"
+              >
+                กลับ
+              </button>
+            </div>
             <div className="overflow-x-auto mt-4">
               <table className="min-w-full bg-white border border-gray-300 text-sm">
                 <thead>
