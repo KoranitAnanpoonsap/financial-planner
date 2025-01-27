@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import Header from "../components/clientHeader.jsx";
 import Footer from "../components/footer.jsx";
 import FinancialHealthIllustration from "../assets/importance_of_planning.jpg";
@@ -16,9 +15,9 @@ export default function FinancialHealthCheck() {
           <p className="text-gray-600 mb-4">
             สำรวจสุขภาพทางการเงินของคุณพร้อมรับคำแนะนำเบื้องต้น รู้จักการเงินตัวเองได้ง่าย ๆ ในไม่กี่นาที
           </p>
-          <Button className="bg-blue-600 text-white py-2 px-4 rounded-full">
+          <Link to="/client-healthcheck-page" className="bg-blue-600 text-white py-2 px-4 rounded-full">
             เริ่มตรวจสุขภาพทางการเงินของคุณกันเถอะ
-          </Button>
+          </Link>
         </div>
         <div className="lg:w-1/2 flex justify-center">
           <img
@@ -48,9 +47,9 @@ export default function FinancialHealthCheck() {
           <p className="text-gray-600 mb-4">
             สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำ นำไปปรับใช้ได้ทันที
           </p>
-          <Button className="bg-blue-600 text-white py-2 px-4 rounded-full">
+          <Link to="/client-healthcheck-page" className="bg-blue-600 text-white py-2 px-4 rounded-full">
             เริ่มวิเคราะห์เป้าหมายของคุณกันเถอะ
-          </Button>
+          </Link>
         </div>
       </div>
     </section>

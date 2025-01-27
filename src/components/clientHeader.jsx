@@ -14,7 +14,7 @@ export default function ClientHeader() {
           />
         </div>
         <nav className="space-x-4">
-          <Link to="/" className="text-blue-500 hover:underline">
+          <Link to="/client-homepage" className="text-blue-500 hover:underline">
             หน้าหลัก
           </Link>
           <Link to="/about" className="text-blue-500 hover:underline">

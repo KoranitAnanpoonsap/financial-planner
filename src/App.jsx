@@ -8,6 +8,7 @@ import Register from "./pages/register"
 import CfpHomepage from "./pages/cfp_homepage"
 import ClientHomepage from "./pages/client_homepage"
 import ClientPrecalculationPage from "./pages/client_precalculation_page"
+import ClientHealthcheckPage from "./pages/client_healthcheck_page"
 import PortfolioSelectionCFP from "./pages/portfolio_selection_cfp"
 import PortfolioCreationCFP from "./pages/portfolio_creation_cfp"
 import CFPCashflowBase from "./pages/cfp_cashflow_base"
@@ -40,6 +41,7 @@ function App() {
         <Route path="/cfp-homepage/" element={<CfpHomepage />} />
         <Route path="/client-homepage" element={<ClientHomepage />} />
         <Route path="/client-precalculation-page" element={<ClientPrecalculationPage />} />
+        <Route path="/client-healthcheck-page" element={<ClientHealthcheckPage />} />
         <Route
           path="/portfolio-selection/"
           element={<PortfolioSelectionCFP />}
