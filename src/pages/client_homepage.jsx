@@ -2,9 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
-import Client_Homepage_pic1 from "../assets/client_homepage_pic1.png"
-import Client_Homepage_pic2 from "../assets/financial_planning.jpg"
-import logo from "../assets/TFPA_logo.png"
+import Client_Homepage_pic1 from "../assets/importance_of_planning.jpg"
+import Client_Homepage_pic2 from "../assets/plan_by_yourself.jpg"
+import Client_Homepage_pic3 from "../assets/plan_with_cfp.jpeg"
 
 export default function ClientHomePage() {
   const Banner = () => (
@@ -27,25 +27,30 @@ export default function ClientHomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             title="ความสำคัญของการวางแผนการเงิน"
+            link="/financial-planning-importance"
             imageSrc={Client_Homepage_pic1}
           />
           <FeatureCard
-            title="ขอคำปรึกษาจากนักวางแผนการเงิน"
+            title="วางแผนการเงินของคุณ"
+            link="/client-precalculation-page"
             imageSrc={Client_Homepage_pic2}
           />
           <FeatureCard
-            title="วางแผนการเงินของคุณ"
-            imageSrc="/path-to-plan-image.jpg"
+            title="ขอคำปรึกษาจากนักวางแผนการเงิน"
+            link="/financial-advisor-consultation"
+            imageSrc={Client_Homepage_pic3}
           />
         </div>
       </div>
     </section>
   );
-
-  const FeatureCard = ({ title, imageSrc }) => (
-    <div className="bg-white shadow rounded-lg p-4 text-center">
-      <img src={imageSrc} alt={title} className="w-full h-40 object-cover mb-4" />
-      <h3 className="text-lg font-bold">{title}</h3>
+  
+  const FeatureCard = ({ title, link, imageSrc }) => (
+    <div className="bg-white shadow-lg rounded-lg p-4">
+      <img src={imageSrc} alt={title} className="rounded-lg mb-4" />
+      <h3 className="text-lg font-semibold text-blue-800 hover:underline">
+        <a href={link}>{title}</a>
+      </h3>
     </div>
   );
 
@@ -54,7 +59,8 @@ export default function ClientHomePage() {
       <div className="container mx-auto text-center">
         <h2 className="text-xl font-bold mb-4">เกี่ยวกับเรา</h2>
         <p className="text-gray-700">
-          เราเป็นทีมงานนักวางแผนการเงินที่ได้รับการรับรองจาก CFP...
+        เราเป็นทีมงานนักวางแผนการเงินที่ได้รับการรับรองจาก CFP (Certified Financial Planner) ซึ่งเป็นมาตรฐานระดับสากลที่ยืนยันถึงความเชี่ยวชาญและความน่าเชื่อถือในการให้บริการทางการเงิน ด้วยความมุ่งมั่นในการช่วยเหลือคุณสร้างความมั่นคงทางการเงิน ทีมของเราพร้อมที่จะให้คำปรึกษาและแนะนำวิธีการวางแผนการเงินที่เหมาะสมกับเป้าหมายและความต้องการเฉพาะตัวของคุณ
+        ไม่ว่าคุณจะต้องการวางแผนเพื่อการเกษียณอายุ การลงทุน การจัดการหนี้สิน หรือการวางแผนภาษี เรามีประสบการณ์และความรู้ที่จะช่วยให้คุณตัดสินใจทางการเงินได้อย่างมั่นใจ เราเชื่อมั่นว่าการวางแผนการเงินที่ดีไม่เพียงแต่สร้างความมั่นคงในปัจจุบัน แต่ยังปูทางสู่อนาคตที่มั่นคงและประสบความสำเร็จอีกด้วย
         </p>
       </div>
     </section>

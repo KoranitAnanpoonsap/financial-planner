@@ -12,7 +12,6 @@ export default function ClientHeader() {
             alt="TFPA Logo"
             className="h-12"
           />
-          <h1 className="text-xl font-bold">Thai Financial Planners Association</h1>
         </div>
         <nav className="space-x-4">
           <Link to="/" className="text-blue-500 hover:underline">
