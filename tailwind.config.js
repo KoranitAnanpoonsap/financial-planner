@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
       'ibm': ['IBM Plex Sans Thai', 'sans-serif'],
+        'prompt': ['prompt', 'sans-serif'],
       },
       colors: {
         tfpa_gold: '#D09A3F',
