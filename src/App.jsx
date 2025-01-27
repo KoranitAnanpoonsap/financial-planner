@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import "@fontsource/ibm-plex-sans-thai"
+import "@fontsource/prompt"
 import ClientLogin from "./pages/client_login"
 import PlannerLogin from "./pages/planner_login"
 import AdminLogin from "./pages/admin_login"
