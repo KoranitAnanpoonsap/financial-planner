@@ -1,29 +1,7 @@
-import { useEffect, useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 
 import personIcon from "../assets/person.png"
 import personListIcon from "../assets/personlist.png"
-import newIcon from "../assets/new.png"
-import loadingIcon from "../assets/loading.png"
-import checkIcon from "../assets/check.png"
-
-const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
-}
-
-const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.3,
-}
 
 export default function CfpClientSidePanel() {
   const navigate = useNavigate()

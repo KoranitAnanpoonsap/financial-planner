@@ -364,7 +364,7 @@ export default function ClientsPage() {
                         }}
                         dateFormat="dd/MM/yyyy"
                         className="border rounded p-1 w-full"
-                        placeholderText="เลือกวันที่"
+                        placeholderText="DD/MM/YYYY"
                       />
                     )}
                     {!(
@@ -400,7 +400,7 @@ export default function ClientsPage() {
                         }}
                         dateFormat="dd/MM/yyyy"
                         className="border rounded p-1 w-full"
-                        placeholderText="เลือกวันที่"
+                        placeholderText="DD/MM/YYYY"
                       />
                     )}
                     {client.clientStatus !== "ดำเนินการเรียบร้อย" && (
