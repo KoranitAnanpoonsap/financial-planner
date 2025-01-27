@@ -74,7 +74,7 @@ export default function ClientLogin() {
   }
 
   const handleHomePage = () => {
-    navigate(`/client-homepage/`)
+    navigate("/client-homepage")
   }
 
   return (

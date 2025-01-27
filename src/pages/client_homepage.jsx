@@ -1,42 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import Header from "../components/clientHeader.jsx"
+import Footer from "../components/footer.jsx"
+import Client_Homepage_pic1 from "../assets/client_homepage_pic1.png"
+import Client_Homepage_pic2 from "../assets/financial_planning.jpg"
+import logo from "../assets/TFPA_logo.png"
 
 export default function ClientHomePage() {
-  const Header = () => (
-    <header className="bg-white border-b border-gray-200">
-      <div className="container mx-auto flex justify-between items-center py-4">
-        <div className="flex items-center space-x-4">
-          <img
-            src="/path-to-logo.png"
-            alt="TFPA Logo"
-            className="h-12"
-          />
-          <h1 className="text-xl font-bold">Thai Financial Planners Association</h1>
-        </div>
-        <nav className="space-x-4">
-          <Link to="/" className="text-blue-500 hover:underline">
-            หน้าหลัก
-          </Link>
-          <Link to="/about" className="text-blue-500 hover:underline">
-            เกี่ยวกับสมาคม
-          </Link>
-          <Link to="/planners" className="text-blue-500 hover:underline">
-            รายชื่อนักวางแผนการเงิน
-          </Link>
-          <Link to="/plans" className="text-blue-500 hover:underline">
-            วางแผน
-          </Link>
-          <Link to="/faq" className="text-blue-500 hover:underline">
-            FAQ
-          </Link>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded">
-            Login
-          </button>
-        </nav>
-      </div>
-    </header>
-  );
-
   const Banner = () => (
     <section className="bg-orange-100 p-8 text-center">
       <h2 className="text-2xl font-bold">
@@ -57,11 +27,11 @@ export default function ClientHomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             title="ความสำคัญของการวางแผนการเงิน"
-            imageSrc="/path-to-budget-image.jpg"
+            imageSrc={Client_Homepage_pic1}
           />
           <FeatureCard
             title="ขอคำปรึกษาจากนักวางแผนการเงิน"
-            imageSrc="/path-to-advisor-image.jpg"
+            imageSrc={Client_Homepage_pic2}
           />
           <FeatureCard
             title="วางแผนการเงินของคุณ"
@@ -110,18 +80,8 @@ export default function ClientHomePage() {
     </details>
   );
 
-  const Footer = () => (
-    <footer className="bg-blue-900 text-white py-6">
-      <div className="container mx-auto text-center">
-        <p>Copyright © 2024 Thai Financial Planners Association</p>
-        <p>โทรศัพท์: 0 2009 9393 | Website: www.tfpa.or.th</p>
-      </div>
-    </footer>
-  );
-
   return (
-    <Router>
-      <div>
+    <div>
         <Header />
         <main>
           <Banner />
@@ -131,6 +91,5 @@ export default function ClientHomePage() {
         </main>
         <Footer />
       </div>
-    </Router>
   )
 }

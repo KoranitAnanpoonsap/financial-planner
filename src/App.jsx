@@ -37,7 +37,7 @@ function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/cfp-homepage/" element={<CfpHomepage />} />
-        <Route path="/client-homepage/" element={<ClientHomepage />} />
+        <Route path="/client-homepage" element={<ClientHomepage />} />
         <Route
           path="/portfolio-selection/"
           element={<PortfolioSelectionCFP />}
