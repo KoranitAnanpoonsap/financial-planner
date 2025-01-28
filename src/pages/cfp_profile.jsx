@@ -251,6 +251,9 @@ export default function CfpProfilePage() {
 
   // ----- Submit / Save -----
   const handleSave = async () => {
+    // 1) Clear the old message so it disappears whenever the user presses "save" again
+    setSaveStatus("")
+
     try {
       // Join multi-select values into comma-separated strings
       const chargeString = selectedCharges.join(",")

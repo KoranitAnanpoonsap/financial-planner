@@ -59,7 +59,7 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.4,
+  duration: 0.5,
 }
 
 export default function CFPCashflowBaseDashboard() {

@@ -3,12 +3,8 @@ import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
-import {
-  calculatePortfolioSummary,
-  calculateGoal,
-} from "../utils/calculations.js"
+import { calculateGoal } from "../utils/calculations.js"
 import { motion } from "framer-motion"
-import PortfolioPieChart from "../components/portfolioPieChart.jsx"
 import html2canvas from "html2canvas"
 
 const pageVariants = {
@@ -20,7 +16,7 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 1,
 }
 
 export default function CFPGoalBaseDashboard() {
