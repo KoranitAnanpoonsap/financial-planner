@@ -10,6 +10,8 @@ import ClientHomepage from "./pages/client_homepage"
 import ClientPrecalculationPage from "./pages/client_precalculation_page"
 import ClientHealthcheckPage from "./pages/client_healthcheck_page"
 import ClientHealthcheckResult from "./pages/client_healthcheck_result"
+import ClientEasygoalPage from "./pages/client_easygoal_page"
+import ClientEasygoalResult from "./pages/client_easygoal_result"
 import PortfolioSelectionCFP from "./pages/portfolio_selection_cfp"
 import PortfolioCreationCFP from "./pages/portfolio_creation_cfp"
 import CFPCashflowBase from "./pages/cfp_cashflow_base"
@@ -44,6 +46,8 @@ function App() {
         <Route path="/client-precalculation-page" element={<ClientPrecalculationPage />} />
         <Route path="/client-healthcheck-page" element={<ClientHealthcheckPage />} />
         <Route path="/client-healthcheck-result" element={<ClientHealthcheckResult />} />
+        <Route path="/client-easygoal-page" element={<ClientEasygoalPage />} />
+        <Route path="/client-easygoal-result" element={<ClientEasygoalResult />} />
         <Route
           path="/portfolio-selection/"
           element={<PortfolioSelectionCFP />}

@@ -51,7 +51,7 @@ export default function FinancialHealthCheck() {
             สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำ นำไปปรับใช้ได้ทันที
           </p>
           <a 
-            href="/client-healthcheck-page"
+            href="/client-easygoal-page"
             className="bg-blue-600 text-white py-2 px-4 rounded-full inline-block"
           >
             เริ่มวิเคราะห์เป้าหมายของคุณกันเถอะ
