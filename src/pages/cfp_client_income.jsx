@@ -192,7 +192,9 @@ export default function CFPClientIncomePage() {
     setIncomeName(inc.clientIncomeName)
     setFrequency(inc.clientIncomeFrequency)
     setAmount(inc.clientIncomeAmount.toString())
-    setGrowthRate((inc.clientIncomeAnnualGrowthRate * 100).toString())
+    setGrowthRate(
+      (inc.clientIncomeAnnualGrowthRate * 100).toFixed(2).toString()
+    )
 
     setIncome405Type(inc.clientIncome405Type || 0)
     setIncome406Type(inc.clientIncome406Type || 0)

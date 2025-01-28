@@ -25,6 +25,8 @@ export default function CFPGoalBaseCalculated() {
   const [Goal, setGoal] = useState(null)
   const [fvOfCurrentInvestment, setFvOfCurrentInvestment] = useState(0)
   const [GoalAnnualSaving, setGoalAnnualSaving] = useState(0)
+  const [PortfolioReturn, setPortfolioReturn] = useState("")
+  const [NetIncome, setNetIncome] = useState("")
 
   useEffect(() => {
     fetchAllData()
@@ -42,10 +44,29 @@ export default function CFPGoalBaseCalculated() {
       }
       const gData = await gResponse.json()
       setGoal(gData)
+      setTotalInvestment(gData.totalInvestment?.toString() || "")
+      setPortfolioReturn(
+        gData.portReturn !== undefined
+          ? (gData.portReturn * 100).toFixed(2)
+          : ""
+      )
+
+      const totalInvestAmount = gData.totalInvestment
+      const portReturn = gData.portReturn
+
+      // Fetch assets
+      const assetsResponse = await fetch(
+        `${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`
+      )
+      if (!assetsResponse.ok) {
+        throw new Error("Failed to fetch assets")
+      }
+      const assetsData = await assetsResponse.json()
+      setAssets(assetsData)
 
       // Calculate goal
       const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
-        calculateGoal(gData)
+        calculateGoal(gData, totalInvestAmount, portReturn)
       setFvOfCurrentInvestment(fv)
       setGoalAnnualSaving(saving)
     } catch (error) {
@@ -54,11 +75,96 @@ export default function CFPGoalBaseCalculated() {
     }
   }
 
+  const CalculatedGoalBasedEfficient = () => {
+    return (
+      Goal && (
+        <div className="flex flex-col items-center bg-tfpa_blue text-center p-6 text-2xl rounded-3xl space-y-6 text-white font-bold">
+          <div>เป้าหมาย: {Goal.goalName}</div>
+          <div>เงินลงทุนและกระแสเงินสดของลูกค้า</div>
+          <div
+            className={`w-[70%] py-2 p-0 rounded-3xl text-xl ${
+              GoalAnnualSaving <= Number(Goal.netIncome)
+                ? "bg-green-300 text-green-950"
+                : "bg-red-300 text-red-950"
+            }`}
+          >
+            {GoalAnnualSaving <= Number(Goal.netIncome)
+              ? '"เพียงพอต่อเป้าหมาย"'
+              : '"ไม่เพียงพอต่อเป้าหมาย"'}
+          </div>
+        </div>
+      )
+    )
+  }
+
+  const CalculateGoalBasedFinance = () => {
+    return (
+      Goal && (
+        <div className="bg-tfpa_blue text-center p-6 text-xl rounded-3xl space-y-6 text-white font-bold">
+          <div>สถานะการเงินในปัจจุบันของลูกค้า</div>
+          <div className="text-lg grid grid-cols-2 text-start mx-8">
+            <div>
+              เงินรวมปัจจุบันในการลงทุน:{" "}
+              {Number(Goal.totalInvestment).toLocaleString("en-us", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              บาท
+            </div>
+            <div>
+              กระเเสเงินสดสุทธิเฉลี่ยต่อปี:{" "}
+              {Number(NetIncome).toLocaleString("en-us", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              บาท
+            </div>
+            <div>
+              ผลตอบเเทนต่อปีของพอร์ตที่ลงทุนในปัจจุบัน:{" "}
+              {PortfolioReturn.toLocaleString()}%
+            </div>
+            <div>
+              อัตราการเติบโตของกระเเสเงินสดสุทธิต่อปี:{" "}
+              {(Goal.netIncomeGrowth * 100).toFixed(2).toLocaleString()}%
+            </div>
+            <div>
+              เงินรวมปัจจุบันในการลงทุนในอีก {Goal.goalPeriod.toLocaleString()}{" "}
+              ปี: {fvOfCurrentInvestment.toLocaleString()} บาท
+            </div>
+          </div>
+        </div>
+      )
+    )
+  }
+
+  const CalculateGoalBasedGoalDetails = () => {
+    return (
+      Goal && (
+        <div className="bg-tfpa_blue text-center p-6 text-xl rounded-3xl space-y-6 text-white font-bold">
+          <div>รายละเอียดเป้าหมาย</div>
+          <div className="text-lg grid grid-cols-2 text-start mx-8">
+            <div className="">
+              จำนวนเงินเพื่อเป้าหมาย:{" "}
+              {Number(Goal.goalValue).toLocaleString("en-us", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              บาท
+            </div>
+            <div className="">
+              ระยะเวลาเป้าหมาย: {Goal.goalPeriod.toLocaleString()} ปี
+            </div>
+          </div>
+        </div>
+      )
+    )
+  }
+
   const handleNavigateRetirement = () => {
     navigate(`/retirement-goal/`)
   }
 
-  const handleNavigateGoal = () => {
+  const handleNavigateBack = () => {
     navigate(`/goal-base/`)
   }
 
@@ -73,18 +179,12 @@ export default function CFPGoalBaseCalculated() {
         <CfpClientSidePanel />
         <div className="flex-1 p-4 space-y-8">
           {/* Top buttons */}
-          <div className="flex space-x-4 justify-center">
+          <div className="flex space-x-4 justify-end">
             <button
-              className="bg-tfpa_gold px-4 py-2 rounded font-bold text-white"
-              onClick={handleNavigateGoal}
+              onClick={handleNavigateBack}
+              className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
             >
-              เป้าหมายทั่วไป
-            </button>
-            <button
-              className="bg-gray-200 px-4 py-2 rounded font-bold text-tfpa_blue"
-              onClick={handleNavigateRetirement}
-            >
-              เป้าหมายเกษียณ
+              กลับ
             </button>
           </div>
 
@@ -95,82 +195,41 @@ export default function CFPGoalBaseCalculated() {
             variants={pageVariants}
             transition={pageTransition}
           >
-            {/* Blue Box with Goal Info */}
-            {Goal && (
-              <div className="bg-tfpa_blue p-6 rounded-3xl space-y-6 text-white font-bold mx-32">
-                {/* Goal Name */}
-                <h2 className="text-center text-2xl">{Goal.goalName}</h2>
-
-                {/* Two columns for details */}
-                <div className="grid grid-cols-2 gap-8">
-                  {/* Left Column: Net Income and Growth */}
-                  <div className="flex flex-col space-y-4 text-xl">
-                    <div className="flex justify-between">
-                      <span>กระแสเงินสดสุทธิต่อปี</span>
-                      <span>{Number(Goal.netIncome).toLocaleString()} บาท</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>อัตราการเติบโตของกระแสเงินสดสุทธิต่อปี</span>
-                      <span>{(Goal.netIncomeGrowth * 100).toFixed(2)} %</span>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Goal Value and Period */}
-                  <div className="flex flex-col space-y-4 text-xl">
-                    <div className="flex justify-between">
-                      <span>จำนวนเงินเพื่อเป้าหมาย</span>
-                      <span>{Number(Goal.goalValue).toLocaleString()} บาท</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>ระยะเวลาเป้าหมาย</span>
-                      <span>{Goal.goalPeriod} ปี</span>
-                    </div>
-                  </div>
-                </div>
+            <div className="flex flex-col gap-8 mx-32">
+              <CalculatedGoalBasedEfficient />
+              <div className="text-tfpa_gold text-xl font-bold grid grid-cols-2 text-start mx-12">
+                <span>
+                  จำนวนเงินที่ลูกค้าต้องเก็บออมต่อปี:{" "}
+                  {GoalAnnualSaving < 0
+                    ? 0
+                    : Number(GoalAnnualSaving).toLocaleString("en-us", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                  บาท
+                </span>
+                <span>
+                  เฉลี่ยเดือนละ:{" "}
+                  {GoalAnnualSaving < 0
+                    ? 0
+                    : Number(GoalAnnualSaving / 12).toLocaleString("en-us", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                  บาท
+                </span>
               </div>
-            )}
-
-            {/* Results */}
-            {Goal && (
-              <div className="flex flex-col items-center space-y-4 text-xl font-bold mt-4 mb-4">
-                <div className="flex space-x-4 items-center text-tfpa_gold">
-                  <span>เงินรวมปัจจุบันในการลงทุนคิดเป็นค่าเงินในอนาคต</span>
-                  <span>{fvOfCurrentInvestment.toLocaleString()}</span>
-                  <span>บาท</span>
-                </div>
-
-                <div className="flex space-x-4 items-center text-tfpa_gold">
-                  <span>เงินที่ต้องเก็บออมต่อปี</span>
-                  <span>
-                    {GoalAnnualSaving < 0
-                      ? 0
-                      : GoalAnnualSaving.toLocaleString()}
-                  </span>
-                  <span>บาท</span>
-                </div>
-
-                <div
-                  className={`px-52 py-2 rounded-3xl ${
-                    GoalAnnualSaving <= Number(Goal.netIncome)
-                      ? "bg-green-300 text-green-950"
-                      : "bg-red-300 text-red-950"
-                  }`}
+              <CalculateGoalBasedFinance />
+              <CalculateGoalBasedGoalDetails />
+              {/* Dashboard Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleDashboard}
+                  className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-bold"
                 >
-                  {GoalAnnualSaving <= Number(Goal.netIncome)
-                    ? "เงินที่ออมอยู่ต่อปีมีเพียงพอ"
-                    : "เงินที่ออมอยู่ต่อปีมีไม่เพียงพอ"}
-                </div>
+                  Dashboard
+                </button>
               </div>
-            )}
-
-            {/* Dashboard Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={handleDashboard}
-                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-bold"
-              >
-                Dashboard
-              </button>
             </div>
           </motion.div>
         </div>

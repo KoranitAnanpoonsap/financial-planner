@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import "@fontsource/ibm-plex-sans-thai"
+import "@fontsource/prompt"
 import ClientLogin from "./pages/client_login"
 import PlannerLogin from "./pages/planner_login"
 import AdminLogin from "./pages/admin_login"
@@ -12,6 +13,7 @@ import ClientHealthcheckPage from "./pages/client_healthcheck_page"
 import ClientHealthcheckResult from "./pages/client_healthcheck_result"
 import ClientEasygoalPage from "./pages/client_easygoal_page"
 import ClientEasygoalResult from "./pages/client_easygoal_result"
+import CFPProfile from "./pages/cfp_profile"
 import PortfolioSelectionCFP from "./pages/portfolio_selection_cfp"
 import PortfolioCreationCFP from "./pages/portfolio_creation_cfp"
 import CFPCashflowBase from "./pages/cfp_cashflow_base"
@@ -19,7 +21,7 @@ import CFPCashflowBaseCalculated from "./pages/cfp_cashflow_base_calculated"
 import CFPCashflowBaseDashboard from "./pages/cfp_cashflow_base_dashboard.jsx"
 import CFPGoalBase from "./pages/cfp_goal_base"
 import CFPGoalBaseCalculated from "./pages/cfp_goal_base_calculated"
-import CFPGoalBaseDashboard from "./pages/cfp_goal_base_dashboard.jsx";
+import CFPGoalBaseDashboard from "./pages/cfp_goal_base_dashboard.jsx"
 import RetirementGoalPage from "./pages/retirement_goal"
 import RetirementGoalCalculated from "./pages/retirement_goal_calculated"
 import TaxIncomePage from "./pages/tax_income"
@@ -48,6 +50,7 @@ function App() {
         <Route path="/client-healthcheck-result" element={<ClientHealthcheckResult />} />
         <Route path="/client-easygoal-page" element={<ClientEasygoalPage />} />
         <Route path="/client-easygoal-result" element={<ClientEasygoalResult />} />
+        <Route path="/cfp-profile/" element={<CFPProfile />} />
         <Route
           path="/portfolio-selection/"
           element={<PortfolioSelectionCFP />}
@@ -59,8 +62,8 @@ function App() {
           element={<CFPCashflowBaseCalculated />}
         />
         <Route
-            path="/cashflow-base-dashboard/"
-            element={<CFPCashflowBaseDashboard />}
+          path="/cashflow-base-dashboard/"
+          element={<CFPCashflowBaseDashboard />}
         />
         <Route path="/goal-base/" element={<CFPGoalBase />} />
         <Route

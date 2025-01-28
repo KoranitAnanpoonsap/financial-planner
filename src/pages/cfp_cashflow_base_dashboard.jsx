@@ -1,20 +1,32 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer.jsx"
 import Header from "../components/cfpHeader.jsx"
 import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { motion } from "framer-motion"
+
+// Import the calculation functions
+import {
+  calculatePortfolioSummary,
+  calculateYearlyIncome,
+  calculateYearlyExpense,
+  calculateGoalPayments,
+} from "../utils/calculations.js"
 import { Line } from "react-chartjs-2"
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  plugins,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
 } from "chart.js"
-
+import ChartDataLabels from "chartjs-plugin-datalabels"
+import html2canvas from "html2canvas"
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -23,9 +35,21 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 )
-
+Chart.defaults.set("plugins.datalabels", {
+  formatter: function (value, context) {
+    return (
+      Number(value).toLocaleString("en-us", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }) + " บาท"
+    )
+  },
+  align: -45,
+  color: "black",
+})
 const pageVariants = {
   initial: { opacity: 0 },
   in: { opacity: 1 },
@@ -35,45 +59,33 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.3,
+  duration: 0.5,
 }
 
-// Import the calculation functions
-import {
-  calculatePortfolioSummary,
-  calculateYearlyIncome,
-  calculateYearlyExpense,
-  calculateGoalPayments,
-} from "../utils/calculations.js"
-
 export default function CFPCashflowBaseDashboard() {
-  const [clientId] = useState(Number(localStorage.getItem("clientId")) || "")
+  const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
+  const navigate = useNavigate()
 
   const [incomes, setIncomes] = useState([])
   const [expenses, setExpenses] = useState([])
   const [goals, setGoals] = useState([])
   const [portfolioReturn, setPortfolioReturn] = useState(0)
+  const [check, setCheck] = useState([])
 
   const years = [1, 2, 3, 4, 5]
 
-  const [selectedGoals, setSelectedGoals] = useState([])
-  const [buttonStatus, setButtonStatus] = useState([])
-
   useEffect(() => {
     fetchAllData()
-  }, [clientId])
-
-  // useEffect(() => {
-  //
-  // },[])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientUuid])
 
   const fetchAllData = async () => {
     try {
       const [incomesRes, expensesRes, goalsRes, assetsRes] = await Promise.all([
-        fetch(`http://localhost:8080/api/clientincome/${clientId}`),
-        fetch(`http://localhost:8080/api/clientexpense/${clientId}`),
-        fetch(`http://localhost:8080/api/cashflow/${clientId}`),
-        fetch(`http://localhost:8080/api/portassets/${clientId}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientincome/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/clientexpense/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/cashflow/${clientUuid}`),
+        fetch(`${import.meta.env.VITE_API_KEY}api/portassets/${clientUuid}`),
       ])
 
       if (!incomesRes.ok || !expensesRes.ok || !goalsRes.ok || !assetsRes.ok) {
@@ -89,11 +101,12 @@ export default function CFPCashflowBaseDashboard() {
       setExpenses(expensesData)
       setGoals(goalsData)
 
-      const newButtonStatus = []
+      const initialCheck = []
+
       goalsData.forEach(() => {
-        newButtonStatus.push(false)
+        initialCheck.push(true)
       })
-      setButtonStatus(newButtonStatus)
+      setCheck(initialCheck)
 
       const { portReturn } = calculatePortfolioSummary(assetsData)
       setPortfolioReturn(portReturn)
@@ -140,182 +153,192 @@ export default function CFPCashflowBaseDashboard() {
     }
   })
 
-  const CashFlowSufficientAllGoals = () => {
+  const handleNavigateBack = () => {
+    navigate(`/cashflow-base-calculated/`)
+  }
+
+  const DashboardCashFlowBasedEfficient = () => {
     let sufficients = true
-    calculationResults.forEach((r) => {
-      if (r.netIncomeAfterGoals < 0) {
+    const inputs = document.getElementsByTagName("input")
+    const data = []
+
+    calculationResults.map((r, i) => {
+      let netIncome = r.netIncome
+      goals.forEach((goal, index) => {
+        if (check[index]) {
+          const pay = r.goalPayments.find(
+            (g) => Object.keys(g)[0] === goal.clientGoalName
+          )
+          netIncome = netIncome - parseFloat(pay[goal.clientGoalName])
+        }
+      })
+      if (netIncome < 0) {
         sufficients = false
       }
-    })
-    return (
-      <div className="w-[300px] h-[300px] bg-gray-50 flex flex-col items-center py-1 gap-1">
-        <div className="w-full h-8 bg-tfpa_light_blue flex flex-col items-center justify-center"></div>
-        <div className="flex flex-col items-center justify-center h-full gap-5 text-center">
-          กระแสเงินสดเพียงพอ
-          <br />
-          ต่อการออม
-          <br />
-          เพื่อทุกเป้าหมาย
-          <span className="text-[48px] font-bold font-sans">
-            {sufficients ? "เพียงพอ" : "ไม่เพียงพอ"}
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  const IncomeExpenseChart = () => {
-    const xValues = years.map((year) => {
-      return "ปีที่ " + year
-    })
-    const Incomes = calculationResults.map((result) => {
-      return result.totalIncome
-    })
-    const Expenses = calculationResults.map((result) => {
-      return result.totalExpense
+      data.push(netIncome)
     })
 
-    const chartData = {
-      labels: xValues,
-      datasets: [
-        {
-          label: "รายได้",
-          tension: 0,
-          borderColor: "rgba(19, 83, 138, 0.5)",
-          data: Incomes,
-        },
-        {
-          label: "รายจ่าย",
-          tension: 0,
-          borderColor: "rgba(235, 67, 67, 0.5)",
-          data: Expenses,
-        },
-      ],
-    }
-    return (
-      <div className="flex w-[550px]">
-        <Line data={chartData} />
-      </div>
-    )
-  }
-
-  const CashFlowSufficientSelectedGoals = () => {
-    let sufficients = true
-    selectedGoals.forEach((goal) => {
+    goals.forEach((goal, index) => {
+      if (check[index]) {
+      }
       if (goal < 0) {
         sufficients = false
       }
     })
-    let goalList = ""
-    buttonStatus.forEach((status, index) => {
-      if (status) {
-        let goalName = ""
-        goalName += goals[index].id.clientGoalName + ", "
-        goalList += goalName
-      }
-    })
-    return (
-      <div className="w-[300px] h-[300px] bg-gray-50 flex flex-col items-center py-1 gap-1">
-        <div className="w-full h-8 bg-tfpa_light_blue flex flex-col items-center justify-center"></div>
-        <div className="flex flex-col items-center justify-center h-full gap-5 text-center">
-          กระแสเงินสดเพียงพอ
-          <br />
-          ต่อการออมของเป้าหมาย
-          <br />
-          <span className="text-[26px] font-bold text-[#219DFF]">
-            {goalList.slice(0, -2)}
-          </span>
-          <span className="text-[48px] font-bold font-sans">
-            {goalList.length === 0
-              ? "-"
-              : sufficients
-              ? "เพียงพอ"
-              : "ไม่เพียงพอ"}
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  const CashFlowDeductedSelectedGoals = () => {
-    const xValues = years.map((year) => {
-      return "ปีที่ " + year
-    })
-
     const chartData = {
-      labels: xValues,
+      labels: [1, 2, 3, 4, 5],
       datasets: [
         {
-          label: "กระแสเงินสดสุทธิตามเป้าหมายที่เลือก",
-          tension: 0,
-          borderColor: "rgba(19, 83, 138, 0.5)",
-          data:
-            selectedGoals.length > 0
-              ? selectedGoals
-              : calculationResults.map((r) => r.netIncome),
+          label: "กระแสเงินสดสุทธิหลังหักเป้าหมาย",
+          data: data,
+          borderWidth: 1,
+          borderColor: "#FF6384",
         },
       ],
     }
-    return (
-      <div className="flex w-[550px]">
-        <Line data={chartData} />
-      </div>
-    )
-  }
-
-  const CashFlowSelectedGoalsAnalysis = () => {
-    const selectGoals = (e, buttonCount) => {
-      e.preventDefault()
-      const newButtonStatus = [...buttonStatus]
-      newButtonStatus[buttonCount] = !newButtonStatus[buttonCount]
-
-      const newSelectedGoals = []
-      calculationResults.forEach((r) => {
-        let cumulate = 0
-        r.goalPayments.forEach((payment, index) => {
-          if (newButtonStatus[index]) {
-            cumulate += parseFloat(payment[goals[index].id.clientGoalName])
-          }
-        })
-        newSelectedGoals.push(r.netIncome - cumulate)
+    const onCheckBoxClick = (index) => {
+      const initCheck = []
+      check.forEach((value, i) => {
+        if (i === index) {
+          initCheck.push(!value)
+        } else {
+          initCheck.push(value)
+        }
       })
-      setSelectedGoals(newSelectedGoals)
-      setButtonStatus(newButtonStatus)
+      setCheck(initCheck)
     }
 
     return (
-      <>
-        <div className="w-full h-[5px] flex bg-tfpa_blue rounded-3xl my-5"></div>
-        <div className="w-full flex flex-row gap-2 items-center justify-center text-3xl">
-          <div className="flex gap-10">
+      <div className="text-3xl flex flex-col w-full items-center border-black border-2 rounded-2xl p-4">
+        {sufficients ? (
+          <div className={"mb-8 text-[green] flex gap-2"}>
+            "{"คุณมีกระเเสเงินสดเพียงพอต่อการออมเพื่อ"}{" "}
+            {goals.map((goal, index) => {
+              if (check[index]) {
+                return <div>{goal.clientGoalName}</div>
+              }
+            })}
+            "
+          </div>
+        ) : (
+          <div className={"mb-8 text-[red] flex gap-2"}>
+            "{"คุณมีกระเเสเงินสดไม่เพียงพอต่อการออมเพื่อ"}{" "}
+            {goals.map((goal, index) => {
+              if (check[index]) {
+                return <div>{goal.clientGoalName}</div>
+              }
+            })}
+            "
+          </div>
+        )}
+        <div className="m-2">
+          กราฟเเสดงความเพียงพอของกระเเสเงินสดสำหรับเป้าหมายในเเต่ละปี
+        </div>
+        <div className="flex w-full px-60">
+          <div className="w-full">
+            <Line data={chartData} />
+          </div>
+          <div className="absolute right-0 mr-[10%] mt-[10%] flex flex-col gap-2 text-base">
             {goals.map((goal, index) => {
               return (
-                <>
-                  <div className="mx-1 flex gap-1">
-                    <input
-                      type="checkbox"
-                      className="w-[25px]"
-                      onChange={(e) => selectGoals(e, index)}
-                      checked={buttonStatus[index]}
-                    />
-                    <span className="">{goal.id.clientGoalName}</span>
-                  </div>
-                </>
+                <div className="flex gap-x-2 items-center">
+                  <input
+                    className="w-6 h-6"
+                    type="checkbox"
+                    checked={check[index]}
+                    onChange={() => onCheckBoxClick(index)}
+                  />
+                  {goal.clientGoalName}
+                </div>
               )
             })}
           </div>
         </div>
-        <CashFlowSufficientSelectedGoals />
-        <CashFlowDeductedSelectedGoals />
-      </>
+      </div>
     )
   }
+
+  const DashboardCashFlowBasedGoalDetail = () => {
+    return (
+      <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
+        <div className="text-2xl mb-2">รายละเอียดของแต่ละเป้าหมาย</div>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                ชื่อเป้าหมาย
+              </th>
+              <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                จำนวนเงินเพื่อเป้าหมาย
+              </th>
+              <th className="py-2 px-4 border font-ibm font-bold text-tfpa_blue">
+                ระยะเวลาเป้าหมาย (ปี)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {goals.map((goal) => (
+              <tr key={goal.clientGoalName}>
+                <td className="py-2 px-4 border">{goal.clientGoalName}</td>
+                <td className="py-2 px-4 border">
+                  {goal.clientGoalValue.toLocaleString()}
+                </td>
+                <td className="py-2 px-4 border">{goal.clientGoalPeriod}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  const DashboardCashFlowBasedAnnualNetCashFlow = () => {
+    const years = []
+    const data = calculationResults.map((result, index) => {
+      if (result.netIncome !== 0) {
+        years.push(index + 1)
+      }
+      return result.netIncome
+    })
+    const chartData = {
+      labels: years,
+      datasets: [
+        {
+          label: "กระเเสเงินสดสุทธิ",
+          data: data,
+          borderWidth: 1,
+          borderColor: "#FF6384",
+        },
+      ],
+    }
+    return (
+      <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
+        <div className="text-2xl mb-2">กระเเสเงินสดสุทธิเเต่ละปี</div>
+        <div className="w-full">
+          <Line data={chartData} />
+        </div>
+      </div>
+    )
+  }
+
+  function print() {
+    const element = document.getElementById("print")
+    html2canvas(element).then((canvas) => {
+      // Append the canvas to the body or save it as an image
+      document.body.appendChild(canvas)
+      const link = document.createElement("a")
+      link.download = "dashboard.png"
+      link.href = canvas.toDataURL("image/png")
+      canvas.remove()
+      link.click()
+      document.delete(link)
+    })
+  }
   return (
-    <div className="flex flex-col min-h-screen font-ibm font-bold text-tfpa_blue">
+    <div className="flex flex-col min-h-screen">
       <Header />
       <div className="flex flex-1">
         <CfpClientSidePanel />
-        <div className="flex-1 p-4 space-y-8">
+        <div className="flex-1 p-4 space-y-8 w-full">
           <motion.div
             initial="initial"
             animate="in"
@@ -323,11 +346,31 @@ export default function CFPCashflowBaseDashboard() {
             variants={pageVariants}
             transition={pageTransition}
           >
-            <div className="flex flex-row py-1 px-10 gap-2 items-center justify-between flex-wrap">
-              <CashFlowSufficientAllGoals />
-              <IncomeExpenseChart />
-              <CashFlowSelectedGoalsAnalysis />
+            <div className="flex space-x-4 justify-end">
+              <button
+                onClick={handleNavigateBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+              >
+                กลับ
+              </button>
             </div>
+            <div id="print">
+              <div className="flex flex-col w-full p-4 gap-8 text-tfpa_blue">
+                <DashboardCashFlowBasedEfficient />
+                <div className="flex gap-8 flex-col xl:flex-row">
+                  <DashboardCashFlowBasedGoalDetail />
+                  <DashboardCashFlowBasedAnnualNetCashFlow />
+                </div>
+              </div>
+            </div>
+            <center>
+              <button
+                onClick={print}
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 text-2xl font-bold mt-8 rounded-2xl"
+              >
+                Print
+              </button>
+            </center>
           </motion.div>
         </div>
       </div>

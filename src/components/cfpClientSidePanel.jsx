@@ -7,24 +7,6 @@ import newIcon from "../assets/new.png"
 import loadingIcon from "../assets/loading.png"
 import checkIcon from "../assets/check.png"
 
-const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
-}
-
-const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.3,
-}
-
 export default function CfpSidePanel() {
   const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
@@ -84,7 +66,7 @@ export default function CfpSidePanel() {
       routes: [`/portfolio-selection/`, `/portfolio-chart/`],
     },
     {
-      label: "การคำนวณเป้าหมาย",
+      label: "การคำนวณเป้าหมายอย่างง่าย",
       icon: loadingIcon,
       routes: [
         `/goal-base/`,
@@ -95,7 +77,7 @@ export default function CfpSidePanel() {
       ],
     },
     {
-      label: "การวางแผนหลายเป้าหมาย",
+      label: "การวางแผนเป้าหมายองค์รวม",
       icon: checkIcon,
       routes: [`/cashflow-base/`, `/cashflow-base-calculated/`],
     },

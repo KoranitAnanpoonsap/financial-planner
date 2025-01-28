@@ -110,7 +110,11 @@ export default function CFPCashflowBaseCalculated() {
 
   const handleDashboard = () => {
     // Navigate to a dashboard page
-    navigate(`/cashflow-base-dashboard`)
+    navigate(`/cashflow-base-dashboard/`)
+  }
+  const handleNavigateBack = () => {
+    // Navigate to a dashboard page
+    navigate(`/cashflow-base/`)
   }
 
   return (
@@ -126,6 +130,14 @@ export default function CFPCashflowBaseCalculated() {
             variants={pageVariants}
             transition={pageTransition}
           >
+            <div className="flex space-x-4 justify-end">
+              <button
+                onClick={handleNavigateBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
+              >
+                กลับ
+              </button>
+            </div>
             <div className="overflow-x-auto mt-4">
               <table className="min-w-full bg-white border border-gray-300 text-sm">
                 <thead>
@@ -184,7 +196,7 @@ export default function CFPCashflowBaseCalculated() {
                     </tr>
                   ))}
                   {/* Total Income */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
                       รวมรายได้
                     </td>
@@ -241,7 +253,7 @@ export default function CFPCashflowBaseCalculated() {
                     </tr>
                   ))}
                   {/* Total Expense */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
                       รวมรายจ่าย
                     </td>
@@ -260,7 +272,7 @@ export default function CFPCashflowBaseCalculated() {
                   </tr>
 
                   {/* Net Income */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
                       กระแสเงินสดสุทธิ
                     </td>
