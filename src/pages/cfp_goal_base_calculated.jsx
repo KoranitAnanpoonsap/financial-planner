@@ -192,7 +192,7 @@ export default function CFPGoalBaseCalculated() {
               <CalculatedGoalBasedEfficient />
               <div className="text-tfpa_gold text-xl font-bold grid grid-cols-2 text-start mx-12">
                 <span>
-                  จำนวนเงินที่ลูกค้าต้องเก็บออมต่อปี:{" "}
+                  จำนวนเงินที่ลูกค้าต้องเก็บออมเพิ่มต่อปี:{" "}
                   {GoalAnnualSaving < 0
                     ? 0
                     : Number(GoalAnnualSaving).toLocaleString("en-us", {
