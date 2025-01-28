@@ -24,6 +24,7 @@ const pageTransition = {
 }
 
 export default function AdminLogin() {
+  //admin
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
