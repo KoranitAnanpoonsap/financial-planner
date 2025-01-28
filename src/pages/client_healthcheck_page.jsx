@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Header from "../components/clientHeader.jsx";
 import Footer from "../components/footer.jsx";
 
 export default function FinancialHealthForm() {
+  const navigate = useNavigate(); // Initialize navigation
+
   const [formData, setFormData] = useState({
     cashFlow: "",
     liquidAssets: "",
@@ -13,26 +16,28 @@ export default function FinancialHealthForm() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Allow only numbers (or an empty string) and update state
     if (/^\d*$/.test(value)) {
       setFormData((prev) => ({
         ...prev,
-        [name]: value, // Keep as a string to avoid React delays
+        [name]: value,
       }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e) => { 
     e.preventDefault();
 
-    // Convert strings to numbers when processing the form data
     const numericData = Object.fromEntries(
       Object.entries(formData).map(([key, value]) => [key, Number(value) || 0])
     );
 
-    console.log("Form data submitted:", numericData);
-    // Perform calculations or API calls here
+    // Perform calculations
+    const value1 = numericData.cashFlow !== 0 ? numericData.liquidAssets / numericData.cashFlow : 0;
+    const value2 = numericData.annualIncome !== 0 ? numericData.debtPayments / numericData.annualIncome : 0;
+    const value3 = numericData.annualIncome !== 0 ? numericData.annualSavings / numericData.annualIncome : 0;
+
+    // Navigate to the results page with calculated values
+    navigate("/client-healthcheck-result", { state: { value1, value2, value3 } });
   };
 
   const InputField = ({ label, name }) => (
@@ -41,10 +46,10 @@ export default function FinancialHealthForm() {
         {label} <span className="text-gray-500">(ต่อเดือน)</span>
       </label>
       <input
-        type="text" // Keep as text to handle input validation
+        type="text"
         name={name}
         id={name}
-        value={formData[name]} // Controlled input
+        value={formData[name]}
         onChange={handleInputChange}
         className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
       />
@@ -81,3 +86,4 @@ export default function FinancialHealthForm() {
     </div>
   );
 }
+
