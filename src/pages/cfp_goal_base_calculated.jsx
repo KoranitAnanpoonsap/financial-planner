@@ -25,8 +25,6 @@ export default function CFPGoalBaseCalculated() {
   const [Goal, setGoal] = useState(null)
   const [fvOfCurrentInvestment, setFvOfCurrentInvestment] = useState(0)
   const [GoalAnnualSaving, setGoalAnnualSaving] = useState(0)
-  const [PortfolioReturn, setPortfolioReturn] = useState("")
-  const [NetIncome, setNetIncome] = useState("")
 
   useEffect(() => {
     fetchAllData()
@@ -44,7 +42,6 @@ export default function CFPGoalBaseCalculated() {
       }
       const gData = await gResponse.json()
       setGoal(gData)
-      setTotalInvestment(gData.totalInvestment?.toString() || "")
       setPortfolioReturn(
         gData.portReturn !== undefined
           ? (gData.portReturn * 100).toFixed(2)
@@ -113,7 +110,7 @@ export default function CFPGoalBaseCalculated() {
             </div>
             <div>
               กระเเสเงินสดสุทธิเฉลี่ยต่อปี:{" "}
-              {Number(NetIncome).toLocaleString("en-us", {
+              {Number(Goal.netIncome).toLocaleString("en-us", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}{" "}
@@ -121,7 +118,7 @@ export default function CFPGoalBaseCalculated() {
             </div>
             <div>
               ผลตอบเเทนต่อปีของพอร์ตที่ลงทุนในปัจจุบัน:{" "}
-              {PortfolioReturn.toLocaleString()}%
+              {(Goal.portReturn * 100).toFixed(2).toLocaleString()}%
             </div>
             <div>
               อัตราการเติบโตของกระเเสเงินสดสุทธิต่อปี:{" "}
@@ -158,10 +155,6 @@ export default function CFPGoalBaseCalculated() {
         </div>
       )
     )
-  }
-
-  const handleNavigateRetirement = () => {
-    navigate(`/retirement-goal/`)
   }
 
   const handleNavigateBack = () => {
