@@ -517,7 +517,7 @@ export default function TaxIncomePage() {
             <div className="flex justify-end mt-4">
               <button
                 onClick={handleNext}
-                className="bg-tfpa_gold hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded font-bold"
+                className="bg-tfpa_gold hover:bg-tfpa_gold_hover text-white px-4 py-2 rounded font-bold"
               >
                 ถัดไป
               </button>

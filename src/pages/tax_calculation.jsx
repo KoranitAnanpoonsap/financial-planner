@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Footer from "../components/footer"
 import Header from "../components/cfpHeader"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
@@ -8,15 +8,9 @@ import { fetchAndCalculateTaxPlanForClient } from "../utils/taxPlanCalculations"
 import { motion } from "framer-motion"
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 1,
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
 }
 
 const pageTransition = {
@@ -81,6 +75,9 @@ export default function TaxCalculationPage() {
   // Debounce timer
   const [debounceTimer, setDebounceTimer] = useState(null)
 
+  // 1) This flag indicates if the initial data load is fully complete
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false)
+
   useEffect(() => {
     fetchData()
   }, [clientUuid])
@@ -130,9 +127,18 @@ export default function TaxCalculationPage() {
       const taxPlanRes = await fetch(
         `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`
       )
+      let tempInvestments = {
+        rmf: 0,
+        ssf: 0,
+        govPensionFund: 0,
+        pvd: 0,
+        nationSavingsFund: 0,
+        pensionInsurance: 0,
+        total: 0,
+      }
       if (taxPlanRes.ok) {
         const taxPlanData = await taxPlanRes.json()
-        setInvestments({
+        tempInvestments = {
           rmf: taxPlanData.investRmf || 0,
           ssf: taxPlanData.investSsf || 0,
           govPensionFund: taxPlanData.investGovPensionFund || 0,
@@ -146,22 +152,14 @@ export default function TaxCalculationPage() {
             (taxPlanData.investPvd || 0) +
             (taxPlanData.investNationSavingsFund || 0) +
             (taxPlanData.investPensionInsurance || 0),
-        })
-      } else {
-        setInvestments({
-          rmf: 0,
-          ssf: 0,
-          govPensionFund: 0,
-          pvd: 0,
-          nationSavingsFund: 0,
-          pensionInsurance: 0,
-          total: 0,
-        })
+        }
       }
 
-      // Recalculate new tax based on investments
+      setInvestments(tempInvestments)
+
+      // Recalculate new tax based on totalUsedDeductions
       const totalUsedDeductions = Math.min(
-        calculatedAlreadyUsed.total + investments.total,
+        calculatedAlreadyUsed.total + tempInvestments.total,
         500000
       )
       const newTaxResult = await fetchAndCalculateTaxPlanForClient(
@@ -170,6 +168,9 @@ export default function TaxCalculationPage() {
       )
       setNewTaxToPay(newTaxResult.taxToPay)
       setTaxSaved(taxResult.taxToPay - newTaxResult.taxToPay)
+
+      // 2) Mark that the initial load is finished (so no flicker occurs)
+      setInitialLoadComplete(true)
     } catch (error) {
       console.error(error)
     }
@@ -183,8 +184,6 @@ export default function TaxCalculationPage() {
     const nationSavingsMax = 30000
     const pensionInsuranceMax = Math.min(0.15 * totalIncome, 200000)
 
-    // The overall total is capped at 500,000 as per specifications
-    // However, individual deductions are already capped
     const individualTotal =
       rmfMax +
       ssfMax +
@@ -305,7 +304,7 @@ export default function TaxCalculationPage() {
 
     const timer = setTimeout(() => {
       saveInvestments(name, cappedValue)
-    }, 500) // 500ms delay
+    }, 500)
 
     setDebounceTimer(timer)
   }
@@ -368,7 +367,7 @@ export default function TaxCalculationPage() {
     }
   }
 
-  // Calculate new tax after planning when investments or already used deductions change
+  // 3) Only recalc newTaxToPay / taxSaved if the initial load is done
   useEffect(() => {
     const calculateNewTax = async () => {
       try {
@@ -387,15 +386,17 @@ export default function TaxCalculationPage() {
       }
     }
 
-    calculateNewTax()
+    // If initial load not complete, skip recalculating to avoid flicker
+    if (initialLoadComplete) {
+      calculateNewTax()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [investments, alreadyUsedDeductions, totalIncome])
+  }, [investments, alreadyUsedDeductions, totalIncome, initialLoadComplete])
 
   const handleBack = () => {
     navigate(`/tax-deduction/`)
   }
 
-  // Function to auto-highlight input content on focus
   const handleInputFocus = (e) => {
     e.target.select()
   }
@@ -445,6 +446,7 @@ export default function TaxCalculationPage() {
               <span className="font-bold text-tfpa_blue">ผลการคำนวณ</span>
             </button>
           </div>
+
           <motion.div
             initial="initial"
             animate="in"
@@ -766,15 +768,24 @@ export default function TaxCalculationPage() {
               </div>
               <div className="flex items-center space-x-2 text-lg">
                 <span>หลังวางแผนเสียภาษี:</span>
-                <span className="text-tfpa_gold">
-                  {newTaxToPay.toLocaleString()} บาท
-                </span>
+                {/* 4) If initial load not complete, show nothing or a placeholder */}
+                {initialLoadComplete ? (
+                  <span className="text-tfpa_gold">
+                    {newTaxToPay.toLocaleString()} บาท
+                  </span>
+                ) : (
+                  <span className="text-gray-400">--</span>
+                )}
               </div>
               <div className="flex items-center space-x-2 text-lg">
                 <span>ประหยัดภาษี:</span>
-                <span className="text-tfpa_gold">
-                  {taxSaved.toLocaleString()} บาท
-                </span>
+                {initialLoadComplete ? (
+                  <span className="text-tfpa_gold">
+                    {taxSaved.toLocaleString()} บาท
+                  </span>
+                ) : (
+                  <span className="text-gray-400">--</span>
+                )}
               </div>
             </div>
 
@@ -782,7 +793,7 @@ export default function TaxCalculationPage() {
             <div className="flex justify-end">
               <button
                 onClick={handleBack}
-                className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
+                className="bg-tfpa_gold hover:bg-tfpa_gold_hover text-white px-4 py-2 rounded font-bold"
               >
                 กลับ
               </button>

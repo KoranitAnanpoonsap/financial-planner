@@ -1236,13 +1236,13 @@ export default function TaxDeductionPage() {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
+                className="bg-tfpa_gold hover:bg-tfpa_gold_hover text-white px-4 py-2 rounded font-bold"
               >
                 กลับ
               </button>
               <button
                 onClick={handleNext}
-                className="bg-tfpa_gold text-white px-4 py-2 rounded font-bold"
+                className="bg-tfpa_gold hover:bg-tfpa_gold_hover text-white px-4 py-2 rounded font-bold"
               >
                 ถัดไป
               </button>
