@@ -160,7 +160,9 @@ export default function CFPClientExpensePage() {
     setExpenseName(exp.clientExpenseName)
     setFrequency(exp.clientExpenseFrequency)
     setAmount(exp.clientExpenseAmount.toString())
-    setGrowthRate((exp.clientExpenseAnnualGrowthRate * 100).toString())
+    setGrowthRate(
+      (exp.clientExpenseAnnualGrowthRate * 100).toFixed(2).toString()
+    )
     setDebtExpense(exp.clientDebtExpense)
     setNonMortgageDebtExpense(exp.clientNonMortgageDebtExpense)
     setSavingExpense(exp.clientSavingExpense)

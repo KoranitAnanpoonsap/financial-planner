@@ -132,8 +132,8 @@ export default function CFPCashflowBaseCalculated() {
           >
             <div className="flex space-x-4 justify-end">
               <button
-                  onClick={handleNavigateBack}
-                  className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-6 py-2 rounded font-ibm"
+                onClick={handleNavigateBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
               >
                 กลับ
               </button>
@@ -196,7 +196,7 @@ export default function CFPCashflowBaseCalculated() {
                     </tr>
                   ))}
                   {/* Total Income */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
                       รวมรายได้
                     </td>
@@ -253,7 +253,7 @@ export default function CFPCashflowBaseCalculated() {
                     </tr>
                   ))}
                   {/* Total Expense */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border font-ibm font-semibold text-tfpa_gold">
                       รวมรายจ่าย
                     </td>
@@ -272,7 +272,7 @@ export default function CFPCashflowBaseCalculated() {
                   </tr>
 
                   {/* Net Income */}
-                  <tr className="border-t-2">
+                  <tr>
                     <td className="py-2 px-4 border text-lg font-ibm font-semibold text-tfpa_blue">
                       กระแสเงินสดสุทธิ
                     </td>

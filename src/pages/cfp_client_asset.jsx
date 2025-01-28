@@ -4,6 +4,8 @@ import Header from "../components/cfpHeader"
 import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 
 // Define mappings for asset types, invest types, and invest risks
 const assetTypes = [
@@ -336,12 +338,12 @@ export default function CFPClientAssetPage() {
                   <label className="block text-tfpa_blue font-bold mb-2">
                     วันที่ซื้อสินทรัพย์
                   </label>
-                  <input
-                    type="date"
-                    value={buyDate}
-                    onChange={(e) => setBuyDate(e.target.value)}
+                  <DatePicker
+                    selected={buyDate}
+                    onChange={(date) => setBuyDate(date)}
+                    dateFormat="dd/MM/yyyy" // Display format
                     className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
-                    placeholder="mm/dd/yyyy"
+                    placeholderText="DD/MM/YYYY"
                   />
                 </div>
               )}

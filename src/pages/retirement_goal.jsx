@@ -63,12 +63,12 @@ export default function RetirementGoalPage() {
         )
         setClientExpectedRetiredPortReturn(
           rg.clientExpectedRetiredPortReturn !== undefined
-            ? (rg.clientExpectedRetiredPortReturn * 100).toString()
+            ? (rg.clientExpectedRetiredPortReturn * 100).toFixed(2).toString()
             : ""
         )
         setInflationRate(
           rg.inflationRate !== undefined
-            ? (rg.inflationRate * 100).toString()
+            ? (rg.inflationRate * 100).toFixed(2).toString()
             : ""
         )
       } else {
@@ -159,26 +159,7 @@ export default function RetirementGoalPage() {
       const savedGoal = await response.json()
 
       setRetirementGoalExists(true)
-      setRetirementGoal(savedGoal) // Update the retirementGoal state
-      // Update state with saved data to ensure consistency
-      setClientCurrentAge(savedGoal.clientCurrentAge?.toString() || "")
-      setClientRetirementAge(savedGoal.clientRetirementAge?.toString() || "")
-      setClientLifeExpectancy(savedGoal.clientLifeExpectancy?.toString() || "")
-      setClientCurrentYearlyExpense(
-        savedGoal.clientCurrentYearlyExpense?.toString() || ""
-      )
-      setClientExpectedRetiredPortReturn(
-        savedGoal.clientExpectedRetiredPortReturn !== undefined
-          ? (savedGoal.clientExpectedRetiredPortReturn * 100).toFixed(2)
-          : ""
-      )
-      setInflationRate(
-        savedGoal.inflationRate !== undefined
-          ? (savedGoal.inflationRate * 100).toFixed(2)
-          : ""
-      )
-      // Optionally, refetch all data to ensure synchronization
-      // await fetchAllData()
+
       console.log("Retirement goal saved successfully:", savedGoal)
     } catch (error) {
       console.error("Error saving retirement goal:", error)

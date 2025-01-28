@@ -148,23 +148,6 @@ export default function CFPGoalBase() {
       const savedGoal = await response.json()
 
       setGoalExists(true) // now definitely exists
-
-      // Update state with formatted numbers
-      setNetIncome(savedGoal.netIncome?.toString() || "")
-      setNetIncomeGrowth(
-        savedGoal.netIncomeGrowth !== undefined
-          ? (savedGoal.netIncomeGrowth * 100).toFixed(2)
-          : ""
-      )
-      setGoalName(savedGoal.goalName || "")
-      setGoalValue(savedGoal.goalValue?.toString() || "")
-      setGoalPeriod(savedGoal.goalPeriod?.toString() || "")
-      setTotalInvestment(savedGoal.totalInvestment?.toString() || "")
-      setPortfolioReturn(
-        savedGoal.portReturn !== undefined
-          ? (savedGoal.portReturn * 100).toFixed(2)
-          : ""
-      )
     } catch (error) {
       console.error("Error saving goal:", error)
       // Optionally, handle errors (e.g., display a toast notification)

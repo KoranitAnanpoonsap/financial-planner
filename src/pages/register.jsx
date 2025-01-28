@@ -268,7 +268,7 @@ export default function RegisterPage() {
             <DateInput
               label="วัน/เดือน/ปีเกิด"
               value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
+              onChange={(date) => setBirthdate(date)}
             />
 
             <button

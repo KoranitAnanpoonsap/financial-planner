@@ -5,7 +5,11 @@ import Footer from "../components/footer"
 import CfpClientSidePanel from "../components/cfpClientSidePanel"
 import { motion } from "framer-motion"
 
-// Mapping for debt types
+// 1) Import react-datepicker and date-fns formatting tools
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import { format, parseISO } from "date-fns"
+
 const debtTypes = {
   1: "หนี้บ้าน",
   2: "หนี้รถยนต์",
@@ -17,7 +21,6 @@ const debtTypes = {
   8: "หนี้อื่นๆ",
 }
 
-// Mapping for debt terms
 const debtTerms = {
   1: "ระยะสั้น",
   2: "ระยะยาว",
@@ -48,7 +51,10 @@ export default function CFPClientDebtPage() {
   const [debtTerm, setDebtTerm] = useState(1) // 1 represents "ระยะสั้น"
   const [amount, setAmount] = useState("")
   const [interest, setInterest] = useState("")
-  const [startDate, setStartDate] = useState("")
+
+  // 2) Store `startDate` as a Date object
+  const [startDate, setStartDate] = useState(null)
+
   const [years, setYears] = useState("")
   const [principal, setPrincipal] = useState("")
 
@@ -67,13 +73,15 @@ export default function CFPClientDebtPage() {
         return
       }
       const data = await res.json()
+
+      // 3) Convert the incoming date string to a Date object IF you want to
+      // store it immediately. Typically, we do this in the table row for display.
       setDebts(data)
     } catch (error) {
       console.error("Error fetching debts:", error)
     }
   }
 
-  // Helper functions to get labels from values
   const getDebtTypeLabel = (typeValue) => {
     return debtTypes[typeValue] || "ไม่ระบุ"
   }
@@ -90,12 +98,16 @@ export default function CFPClientDebtPage() {
       debtTerm === 0 ||
       amount === "" ||
       interest === "" ||
-      startDate.trim() === "" ||
+      !startDate || // must be a valid Date object
       years === "" ||
       principal === ""
     ) {
       return
     }
+
+    // 4) Convert `startDate` (Date object) to string format for the server, e.g. yyyy-MM-dd
+    // We'll do this with date-fns:
+    const isoDateString = format(startDate, "yyyy-MM-dd")
 
     const newDebt = {
       clientUuid: clientUuid,
@@ -104,7 +116,7 @@ export default function CFPClientDebtPage() {
       clientDebtTerm: debtTerm,
       clientDebtAmount: parseFloat(amount),
       clientDebtAnnualInterest: parseFloat(interest) / 100,
-      clientStartDateDebt: startDate, // Ensure format YYYY-MM-DD
+      clientStartDateDebt: isoDateString, // e.g. "2025-01-01"
       clientDebtDuration: parseInt(years, 10),
       clientDebtPrincipal: parseFloat(principal),
     }
@@ -127,9 +139,9 @@ export default function CFPClientDebtPage() {
           console.error("Failed to delete old debt")
           return
         }
-        // Continue with POST to create new debt
+        // Continue with POST
       } else {
-        // If the name wasn't changed, just update the debt
+        // Just update
         url = `${
           import.meta.env.VITE_API_KEY
         }api/clientdebt/${clientUuid}/${encodeURIComponent(
@@ -145,17 +157,13 @@ export default function CFPClientDebtPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newDebt),
       })
-
       if (!res.ok) {
         console.error("Failed to create/update debt")
         return
       }
-
       await res.json()
-
       // Refresh list
       await fetchDebts()
-
       // Reset fields
       resetFields()
     } catch (error) {
@@ -175,7 +183,6 @@ export default function CFPClientDebtPage() {
         console.error("Failed to delete debt")
         return
       }
-      // Refresh list
       await fetchDebts()
     } catch (error) {
       console.error("Error deleting debt:", error)
@@ -189,8 +196,13 @@ export default function CFPClientDebtPage() {
     setDebtName(dbt.clientDebtName)
     setDebtTerm(dbt.clientDebtTerm)
     setAmount(dbt.clientDebtAmount.toString())
-    setInterest((dbt.clientDebtAnnualInterest * 100).toString())
-    setStartDate(dbt.clientStartDateDebt)
+    setInterest((dbt.clientDebtAnnualInterest * 100).toFixed(2).toString())
+    // 5) parse the date string into a Date object for the date picker
+    if (dbt.clientStartDateDebt) {
+      setStartDate(parseISO(dbt.clientStartDateDebt)) // from date-fns
+    } else {
+      setStartDate(null)
+    }
     setYears(dbt.clientDebtDuration.toString())
     setPrincipal(dbt.clientDebtPrincipal.toString())
   }
@@ -207,13 +219,12 @@ export default function CFPClientDebtPage() {
     setDebtTerm(1)
     setAmount("")
     setInterest("")
-    setStartDate("")
+    setStartDate(null)
     setYears("")
     setPrincipal("")
   }
 
   const handleBack = () => {
-    // Navigate back to client asset page
     navigate(`/client-asset/`)
   }
 
@@ -303,10 +314,7 @@ export default function CFPClientDebtPage() {
                 </label>
                 <select
                   value={debtType}
-                  onChange={(e) => {
-                    const selectedType = parseInt(e.target.value, 10)
-                    setDebtType(selectedType)
-                  }}
+                  onChange={(e) => setDebtType(parseInt(e.target.value, 10))}
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
                 >
                   <option value={0}>เลือก</option>
@@ -334,7 +342,7 @@ export default function CFPClientDebtPage() {
               {/* Debt Term */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
-                  ประเภทหนี้สิน
+                  ประเภทหนี้สิน (ระยะสั้น/ยาว)
                 </label>
                 <select
                   value={debtTerm}
@@ -378,16 +386,17 @@ export default function CFPClientDebtPage() {
                 />
               </div>
 
-              {/* Start Date */}
+              {/* Start Date (Use React DatePicker) */}
               <div>
                 <label className="block text-tfpa_blue font-bold mb-2">
-                  วันที่เริ่มต้นของหนี้สิน
+                  วันที่เริ่มต้นของหนี้สิน (DD/MM/YYYY)
                 </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  dateFormat="dd/MM/yyyy" // Display format
                   className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                  placeholderText="DD/MM/YYYY"
                 />
               </div>
 
@@ -484,48 +493,60 @@ export default function CFPClientDebtPage() {
                 </tr>
               </thead>
               <tbody>
-                {debts.map((dbt) => (
-                  <tr key={`${dbt.clientUuid}-${dbt.clientDebtName}`}>
-                    <td className="py-2 px-4 border">
-                      {getDebtTypeLabel(dbt.clientDebtType)}
-                    </td>
-                    <td className="py-2 px-4 border">{dbt.clientDebtName}</td>
-                    <td className="py-2 px-4 border">
-                      {getDebtTermLabel(dbt.clientDebtTerm)}
-                    </td>
-                    <td className="py-2 px-4 border text-right">
-                      {dbt.clientDebtAmount.toLocaleString()}
-                    </td>
-                    <td className="py-2 px-4 border text-right">
-                      {(dbt.clientDebtAnnualInterest * 100).toFixed(2)}%
-                    </td>
-                    <td className="py-2 px-4 border">
-                      {new Date(dbt.clientStartDateDebt).toLocaleDateString()}
-                    </td>
-                    <td className="py-2 px-4 border text-right">
-                      {dbt.clientDebtDuration}
-                    </td>
-                    <td className="py-2 px-4 border text-right">
-                      {dbt.clientDebtPrincipal.toLocaleString()}
-                    </td>
-                    <td className="py-2 px-4 border">
-                      <div className="flex space-x-4">
-                        <button
-                          onClick={() => handleEdit(dbt)}
-                          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-1 rounded font-ibm"
-                        >
-                          แก้ไข
-                        </button>
-                        <button
-                          onClick={() => handleDeleteDebt(dbt)}
-                          className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded font-ibm"
-                        >
-                          ลบ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {debts.map((dbt) => {
+                  // 6) Format date in dd/MM/yyyy if present
+                  let displayDate = ""
+                  if (dbt.clientStartDateDebt) {
+                    try {
+                      const parsed = parseISO(dbt.clientStartDateDebt)
+                      displayDate = format(parsed, "dd/MM/yyyy")
+                    } catch (err) {
+                      console.error("Date parse error:", err)
+                      displayDate = dbt.clientStartDateDebt
+                    }
+                  }
+
+                  return (
+                    <tr key={`${dbt.clientUuid}-${dbt.clientDebtName}`}>
+                      <td className="py-2 px-4 border">
+                        {getDebtTypeLabel(dbt.clientDebtType)}
+                      </td>
+                      <td className="py-2 px-4 border">{dbt.clientDebtName}</td>
+                      <td className="py-2 px-4 border">
+                        {getDebtTermLabel(dbt.clientDebtTerm)}
+                      </td>
+                      <td className="py-2 px-4 border text-right">
+                        {dbt.clientDebtAmount.toLocaleString()}
+                      </td>
+                      <td className="py-2 px-4 border text-right">
+                        {(dbt.clientDebtAnnualInterest * 100).toFixed(2)}%
+                      </td>
+                      <td className="py-2 px-4 border">{displayDate}</td>
+                      <td className="py-2 px-4 border text-right">
+                        {dbt.clientDebtDuration}
+                      </td>
+                      <td className="py-2 px-4 border text-right">
+                        {dbt.clientDebtPrincipal.toLocaleString()}
+                      </td>
+                      <td className="py-2 px-4 border">
+                        <div className="flex space-x-4">
+                          <button
+                            onClick={() => handleEdit(dbt)}
+                            className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-1 rounded font-ibm"
+                          >
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDebt(dbt)}
+                            className="bg-red-500 hover:bg-red-700 text-white px-4 py-1 rounded font-ibm"
+                          >
+                            ลบ
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
                 {debts.length === 0 && (
                   <tr>
                     <td className="py-2 px-4 border text-center" colSpan="9">

@@ -179,7 +179,7 @@ export default function PortfolioSelectionCFP() {
     setInvestType(asset.investType)
     setInvestName(asset.investName)
     setInvestAmount(asset.investAmount.toString())
-    setYearlyReturn((asset.yearlyReturn * 100).toString())
+    setYearlyReturn((asset.yearlyReturn * 100).toFixed(2).toString())
   }
 
   const handleCancelEdit = () => {
@@ -312,7 +312,11 @@ export default function PortfolioSelectionCFP() {
               {/* Display Yearly Return */}
               {investType !== 0 && (
                 <p className="mb-4 font-bold text-tfpa_blue">
-                  ผลตอบแทนต่อปี: {parseFloat(yearlyReturn).toFixed(2)}%
+                  {/* If yearlyReturn is empty or NaN, show nothing after the colon */}
+                  ผลตอบแทนต่อปี:{" "}
+                  {yearlyReturn && !isNaN(parseFloat(yearlyReturn))
+                    ? `${parseFloat(yearlyReturn).toFixed(2)}%`
+                    : ""}
                 </p>
               )}
 
