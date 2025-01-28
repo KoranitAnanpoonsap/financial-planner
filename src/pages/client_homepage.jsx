@@ -8,7 +8,7 @@ import Client_Homepage_pic3 from "../assets/plan_with_cfp.jpeg"
 
 export default function ClientHomePage() {
   const Banner = () => (
-    <section className="bg-orange-100 p-8 text-center">
+    <section className="bg-tfpa_gold p-8 text-center text-white">
       <h2 className="text-2xl font-bold">
         CFP<sup>®</sup> Professionals deliver “The Standard of Excellence”
       </h2>

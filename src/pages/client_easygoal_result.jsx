@@ -23,17 +23,6 @@ export default function EasyGoalResult() {
 
   requiredMonthlySavings = requiredMonthlySavings > 0 ? requiredMonthlySavings.toFixed(2) : 0;
 
-  // Financial recommendation based on required savings
-  let recommendation = "";
-  if (requiredMonthlySavings == 0) {
-    recommendation = "คุณมีเงินลงทุนเพียงพอที่จะบรรลุเป้าหมายได้แล้ว!";
-  } else if (requiredMonthlySavings > target * 0.02) {
-    recommendation =
-      "อัตราการออมของคุณสูง อาจต้องพิจารณาเพิ่มระยะเวลาในการลงทุน หรือหาทางเพิ่มผลตอบแทนจากการลงทุน";
-  } else {
-    recommendation = "คุณอยู่ในแนวทางที่ดีแล้ว! เพียงแค่รักษาระดับการออมและการลงทุนต่อไป";
-  }
-
   return (
     <div>
       <Header />
@@ -51,12 +40,6 @@ export default function EasyGoalResult() {
           <div className="text-center text-lg">
             <p className="mb-4">จำนวนเงินที่ต้องออมรายเดือน:</p>
             <p className="text-3xl font-bold text-green-600">{requiredMonthlySavings} บาท</p>
-          </div>
-
-          {/* Recommendation Section */}
-          <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-            <h4 className="text-lg font-semibold text-blue-900">คำแนะนำ</h4>
-            <p className="text-gray-700">{recommendation}</p>
           </div>
 
           {/* Action Buttons */}
