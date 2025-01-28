@@ -29,7 +29,7 @@ export default function ClientHeader() {
           <Link to="/faq" className="text-blue-500 hover:underline">
             FAQ
           </Link>
-          <Link to="/client_login" className="bg-blue-500 text-white px-4 py-2 rounded">
+          <Link to="/client-login" className="bg-blue-500 text-white px-4 py-2 rounded">
             Login
           </Link>
         </nav>
