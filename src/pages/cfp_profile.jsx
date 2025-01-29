@@ -393,7 +393,7 @@ export default function CfpProfilePage() {
                 อีเมลติดต่อ
               </label>
               <input
-                type="email"
+                type="text"
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
                 className="border p-2 w-full"
