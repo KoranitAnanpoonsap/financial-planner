@@ -42,11 +42,6 @@ export default function CFPGoalBaseCalculated() {
       }
       const gData = await gResponse.json()
       setGoal(gData)
-      setPortfolioReturn(
-        gData.portReturn !== undefined
-          ? (gData.portReturn * 100).toFixed(2)
-          : ""
-      )
 
       const totalInvestAmount = gData.totalInvestment
       const portReturn = gData.portReturn
@@ -59,7 +54,6 @@ export default function CFPGoalBaseCalculated() {
         throw new Error("Failed to fetch assets")
       }
       const assetsData = await assetsResponse.json()
-      setAssets(assetsData)
 
       // Calculate goal
       const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
