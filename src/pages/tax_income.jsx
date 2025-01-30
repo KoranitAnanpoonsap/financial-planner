@@ -124,10 +124,12 @@ export default function TaxIncomePage() {
       })
       if (!res.ok) {
         console.error("Failed to update otherExpenseDeduction in DB")
-      } else {
-        // Optionally re-fetch or trust local state
-        // fetchData()
+        return
       }
+      // 3) Once PUT is successful, re-fetch totals from your server logic:
+      const result = await fetchAndCalculateTaxForClient(clientUuid)
+      setTotalIncome(result.totalIncome)
+      setTotalExpense(result.totalExpenseDeductions)
     } catch (err) {
       console.error("Error updating 40(8) other expense:", err)
     }
@@ -152,7 +154,7 @@ export default function TaxIncomePage() {
     },
     4: {
       code: "40(4)",
-      label: "เงินได้จากการออกการลงทุน",
+      label: "เงินได้จากการลงทุน",
       amount: 0,
     },
     5: {
@@ -196,6 +198,27 @@ export default function TaxIncomePage() {
     },
   }
 
+  // Map the numeric “405” code -> string key
+  const sub405Map = {
+    1: "บ้าน/โรงเรือน/สิ่งปลูกสร้าง/แพ/ยานพาหนะ",
+    2: "ที่ดินที่ใช้ในการเกษตร",
+    3: "ที่ดินที่มิได้ใช้ในการเกษตร",
+    4: "ทรัพย์สินอื่นๆ",
+  }
+
+  // Map the numeric “406” code -> string key
+  const sub406Map = {
+    1: "การประกอบโรคศิลปะ",
+    2: "กฎหมาย/วิศวกรรม/สถาปัตยกรรม/การบัญชี/ประณีตศิลปกรรม",
+  }
+
+  const sub408Map = {
+    1: "ประเภทที่ (1) (เงินได้ส่วนที่ไม่เกิน 300,000 บาท)",
+    2: "ประเภทที่ (1) (เงินได้ส่วนที่เกิน 300,000 บาท)",
+    3: "ประเภทที่ (2) ถึง (43)",
+    4: "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)",
+  }
+
   // Tally incomes for UI display
   incomes.forEach((inc) => {
     const mainType = inc.clientIncomeType
@@ -205,28 +228,35 @@ export default function TaxIncomePage() {
     categories[mainType].amount += inc.displayIncomeAmount || 0
 
     if (mainType === 5) {
-      const sub405 = inc.clientIncome405Type
-      if (categories[mainType].subtypes[sub405] !== undefined) {
-        categories[mainType].subtypes[sub405] += inc.displayIncomeAmount || 0
+      // 40(5)
+      const sub405Key = sub405Map[inc.clientIncome405Type]
+      if (sub405Key && categories[5].subtypes[sub405Key] !== undefined) {
+        categories[5].subtypes[sub405Key] += inc.displayIncomeAmount || 0
       }
     } else if (mainType === 6) {
-      const sub406 = inc.clientIncome406Type
-      if (categories[mainType].subtypes[sub406] !== undefined) {
-        categories[mainType].subtypes[sub406] += inc.displayIncomeAmount || 0
+      // 40(6)
+      const sub406Key = sub406Map[inc.clientIncome406Type]
+      if (sub406Key && categories[6].subtypes[sub406Key] !== undefined) {
+        categories[6].subtypes[sub406Key] += inc.displayIncomeAmount || 0
       }
     } else if (mainType === 8) {
       const sub408 = inc.clientIncome408Type
+      const subKey = sub408Map[sub408]
+
+      // If the server returns something outside [1..4], guard here:
+      if (!subKey) {
+        console.warn(`Unrecognized 40(8) subtype: ${sub408}`)
+        return
+      }
+
       // เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)
-      if (sub408 === 4) {
-        const rec = categories[mainType].subtypes[sub408]
-        rec.total += inc.displayIncomeAmount || 0
-        // push entire inc
-        rec.items.push(inc)
-      } else if (
-        categories[mainType].subtypes[sub408] !== undefined &&
-        typeof categories[mainType].subtypes[sub408] === "number"
-      ) {
-        categories[mainType].subtypes[sub408] += inc.displayIncomeAmount || 0
+      if (subKey === "เงินได้ประเภทที่ไม่อยู่ใน (1) ถึง (43)") {
+        categories[8].subtypes[subKey].total += inc.displayIncomeAmount || 0
+        categories[8].subtypes[subKey].items.push(inc)
+      } else {
+        // For the other subtypes (which are just numbers in your object),
+        // simply add to the existing total
+        categories[8].subtypes[subKey] += inc.displayIncomeAmount || 0
       }
     }
   })
@@ -425,7 +455,7 @@ export default function TaxIncomePage() {
 
                                             {/* Editable otherExpenseDeduction */}
                                             <label className="text-tfpa_blue whitespace-nowrap">
-                                              หักค่าใช้จ่ายจริงตามความจำเป็นฯ
+                                              หักค่าใช้จ่ายจริงตามความจำเป็น
                                             </label>
                                             <input
                                               type="number"
