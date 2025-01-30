@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import "@fontsource/ibm-plex-sans-thai"
 import "@fontsource/prompt"
 import ClientLogin from "./pages/client_login"
@@ -36,7 +36,8 @@ import CFPClientDebtPage from "./pages/cfp_client_debt"
 
 export default function App() {
   return (
-    <BrowserRouter basename={"/financial-planner/"}>
+    //<BrowserRouter basename={"/financial-planner/"}>
+    <Router>
       <Routes>
         <Route path="/" element={<LoginSelection />} />
         <Route path="/client-login" element={<ClientLogin />} />
@@ -104,6 +105,7 @@ export default function App() {
         <Route path="/client-asset/" element={<CFPClientAssetPage />} />
         <Route path="/client-debt/" element={<CFPClientDebtPage />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
+    //</BrowserRouter>
   )
 }
