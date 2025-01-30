@@ -1,24 +1,27 @@
-# Use an official OpenJDK runtime as a parent image
+# Use OpenJDK 23 as the base image
 FROM openjdk:23-jdk-slim
 
-# Set the working directory inside the container
+# Set work directory
 WORKDIR /app
 
-# Copy the Gradle build files
+# Copy Gradle files
 COPY gradlew .
 COPY gradle/ gradle/
 COPY build.gradle .
 COPY settings.gradle .
 COPY src/ src/
 
-# Grant execute permission to Gradle wrapper
+# Grant execute permissions to Gradle wrapper
 RUN chmod +x gradlew
 
-# Build the application
+# Build the application (skip tests)
 RUN ./gradlew build -x test
 
-# Expose port (Render assigns dynamic ports)
+# Copy the JAR file explicitly
+RUN cp build/libs/*.jar app.jar
+
+# Expose the port (Render dynamically assigns ports)
 EXPOSE $PORT
 
-# Run the application
-CMD ["java", "-jar", "build/libs/*.jar"]
+# Start the application
+CMD ["java", "-jar", "app.jar"]
