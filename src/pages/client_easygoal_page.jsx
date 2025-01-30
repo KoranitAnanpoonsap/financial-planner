@@ -1,33 +1,33 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Header from "../components/clientHeader.jsx";
-import Footer from "../components/footer.jsx";
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Header from "../components/clientHeader.jsx"
+import Footer from "../components/footer.jsx"
 
 export default function EasyGoal() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   // State for user input
-  const [goalName, setGoalName] = useState("");
-  const [targetAmount, setTargetAmount] = useState("");
-  const [timeFrame, setTimeFrame] = useState("");
-  const [currentSavings, setCurrentSavings] = useState("");
-  const [expectedReturn, setExpectedReturn] = useState("");
+  const [goalName, setGoalName] = useState("")
+  const [targetAmount, setTargetAmount] = useState("")
+  const [timeFrame, setTimeFrame] = useState("")
+  const [currentSavings, setCurrentSavings] = useState("")
+  const [expectedReturn, setExpectedReturn] = useState("")
 
   // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Convert inputs to numbers
-    const target = parseFloat(targetAmount);
-    const years = parseFloat(timeFrame);
-    const savings = parseFloat(currentSavings);
-    const returnRate = parseFloat(expectedReturn) / 100; // Convert % to decimal
+    const target = parseFloat(targetAmount)
+    const years = parseFloat(timeFrame)
+    const savings = parseFloat(currentSavings)
+    const returnRate = parseFloat(expectedReturn) / 100 // Convert % to decimal
 
     // Navigate to result page with entered values
-    navigate("/client-easygoal-result", {
+    navigate(`/client-easygoal-result`, {
       state: { goalName, target, years, savings, returnRate },
-    });
-  };
+    })
+  }
 
   return (
     <div>
@@ -35,17 +35,29 @@ export default function EasyGoal() {
       <main className="container mx-auto py-12">
         {/* Header Section */}
         <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
-          <h2 className="text-2xl font-bold">วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน</h2>
-          <p className="text-lg">สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำที่นำไปใช้ได้ทันที</p>
+          <h2 className="text-2xl font-bold">
+            วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน
+          </h2>
+          <p className="text-lg">
+            สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน
+            พร้อมคำแนะนำที่นำไปใช้ได้ทันที
+          </p>
         </section>
 
         {/* Form Section */}
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-          <h3 className="text-xl font-semibold text-center mb-6">ข้อมูลเบื้องต้นที่จะช่วยให้คุณบรรลุเป้าหมายได้เร็วขึ้น</h3>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto"
+        >
+          <h3 className="text-xl font-semibold text-center mb-6">
+            ข้อมูลเบื้องต้นที่จะช่วยให้คุณบรรลุเป้าหมายได้เร็วขึ้น
+          </h3>
 
           {/* Goal Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">ชื่อเป้าหมาย</label>
+            <label className="block text-gray-700 font-medium">
+              ชื่อเป้าหมาย
+            </label>
             <input
               type="text"
               className="w-full p-2 border rounded-lg"
@@ -58,7 +70,9 @@ export default function EasyGoal() {
 
           {/* Target Amount */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">จำนวนเงินเพื่อเป้าหมายนั้น</label>
+            <label className="block text-gray-700 font-medium">
+              จำนวนเงินเพื่อเป้าหมายนั้น
+            </label>
             <div className="flex items-center">
               <input
                 type="number"
@@ -74,7 +88,9 @@ export default function EasyGoal() {
 
           {/* Time Frame */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">ระยะเวลาก่อนที่จะถึงเป้าหมายนั้น</label>
+            <label className="block text-gray-700 font-medium">
+              ระยะเวลาก่อนที่จะถึงเป้าหมายนั้น
+            </label>
             <div className="flex items-center">
               <input
                 type="number"
@@ -90,7 +106,9 @@ export default function EasyGoal() {
 
           {/* Current Savings */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">เงินรวมปัจจุบันในการลงทุน</label>
+            <label className="block text-gray-700 font-medium">
+              เงินรวมปัจจุบันในการลงทุน
+            </label>
             <div className="flex items-center">
               <input
                 type="number"
@@ -106,7 +124,9 @@ export default function EasyGoal() {
 
           {/* Expected Return Rate */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">ผลตอบแทนต่อปีของการลงทุน</label>
+            <label className="block text-gray-700 font-medium">
+              ผลตอบแทนต่อปีของการลงทุน
+            </label>
             <div className="flex items-center">
               <input
                 type="number"
@@ -133,5 +153,5 @@ export default function EasyGoal() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }

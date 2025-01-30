@@ -46,7 +46,7 @@ export default function FinancialHealthForm() {
         : 0
 
     // Navigate to the results page with calculated values
-    navigate("/client-healthcheck-result", {
+    navigate(`/client-healthcheck-result`, {
       state: { value1, value2, value3 },
     })
   }

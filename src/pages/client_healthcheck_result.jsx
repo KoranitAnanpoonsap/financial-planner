@@ -167,7 +167,7 @@ export default function FinancialResults() {
 
         <div className="text-center mt-6">
           <button
-            onClick={() => navigate("/client-healthcheck-page")}
+            onClick={() => navigate(`/client-healthcheck-page`)}
             className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700"
           >
             กรอกข้อมูลใหม่

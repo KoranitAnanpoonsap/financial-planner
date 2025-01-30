@@ -34,8 +34,9 @@ import CFPClientExpensePage from "./pages/cfp_client_expense"
 import CFPClientAssetPage from "./pages/cfp_client_asset"
 import CFPClientDebtPage from "./pages/cfp_client_debt"
 
-function App() {
+export default function App() {
   return (
+    //<BrowserRouter basename={"/financial-planner/"}>
     <Router>
       <Routes>
         <Route path="/" element={<LoginSelection />} />
@@ -45,11 +46,23 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/cfp-homepage/" element={<CfpHomepage />} />
         <Route path="/client-homepage" element={<ClientHomepage />} />
-        <Route path="/client-precalculation-page" element={<ClientPrecalculationPage />} />
-        <Route path="/client-healthcheck-page" element={<ClientHealthcheckPage />} />
-        <Route path="/client-healthcheck-result" element={<ClientHealthcheckResult />} />
+        <Route
+          path="/client-precalculation-page"
+          element={<ClientPrecalculationPage />}
+        />
+        <Route
+          path="/client-healthcheck-page"
+          element={<ClientHealthcheckPage />}
+        />
+        <Route
+          path="/client-healthcheck-result"
+          element={<ClientHealthcheckResult />}
+        />
         <Route path="/client-easygoal-page" element={<ClientEasygoalPage />} />
-        <Route path="/client-easygoal-result" element={<ClientEasygoalResult />} />
+        <Route
+          path="/client-easygoal-result"
+          element={<ClientEasygoalResult />}
+        />
         <Route path="/cfp-profile/" element={<CFPProfile />} />
         <Route
           path="/portfolio-selection/"
@@ -93,7 +106,6 @@ function App() {
         <Route path="/client-debt/" element={<CFPClientDebtPage />} />
       </Routes>
     </Router>
+    //</BrowserRouter>
   )
 }
-
-export default App

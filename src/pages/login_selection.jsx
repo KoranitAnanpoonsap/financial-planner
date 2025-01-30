@@ -45,19 +45,19 @@ export default function LoginSelection() {
           <div className="space-y-4">
             <button
               className="w-52 py-4 bg-tfpa_gold hover:bg-tfpa_gold_hover rounded-2xl transition-colors font-ibm text-white"
-              onClick={() => navigate("/client-login")}
+              onClick={() => navigate(`/client-login`)}
             >
               แบบลูกค้า
             </button>
             <button
               className="w-52 py-4 bg-tfpa_gold hover:bg-tfpa_gold_hover rounded-2xl transition-colors font-ibm text-white"
-              onClick={() => navigate("/planner-login")}
+              onClick={() => navigate(`/planner-login`)}
             >
               แบบนักวางทางการเงิน
             </button>
             <button
               className="w-52 py-4 bg-tfpa_gold hover:bg-tfpa_gold_hover rounded-2xl transition-colors font-ibm text-white"
-              onClick={() => navigate("/admin-login")}
+              onClick={() => navigate(`/admin-login`)}
             >
               แบบแอดมิน
             </button>

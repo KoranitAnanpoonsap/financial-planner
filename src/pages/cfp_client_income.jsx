@@ -570,6 +570,13 @@ export default function CFPClientIncomePage() {
                     </td>
                   </tr>
                 ))}
+                {incomes.length === 0 && (
+                  <tr>
+                    <td className="py-2 px-4 border text-center" colSpan="9">
+                      ไม่มีรายได้ที่บันทึกไว้
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 

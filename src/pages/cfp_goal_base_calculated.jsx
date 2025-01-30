@@ -42,11 +42,6 @@ export default function CFPGoalBaseCalculated() {
       }
       const gData = await gResponse.json()
       setGoal(gData)
-      setPortfolioReturn(
-        gData.portReturn !== undefined
-          ? (gData.portReturn * 100).toFixed(2)
-          : ""
-      )
 
       const totalInvestAmount = gData.totalInvestment
       const portReturn = gData.portReturn
@@ -59,7 +54,6 @@ export default function CFPGoalBaseCalculated() {
         throw new Error("Failed to fetch assets")
       }
       const assetsData = await assetsResponse.json()
-      setAssets(assetsData)
 
       // Calculate goal
       const { fvOfCurrentInvestment: fv, GoalAnnualSaving: saving } =
@@ -99,7 +93,7 @@ export default function CFPGoalBaseCalculated() {
       Goal && (
         <div className="bg-tfpa_blue text-center p-6 text-xl rounded-3xl space-y-6 text-white font-bold">
           <div>สถานะการเงินในปัจจุบันของลูกค้า</div>
-          <div className="text-lg grid grid-cols-2 text-start mx-8">
+          <div className="text-lg grid grid-cols-2 text-start mx-8 gap-x-[180px]">
             <div>
               เงินรวมปัจจุบันในการลงทุน:{" "}
               {Number(Goal.totalInvestment).toLocaleString("en-us", {
@@ -139,7 +133,7 @@ export default function CFPGoalBaseCalculated() {
       Goal && (
         <div className="bg-tfpa_blue text-center p-6 text-xl rounded-3xl space-y-6 text-white font-bold">
           <div>รายละเอียดเป้าหมาย</div>
-          <div className="text-lg grid grid-cols-2 text-start mx-8">
+          <div className="text-lg grid grid-cols-2 text-start mx-8 gap-x-[180px]">
             <div className="">
               จำนวนเงินเพื่อเป้าหมาย:{" "}
               {Number(Goal.goalValue).toLocaleString("en-us", {
@@ -190,8 +184,8 @@ export default function CFPGoalBaseCalculated() {
           >
             <div className="flex flex-col gap-8 mx-32">
               <CalculatedGoalBasedEfficient />
-              <div className="text-tfpa_gold text-xl font-bold grid grid-cols-2 text-start mx-12">
-                <span>
+              <div className="text-tfpa_gold text-xl font-bold grid grid-cols-2 text-start mx-12  gap-x-[180px]">
+                <span className="w-[500px]">
                   จำนวนเงินที่ลูกค้าต้องเก็บออมเพิ่มต่อปี:{" "}
                   {GoalAnnualSaving < 0
                     ? 0

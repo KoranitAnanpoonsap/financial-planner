@@ -66,15 +66,15 @@ export default function ClientLogin() {
   }
 
   const handleBack = () => {
-    navigate("/")
+    navigate(`/`)
   }
 
   const handleRegister = () => {
-    navigate("/register")
+    navigate(`/register`)
   }
 
   const handleHomePage = () => {
-    navigate("/client-homepage")
+    navigate(`/client-homepage`)
   }
 
   return (

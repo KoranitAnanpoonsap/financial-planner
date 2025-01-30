@@ -1,7 +1,7 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import React from "react"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
+import { useNavigate } from "react-router-dom"
 import Client_Homepage_pic1 from "../assets/importance_of_planning.jpg"
 import Client_Homepage_pic2 from "../assets/plan_by_yourself.jpg"
 import Client_Homepage_pic3 from "../assets/plan_with_cfp.jpeg"
@@ -16,7 +16,7 @@ export default function ClientHomePage() {
         เป้าหมายชีวิตสำเร็จได้ด้วยนักวางแผนการเงิน CFP<sup>®</sup>
       </p>
     </section>
-  );
+  )
 
   const Features = () => (
     <section className="bg-blue-50 py-8">
@@ -43,16 +43,25 @@ export default function ClientHomePage() {
         </div>
       </div>
     </section>
-  );
-  
+  )
+
+  const navigate = useNavigate()
+
+  const handleClick = (link) => {
+    navigate(link)
+  }
+
   const FeatureCard = ({ title, link, imageSrc }) => (
-    <div className="bg-white shadow-lg rounded-lg p-4">
+    <div
+      className="bg-white shadow-lg rounded-lg p-4 cursor-pointer"
+      onClick={() => handleClick(link)}
+    >
       <img src={imageSrc} alt={title} className="rounded-lg mb-4" />
       <h3 className="text-lg font-semibold text-tfpa_blue hover:underline">
-        <a href={link}>{title}</a>
+        {title}
       </h3>
     </div>
-  );
+  )
 
   const About = () => (
     <section className="bg-tfpa_gold p-8">
@@ -64,7 +73,7 @@ export default function ClientHomePage() {
         </p>
       </div>
     </section>
-  );
+  )
 
   const FAQ = () => (
     <section className="bg-white py-8">
@@ -75,7 +84,7 @@ export default function ClientHomePage() {
         <FaqItem question="ทำไมฉันจึงต้องไปปรึกษานักวางแผนการเงิน?" />
       </div>
     </section>
-  );
+  )
 
   const FaqItem = ({ question }) => (
     <details className="border-b py-4">
@@ -84,18 +93,18 @@ export default function ClientHomePage() {
         เนื้อหาของคำตอบเกี่ยวกับ {question}
       </p>
     </details>
-  );
+  )
 
   return (
     <div>
-        <Header />
-        <main>
-          <Banner />
-          <Features />
-          <About />
-          <FAQ />
-        </main>
-        <Footer />
-      </div>
+      <Header />
+      <main>
+        <Banner />
+        <Features />
+        <About />
+        <FAQ />
+      </main>
+      <Footer />
+    </div>
   )
 }
