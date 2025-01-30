@@ -21,9 +21,15 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Remove `node_modules` and `package-lock.json` (Fix Rollup Issue)
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+
       - name: Install Dependencies & Build
         run: |
           npm install
+          npm audit fix --force  # Fix vulnerabilities
           npm run build
 
       - name: Deploy to GitHub Pages
