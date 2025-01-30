@@ -239,7 +239,7 @@ export default function CFPFinancialHealthCheck() {
     },
     {
       name: "อัตราส่วนความมั่งคั่ง(Wealth Ratio)",
-      calcTop: "รายได้จากสินทรัพย",
+      calcTop: "รายได้จากสินทรัพย์",
       calcBottom: "รายจ่าย",
       valTop: calculations.totalAssetIncome,
       valBottom: calculations.totalExpense,
