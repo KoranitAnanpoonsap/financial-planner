@@ -53,7 +53,7 @@ export default function LoginSelection() {
               className="w-52 py-4 bg-tfpa_gold hover:bg-tfpa_gold_hover rounded-2xl transition-colors font-ibm text-white"
               onClick={() => navigate(`/planner-login`)}
             >
-              แบบนักวางทางการเงิน
+              แบบนักวางแผนทางการเงิน
             </button>
             <button
               className="w-52 py-4 bg-tfpa_gold hover:bg-tfpa_gold_hover rounded-2xl transition-colors font-ibm text-white"
