@@ -12,19 +12,19 @@ const getFinancialAdvice = (type, value) => {
     if (value >= 3)
       advice = {
         status: "คุณมีสภาพคล่องที่ดีเยี่ยม",
-        message: "รักษาสภาพคล่องที่ดีให้คงอยู่เสมอ.",
+        message: "รักษาระดับสภาพคล่องทางการเงินให้อยู่ในเกณฑ์ที่ดีและมั่นคงอยู่เสมอ เพื่อให้สามารถบริหารจัดการกระแสเงินสดได้อย่างมีประสิทธิภาพ พร้อมรองรับค่าใช้จ่ายที่ไม่คาดคิดและสร้างโอกาสทางการเงินในอนาคตได้อย่างมั่นใจ",
         color: "#10b981",
       }
     else if (value >= 1)
       advice = {
         status: "พอใช้",
-        message: "พยายามเพิ่มสินทรัพย์สภาพคล่องเพื่อความมั่นคงทางการเงิน.",
+        message: "พยายามเพิ่มสินทรัพย์ที่มีสภาพคล่องสูงเพื่อเสริมสร้างความมั่นคงทางการเงิน ควบคู่ไปกับการบริหารรายรับและรายจ่ายให้สมดุล เพื่อให้มีความพร้อมในการรับมือกับเหตุการณ์ไม่คาดฝัน และลดความเสี่ยงด้านสภาพคล่องในระยะยาว",
         color: "#facc15",
       }
     else
       advice = {
         status: "ยังไม่เพียงพอ",
-        message: "ปรับปรุงการใช้จ่ายและสำรองเงินฉุกเฉินเพิ่มขึ้น.",
+        message: "ควรทบทวนพฤติกรรมการใช้จ่ายและวางแผนการเงินให้รอบคอบมากขึ้น โดยเน้นการลดรายจ่ายที่ไม่จำเป็น และเพิ่มการออมเงินสำรองฉุกเฉินให้เพียงพอ เพื่อป้องกันปัญหาสภาพคล่องทางการเงินในอนาคตและลดความเสี่ยงทางการเงินที่อาจเกิดขึ้น",
         color: "#f87171",
       }
   }
@@ -33,19 +33,19 @@ const getFinancialAdvice = (type, value) => {
     if (value < 0.2)
       advice = {
         status: "คุณมีหนี้ในระดับที่ดี",
-        message: "ควบคุมหนี้ให้อยู่ในระดับที่เหมาะสม.",
+        message: "ควบคุมภาระหนี้ให้อยู่ในระดับที่เหมาะสม โดยบริหารจัดการการชำระหนี้อย่างมีวินัย และรักษาสัดส่วนหนี้ต่อรายได้ให้อยู่ในเกณฑ์ที่ปลอดภัย เพื่อให้สามารถใช้ประโยชน์จากสินเชื่ออย่างมีประสิทธิภาพโดยไม่เป็นภาระทางการเงินในระยะยาว",
         color: "#10b981",
       }
     else if (value < 0.4)
       advice = {
         status: "พอใช้",
-        message: "ระวังการก่อหนี้เพิ่มและพยายามลดภาระหนี้สิน.",
+        message: "ระมัดระวังการก่อหนี้เพิ่มโดยไม่จำเป็น และพยายามลดภาระหนี้สินลงอย่างต่อเนื่อง ควรวางแผนการชำระหนี้อย่างเป็นระบบ และปรับโครงสร้างหนี้หากจำเป็น เพื่อป้องกันไม่ให้หนี้สินกลายเป็นภาระทางการเงินที่มากเกินไปในอนาคต",
         color: "#facc15",
       }
     else
       advice = {
         status: "คุณมีความเสี่ยงด้านการชำระหนี้",
-        message: "ควรลดค่าใช้จ่ายที่ไม่จำเป็นและรีไฟแนนซ์หากจำเป็น.",
+        message: "ควรทบทวนและลดค่าใช้จ่ายที่ไม่จำเป็นเพื่อลดภาระหนี้สิน พร้อมทั้งพิจารณาการรีไฟแนนซ์หรือปรับโครงสร้างหนี้เพื่อให้การชำระหนี้เป็นไปอย่างมีประสิทธิภาพมากขึ้น ควรให้ความสำคัญกับการลดหนี้เป็นอันดับแรก เพื่อป้องกันความเสี่ยงด้านการเงินและเพิ่มความมั่นคงในระยะยาว",
         color: "#f87171",
       }
   }
@@ -54,19 +54,19 @@ const getFinancialAdvice = (type, value) => {
     if (value >= 0.2)
       advice = {
         status: "ยอดเยี่ยม",
-        message: "การออมของคุณอยู่ในระดับที่ดี! ควรลงทุนต่อยอด.",
+        message: "การออมของคุณอยู่ในระดับที่ดี ซึ่งเป็นรากฐานสำคัญของความมั่นคงทางการเงิน ควรนำเงินออมไปต่อยอดด้วยการลงทุนที่เหมาะสมกับเป้าหมายและความเสี่ยงที่ยอมรับได้ เพื่อให้เงินเติบโตและสร้างโอกาสทางการเงินที่ดีขึ้นในอนาคต",
         color: "#10b981",
       }
     else if (value >= 0.1)
       advice = {
         status: "ปานกลาง",
-        message: "ควรเพิ่มอัตราการออมให้สูงขึ้นเพื่อเป้าหมายอนาคต.",
+        message: "คุณมีการออมอยู่ในระดับที่พอใช้ได้ แต่ควรเพิ่มอัตราการออมให้สูงขึ้นเพื่อให้สามารถบรรลุเป้าหมายทางการเงินในอนาคตได้อย่างมั่นคง ลองวางแผนงบประมาณให้รัดกุมขึ้น และพิจารณาลดค่าใช้จ่ายที่ไม่จำเป็น เพื่อเพิ่มสัดส่วนการออมและเสริมสร้างความมั่นคงทางการเงินของคุณ",
         color: "#facc15",
       }
     else
       advice = {
         status: "ยังไม่เพียงพอ",
-        message: "พยายามเพิ่มอัตราการออมด้วยการควบคุมค่าใช้จ่าย.",
+        message: "ปัจจุบันอัตราการออมของคุณยังอยู่ในระดับที่ต่ำ ซึ่งอาจส่งผลต่อความมั่นคงทางการเงินในระยะยาว ควรพยายามเพิ่มสัดส่วนการออมด้วยการควบคุมค่าใช้จ่ายที่ไม่จำเป็น และกำหนดเป้าหมายการออมที่ชัดเจน เพื่อให้มีเงินสำรองเพียงพอสำหรับอนาคตและลดความเสี่ยงทางการเงิน",
         color: "#f87171",
       }
   }
@@ -80,33 +80,35 @@ const GaugeChart = ({ value, label, type }) => {
   const advice = getFinancialAdvice(type, value)
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md text-center mb-6">
+    <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center">
       <h3 className="text-lg font-semibold mb-2">{label}</h3>
-      <RadialBarChart
-        width={300}
-        height={200}
-        cx={150}
-        cy={150}
-        innerRadius="80%"
-        outerRadius="100%"
-        data={data}
-        startAngle={180}
-        endAngle={0}
-      >
-        <PolarAngleAxis
-          type="number"
-          domain={[0, 100]}
-          angleAxisId={0}
-          tick={false}
-        />
-        <RadialBar
-          minAngle={15}
-          background
-          dataKey="value"
-          fill={advice.color}
-        />
-      </RadialBarChart>
-      <p className="text-xl font-bold" style={{ color: advice.color }}>
+      <div className="w-44 h-44 flex justify-center items-center">
+        <RadialBarChart
+          width={180}
+          height={180}
+          cx="50%"
+          cy="50%"
+          innerRadius="80%"
+          outerRadius="100%"
+          data={data}
+          startAngle={180}
+          endAngle={0}
+        >
+          <PolarAngleAxis
+            type="number"
+            domain={[0, 100]}
+            angleAxisId={0}
+            tick={false}
+          />
+          <RadialBar
+            minAngle={15}
+            background
+            dataKey="value"
+            fill={advice.color}
+          />
+        </RadialBarChart>
+      </div>
+      <p className="text-xl font-bold mt-2" style={{ color: advice.color }}>
         {advice.status}
       </p>
     </div>
@@ -129,7 +131,7 @@ export default function FinancialResults() {
       <main className="container mx-auto py-12">
         <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
           <h2 className="text-2xl font-bold">
-            ผลการตรวจสุขภาพทางการเงินของคุณ
+            ผลการตรวจสุขภาพการเงินของคุณ
           </h2>
           <p className="text-lg">
             การรู้สถานะทางการเงินของคุณคือก้าวแรกที่สำคัญ
@@ -147,10 +149,8 @@ export default function FinancialResults() {
           <GaugeChart value={value3} label="ด้านการออม" type="savings" />
         </div>
 
-        <section className="bg-gray-100 p-6 rounded-lg shadow-md mt-6">
-          <h3 className="text-xl font-semibold text-center mb-4">
-            คำแนะนำทางการเงิน
-          </h3>
+        <section className="bg-gray-100 p-6 rounded-lg shadow-md mt-6 text-center">
+          <h3 className="text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
           <p className="text-gray-700 mb-4">
             <strong>ด้านสภาพคล่อง:</strong>{" "}
             {getFinancialAdvice("liquidity", value1).message}
@@ -178,3 +178,4 @@ export default function FinancialResults() {
     </div>
   )
 }
+

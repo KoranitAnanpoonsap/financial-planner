@@ -30,7 +30,7 @@ export default function ClientHeader() {
             รายชื่อนักวางแผนการเงิน
           </span>
           <span
-            onClick={() => navigate(`/plans`)}
+            onClick={() => navigate(`/client-precalculation-page`)}
             className="text-tfpa_blue hover:underline cursor-pointer"
           >
             วางแผน

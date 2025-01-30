@@ -8,21 +8,14 @@ export default function EasyGoalResult() {
   const navigate = useNavigate()
   const { goalName, target, years, savings, returnRate } = location.state || {}
 
-  // Calculate required monthly savings
-  const months = years * 12
-  const monthlyReturn = returnRate / 12 // Convert annual rate to monthly
-  let requiredMonthlySavings = 0
+  // Calculate future value of savings per year
+  const annualReturn = returnRate // Assuming returnRate is already annual
+  let futureSavings = savings * Math.pow(1 + annualReturn, years)
 
-  if (returnRate > 0) {
-    requiredMonthlySavings =
-      (target - savings * Math.pow(1 + monthlyReturn, months)) /
-      ((Math.pow(1 + monthlyReturn, months) - 1) / monthlyReturn)
-  } else {
-    requiredMonthlySavings = (target - savings) / months
-  }
-
-  requiredMonthlySavings =
-    requiredMonthlySavings > 0 ? requiredMonthlySavings.toFixed(2) : 0
+  // Calculate the difference
+  const difference = target - futureSavings
+  const requiredAnnualSavings = difference > 0 ? difference : 0
+  const requiredMonthlySavings = (requiredAnnualSavings / 12).toFixed(2)
 
   return (
     <div>
@@ -43,12 +36,29 @@ export default function EasyGoalResult() {
           <h3 className="text-xl font-semibold text-center mb-6">
             ผลลัพธ์ของเป้าหมาย: {goalName}
           </h3>
+          <p className="text-center text-lg mb-4">เป้าหมาย: {target.toLocaleString()} บาท</p>
 
           <div className="text-center text-lg">
-            <p className="mb-4">จำนวนเงินที่ต้องออมรายเดือน:</p>
-            <p className="text-3xl font-bold text-green-600">
-              {requiredMonthlySavings} บาท
-            </p>
+            {difference > 0 ? (
+              <>
+                <p className="mb-4 text-red-600">คุณยังมีเงินไม่เพียงพอสำหรับเป้าหมายนี้</p>
+                <p>คุณต้องออมเพิ่มอีก:</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {requiredAnnualSavings.toLocaleString()} บาท/ปี
+                </p>
+                <p className="text-lg font-bold text-red-600">
+                  ({requiredMonthlySavings} บาท/เดือน)
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mb-4 text-green-600">คุณมีเงินเพียงพอสำหรับเป้าหมายนี้!</p>
+                <p>คุณมีเงินเกินกว่าเป้าหมาย:</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {Math.abs(difference).toLocaleString()} บาท
+                </p>
+              </>
+            )}
           </div>
 
           {/* Action Buttons */}

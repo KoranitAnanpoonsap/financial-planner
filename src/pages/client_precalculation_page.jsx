@@ -1,8 +1,8 @@
 import React from "react"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
-import FinancialHealthIllustration from "../assets/importance_of_planning.jpg"
-import FinancialGoalIllustration from "../assets/plan_with_cfp.jpeg"
+import FinancialHealthIllustration from "../assets/Financial-Healthcheck.jpg"
+import FinancialGoalIllustration from "../assets/EasyGoal.png"
 import { useNavigate } from "react-router-dom"
 
 export default function FinancialHealthCheck() {
