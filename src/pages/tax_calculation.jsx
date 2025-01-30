@@ -23,14 +23,14 @@ export default function TaxCalculationPage() {
   const [clientUuid] = useState(localStorage.getItem("clientUuid") || "")
   const navigate = useNavigate()
 
-  // Tax Calculation States
+  // ------------------- Tax Calculation States -------------------
   const [oldTaxToPay, setOldTaxToPay] = useState(0)
   const [newTaxToPay, setNewTaxToPay] = useState(0)
   const [taxSaved, setTaxSaved] = useState(0)
   const [totalIncome, setTotalIncome] = useState(0)
   const [incomeAfterDeductions, setIncomeAfterDeductions] = useState(0)
 
-  // Deductions States
+  // ------------------- Deductions States -------------------
   const [maxDeductions, setMaxDeductions] = useState({
     rmf: 0,
     ssf: 0,
@@ -61,7 +61,7 @@ export default function TaxCalculationPage() {
     total: 0,
   })
 
-  // Investments State
+  // ---------- Final numeric investments (saved on server) ----------
   const [investments, setInvestments] = useState({
     rmf: 0,
     ssf: 0,
@@ -72,25 +72,34 @@ export default function TaxCalculationPage() {
     total: 0,
   })
 
-  // Debounce timer
-  const [debounceTimer, setDebounceTimer] = useState(null)
+  // ---------- Draft states for user input (strings) ----------
+  // We'll only parse these onBlur
+  const [draftInvestments, setDraftInvestments] = useState({
+    rmf: "0",
+    ssf: "0",
+    govPensionFund: "0",
+    pvd: "0",
+    nationSavingsFund: "0",
+    pensionInsurance: "0",
+  })
 
-  // 1) This flag indicates if the initial data load is fully complete
+  // Once the initial data is loaded from the server, set this to true
   const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
   useEffect(() => {
+    if (!clientUuid) return
     fetchData()
   }, [clientUuid])
 
   const fetchData = async () => {
     try {
-      // Fetch tax calculation data
+      // 1) Fetch basic tax results
       const taxResult = await fetchAndCalculateTaxForClient(clientUuid)
       setOldTaxToPay(taxResult.taxToPay)
       setTotalIncome(taxResult.totalIncome)
       setIncomeAfterDeductions(taxResult.incomeAfterDeductions)
 
-      // Fetch tax deductions data
+      // 2) Fetch tax deduction data
       const taxDeductionsRes = await fetch(
         `${import.meta.env.VITE_API_KEY}api/taxdeduction/${clientUuid}`
       )
@@ -99,31 +108,28 @@ export default function TaxCalculationPage() {
         taxDeductionsData = await taxDeductionsRes.json()
       }
 
-      // Calculate the sum of Life Insurance and Health Insurance
+      // Compute your maximum/used/remaining deductions
       const lifeInsurance = taxDeductionsData?.lifeInsurance || 0
       const healthInsurance = taxDeductionsData?.healthInsurance || 0
       const insuranceSum = lifeInsurance + healthInsurance
 
-      // Calculate maximum deductions based on totalIncome and insuranceSum
       const calculatedMaxDeductions = calculateMaxDeductions(
         taxResult.totalIncome,
         insuranceSum
       )
       setMaxDeductions(calculatedMaxDeductions)
 
-      // Calculate already used deductions
       const calculatedAlreadyUsed =
         calculateAlreadyUsedDeductions(taxDeductionsData)
       setAlreadyUsedDeductions(calculatedAlreadyUsed)
 
-      // Calculate remaining deductions
       const calculatedRemaining = calculateRemainingDeductions(
         calculatedMaxDeductions,
         calculatedAlreadyUsed
       )
       setRemainingDeductions(calculatedRemaining)
 
-      // Fetch existing tax plan
+      // 3) Fetch existing tax plan
       const taxPlanRes = await fetch(
         `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`
       )
@@ -136,6 +142,7 @@ export default function TaxCalculationPage() {
         pensionInsurance: 0,
         total: 0,
       }
+
       if (taxPlanRes.ok) {
         const taxPlanData = await taxPlanRes.json()
         tempInvestments = {
@@ -155,9 +162,20 @@ export default function TaxCalculationPage() {
         }
       }
 
+      // Set final numeric investments
       setInvestments(tempInvestments)
 
-      // Recalculate new tax based on totalUsedDeductions
+      // Also set up the draft states from what we got on the server
+      setDraftInvestments({
+        rmf: String(tempInvestments.rmf),
+        ssf: String(tempInvestments.ssf),
+        govPensionFund: String(tempInvestments.govPensionFund),
+        pvd: String(tempInvestments.pvd),
+        nationSavingsFund: String(tempInvestments.nationSavingsFund),
+        pensionInsurance: String(tempInvestments.pensionInsurance),
+      })
+
+      // 4) Recalculate newTax with existing plan
       const totalUsedDeductions = Math.min(
         calculatedAlreadyUsed.total + tempInvestments.total,
         500000
@@ -169,13 +187,14 @@ export default function TaxCalculationPage() {
       setNewTaxToPay(newTaxResult.taxToPay)
       setTaxSaved(taxResult.taxToPay - newTaxResult.taxToPay)
 
-      // 2) Mark that the initial load is finished (so no flicker occurs)
+      // Mark initial load complete
       setInitialLoadComplete(true)
     } catch (error) {
       console.error(error)
     }
   }
 
+  // ---- Calculation helpers (unchanged from your code) ----
   const calculateMaxDeductions = (totalIncome, insuranceSum) => {
     const rmfMax = Math.min(0.3 * totalIncome, 500000)
     const ssfMax = Math.min(0.3 * totalIncome, 200000)
@@ -246,21 +265,21 @@ export default function TaxCalculationPage() {
       pvd: taxDeductionsData.pvd || 0,
       nationSavingsFund: taxDeductionsData.nationSavingsFund || 0,
       pensionInsurance:
-        taxDeductionsData.pensionInsurance - portion_pensionIns || 0,
+        (taxDeductionsData.pensionInsurance || 0) - portion_pensionIns,
       total:
         (taxDeductionsData.rmf || 0) +
         (taxDeductionsData.ssf || 0) +
         (taxDeductionsData.govPensionFund || 0) +
         (taxDeductionsData.pvd || 0) +
         (taxDeductionsData.nationSavingsFund || 0) +
-        (taxDeductionsData.pensionInsurance - portion_pensionIns || 0),
+        ((taxDeductionsData.pensionInsurance || 0) - portion_pensionIns),
     }
 
     return used
   }
 
   const calculateRemainingDeductions = (max, used) => {
-    const remaining = {
+    return {
       rmf: Math.max(max.rmf - used.rmf, 0),
       ssf: Math.max(max.ssf - used.ssf, 0),
       govPensionFund: Math.max(max.govPensionFund - used.govPensionFund, 0),
@@ -275,18 +294,33 @@ export default function TaxCalculationPage() {
       ),
       total: Math.min(500000, Math.max(max.total - used.total, 0)),
     }
-    return remaining
   }
 
-  const handleInvestmentChange = (e) => {
+  // ---------- onChange: Just update the local "draft" text ----------
+  const handleDraftChange = (e) => {
     const { name, value } = e.target
-    const numericValue = Number(value) || 0
+    setDraftInvestments((prev) => ({
+      ...prev,
+      [name]: value, // raw string
+    }))
+  }
 
-    // Ensure the input does not exceed the remaining deductions
-    const cappedValue = Math.min(numericValue, remainingDeductions[name])
+  // ---------- onBlur: Parse, cap, update numeric investments, then save ----------
+  const handleInvestmentBlur = async (e) => {
+    const { name, value } = e.target
 
+    // 1) parse user input
+    let numericValue = Number(value) || 0
+
+    // 2) cap against remaining if you want
+    const cap = remainingDeductions[name] || 0
+    if (numericValue > cap) {
+      numericValue = cap
+    }
+
+    // 3) update local numeric investments
     setInvestments((prev) => {
-      const updated = { ...prev, [name]: cappedValue }
+      const updated = { ...prev, [name]: numericValue }
       updated.total =
         (updated.rmf || 0) +
         (updated.ssf || 0) +
@@ -297,20 +331,21 @@ export default function TaxCalculationPage() {
       return updated
     })
 
-    // Debounce the save to avoid excessive API calls
-    if (debounceTimer) {
-      clearTimeout(debounceTimer)
-    }
+    // Also reflect the final numeric in the draft
+    setDraftInvestments((prev) => ({
+      ...prev,
+      [name]: String(numericValue),
+    }))
 
-    const timer = setTimeout(() => {
-      saveInvestments(name, cappedValue)
-    }, 500)
-
-    setDebounceTimer(timer)
+    // 4) Save to server for that one field
+    await saveInvestmentsField(name, numericValue)
   }
 
-  const saveInvestments = async (fieldName, value) => {
+  // This saves one field to the server
+  const saveInvestmentsField = async (fieldName, value) => {
     try {
+      // Build the payload using the final local "investments" state
+      // BUT override the single field with the new 'value'.
       const payload = {
         clientUuid: clientUuid,
         investRmf: fieldName === "rmf" ? value : investments.rmf,
@@ -328,48 +363,47 @@ export default function TaxCalculationPage() {
             : investments.pensionInsurance,
       }
 
-      // Check if tax plan exists
+      // Check if the tax plan record exists
       const taxPlanRes = await fetch(
         `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`
       )
+
       if (taxPlanRes.ok) {
-        // Update existing tax plan
+        // update
         const updateRes = await fetch(
           `${import.meta.env.VITE_API_KEY}api/taxplan/${clientUuid}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           }
         )
         if (!updateRes.ok) throw new Error("Failed to update tax plan")
       } else {
-        // Create new tax plan
+        // create
         const createRes = await fetch(
           `${import.meta.env.VITE_API_KEY}api/taxplan`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           }
         )
         if (!createRes.ok) throw new Error("Failed to create tax plan")
       }
 
-      // Refetch data after saving
-      fetchData()
-    } catch (error) {
-      console.error(error)
+      // Importantly: we do NOT re-fetch from server here, to avoid stutter.
+      // We rely on our local state + the effect below to keep the UI updated.
+    } catch (err) {
+      console.error(err)
     }
   }
 
-  // 3) Only recalc newTaxToPay / taxSaved if the initial load is done
+  // ---------- Recalculate newTax whenever "investments" changes ----------
   useEffect(() => {
-    const calculateNewTax = async () => {
+    if (!initialLoadComplete) return
+
+    const recalcNewTax = async () => {
       try {
         const totalUsedDeductions = Math.min(
           alreadyUsedDeductions.total + investments.total,
@@ -386,13 +420,16 @@ export default function TaxCalculationPage() {
       }
     }
 
-    // If initial load not complete, skip recalculating to avoid flicker
-    if (initialLoadComplete) {
-      calculateNewTax()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [investments, alreadyUsedDeductions, totalIncome, initialLoadComplete])
+    recalcNewTax()
+  }, [
+    investments,
+    alreadyUsedDeductions,
+    oldTaxToPay,
+    initialLoadComplete,
+    clientUuid,
+  ])
 
+  // ---------- UI Handlers ----------
   const handleBack = () => {
     navigate(`/tax-deduction/`)
   }
@@ -401,15 +438,16 @@ export default function TaxCalculationPage() {
     e.target.select()
   }
 
+  // ---------- Render ----------
   return (
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
       <div className="flex flex-1">
         <CfpClientSidePanel />
+
         <div className="flex-1 p-8 space-y-8 font-bold">
           {/* Steps Indicator */}
           <div className="flex items-center justify-center space-x-8">
-            {/* Step 1: รายได้ */}
             <button
               onClick={() => navigate(`/tax-income/`)}
               className="flex flex-col items-center focus:outline-none"
@@ -422,7 +460,6 @@ export default function TaxCalculationPage() {
 
             <div className="h-px bg-gray-300 w-24"></div>
 
-            {/* Step 2: ค่าลดหย่อน */}
             <button
               onClick={() => navigate(`/tax-deduction/`)}
               className="flex flex-col items-center focus:outline-none"
@@ -435,7 +472,6 @@ export default function TaxCalculationPage() {
 
             <div className="h-px bg-gray-300 w-24"></div>
 
-            {/* Step 3: ผลการคำนวณ */}
             <button
               onClick={() => navigate(`/tax-calculation/`)}
               className="flex flex-col items-center focus:outline-none"
@@ -458,8 +494,9 @@ export default function TaxCalculationPage() {
             <h2 className="text-xl font-bold text-tfpa_blue bg-tfpa_gold p-2 rounded">
               ผลการคำนวณภาษี
             </h2>
+
             <div className="flex flex-col mt-4 mb-4 md:flex-row p-4 space-y-4 md:space-y-0 md:space-x-8">
-              {/* Left Side - ภาษีที่ต้องจ่าย */}
+              {/* Left - ภาษีที่ต้องจ่าย */}
               <div className="flex bg-tfpa_gold_pale text-3xl p-4 rounded-xl">
                 <div className="flex items-center space-x-2">
                   <span className="text-tfpa_blue font-bold">
@@ -472,7 +509,7 @@ export default function TaxCalculationPage() {
                 </div>
               </div>
 
-              {/* Right Side - รายได้ทั้งปี and รายได้สุทธิ */}
+              {/* Right - รายได้ทั้งปี / รายได้สุทธิ */}
               <div className="flex bg-white p-4 rounded shadow">
                 <div className="flex flex-col space-y-2">
                   <div className="flex items-center space-x-2">
@@ -501,6 +538,7 @@ export default function TaxCalculationPage() {
             <h2 className="text-xl font-bold mt-4 mb-4 text-tfpa_blue bg-tfpa_gold p-2 rounded">
               วางแผนลดหย่อนภาษีเพิ่มเติม
             </h2>
+
             <div className="overflow-x-auto mt-4 mb-4">
               <table className="min-w-full border mt-4 mb-4">
                 <thead>
@@ -607,7 +645,7 @@ export default function TaxCalculationPage() {
                     <td colSpan="8" className="border-t border-dashed"></td>
                   </tr>
 
-                  {/* รวมทั้งสิ้น label above the last column */}
+                  {/* รวม label above the last column */}
                   <tr>
                     <td className="border px-4 py-2"></td>
                     <td className="border px-4 py-2"></td>
@@ -626,84 +664,85 @@ export default function TaxCalculationPage() {
                     <td className="border px-4 py-2 text-tfpa_gold">
                       จำนวนเงินที่จะลงทุน
                     </td>
+                    {/* RMF */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="rmf"
-                        value={investments.rmf}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.rmf}
+                        value={draftInvestments.rmf} // <-- user's typed text
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* SSF */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="ssf"
-                        value={investments.ssf}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.ssf}
+                        value={draftInvestments.ssf}
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* Gov Pension Fund */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="govPensionFund"
-                        value={investments.govPensionFund}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.govPensionFund}
+                        value={draftInvestments.govPensionFund}
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* PVD */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="pvd"
-                        value={investments.pvd}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.pvd}
+                        value={draftInvestments.pvd}
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* กอช */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="nationSavingsFund"
-                        value={investments.nationSavingsFund}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.nationSavingsFund}
+                        value={draftInvestments.nationSavingsFund}
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* ประกันบำนาญ */}
                     <td className="border px-4 py-2 text-center">
                       <input
                         type="number"
                         name="pensionInsurance"
-                        value={investments.pensionInsurance}
-                        onWheel={(e) => e.target.blur()}
-                        onChange={handleInvestmentChange}
-                        max={remainingDeductions.pensionInsurance}
+                        value={draftInvestments.pensionInsurance}
+                        onChange={handleDraftChange}
+                        onBlur={handleInvestmentBlur}
                         onFocus={handleInputFocus}
                         className="w-28 px-2 py-1 border rounded"
                         min="0"
                       />
                     </td>
+                    {/* Final total (read-only) */}
                     <td className="border px-4 py-2 bg-tfpa_gold text-white text-center">
                       {investments.total.toLocaleString()}
                     </td>
@@ -768,7 +807,6 @@ export default function TaxCalculationPage() {
               </div>
               <div className="flex items-center space-x-2 text-lg">
                 <span>หลังวางแผนเสียภาษี:</span>
-                {/* 4) If initial load not complete, show nothing or a placeholder */}
                 {initialLoadComplete ? (
                   <span className="text-tfpa_gold">
                     {newTaxToPay.toLocaleString()} บาท
