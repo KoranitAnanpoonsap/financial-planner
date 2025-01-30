@@ -34,66 +34,81 @@ import CFPClientExpensePage from "./pages/cfp_client_expense"
 import CFPClientAssetPage from "./pages/cfp_client_asset"
 import CFPClientDebtPage from "./pages/cfp_client_debt"
 
-function App() {
+export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LoginSelection />} />
-        <Route path="/client-login" element={<ClientLogin />} />
-        <Route path="/planner-login" element={<PlannerLogin />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/cfp-homepage/" element={<CfpHomepage />} />
-        <Route path="/client-homepage" element={<ClientHomepage />} />
-        <Route path="/client-precalculation-page" element={<ClientPrecalculationPage />} />
-        <Route path="/client-healthcheck-page" element={<ClientHealthcheckPage />} />
-        <Route path="/client-healthcheck-result" element={<ClientHealthcheckResult />} />
-        <Route path="/client-easygoal-page" element={<ClientEasygoalPage />} />
-        <Route path="/client-easygoal-result" element={<ClientEasygoalResult />} />
-        <Route path="/cfp-profile/" element={<CFPProfile />} />
-        <Route
-          path="/portfolio-selection/"
-          element={<PortfolioSelectionCFP />}
-        />
-        <Route path="/portfolio-chart/" element={<PortfolioCreationCFP />} />
-        <Route path="/cashflow-base/" element={<CFPCashflowBase />} />
-        <Route
-          path="/cashflow-base-calculated/"
-          element={<CFPCashflowBaseCalculated />}
-        />
-        <Route
-          path="/cashflow-base-dashboard/"
-          element={<CFPCashflowBaseDashboard />}
-        />
-        <Route path="/goal-base/" element={<CFPGoalBase />} />
-        <Route
-          path="/goal-base-calculated/"
-          element={<CFPGoalBaseCalculated />}
-        />
-        <Route
-          path="/goal-base-dashboard/"
-          element={<CFPGoalBaseDashboard />}
-        />
-        <Route path="/retirement-goal/" element={<RetirementGoalPage />} />
-        <Route
-          path="/retirement-goal-calculated/"
-          element={<RetirementGoalCalculated />}
-        />
-        <Route path="/tax-income/" element={<TaxIncomePage />} />
-        <Route path="/tax-deduction/" element={<TaxDeductionPage />} />
-        <Route path="/tax-calculation/" element={<TaxCalculationPage />} />
-        <Route
-          path="/financial-healthcheck/"
-          element={<CFPFinancialHealthCheck />}
-        />
-        <Route path="/client-info/" element={<CFPClientInfoPage />} />
-        <Route path="/client-income/" element={<CFPClientIncomePage />} />
-        <Route path="/client-expense/" element={<CFPClientExpensePage />} />
-        <Route path="/client-asset/" element={<CFPClientAssetPage />} />
-        <Route path="/client-debt/" element={<CFPClientDebtPage />} />
-      </Routes>
-    </Router>
+    <BrowserRouter basename={"/financial-planner/"}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginSelection />} />
+          <Route path="/client-login" element={<ClientLogin />} />
+          <Route path="/planner-login" element={<PlannerLogin />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/cfp-homepage/" element={<CfpHomepage />} />
+          <Route path="/client-homepage" element={<ClientHomepage />} />
+          <Route
+            path="/client-precalculation-page"
+            element={<ClientPrecalculationPage />}
+          />
+          <Route
+            path="/client-healthcheck-page"
+            element={<ClientHealthcheckPage />}
+          />
+          <Route
+            path="/client-healthcheck-result"
+            element={<ClientHealthcheckResult />}
+          />
+          <Route
+            path="/client-easygoal-page"
+            element={<ClientEasygoalPage />}
+          />
+          <Route
+            path="/client-easygoal-result"
+            element={<ClientEasygoalResult />}
+          />
+          <Route path="/cfp-profile/" element={<CFPProfile />} />
+          <Route
+            path="/portfolio-selection/"
+            element={<PortfolioSelectionCFP />}
+          />
+          <Route path="/portfolio-chart/" element={<PortfolioCreationCFP />} />
+          <Route path="/cashflow-base/" element={<CFPCashflowBase />} />
+          <Route
+            path="/cashflow-base-calculated/"
+            element={<CFPCashflowBaseCalculated />}
+          />
+          <Route
+            path="/cashflow-base-dashboard/"
+            element={<CFPCashflowBaseDashboard />}
+          />
+          <Route path="/goal-base/" element={<CFPGoalBase />} />
+          <Route
+            path="/goal-base-calculated/"
+            element={<CFPGoalBaseCalculated />}
+          />
+          <Route
+            path="/goal-base-dashboard/"
+            element={<CFPGoalBaseDashboard />}
+          />
+          <Route path="/retirement-goal/" element={<RetirementGoalPage />} />
+          <Route
+            path="/retirement-goal-calculated/"
+            element={<RetirementGoalCalculated />}
+          />
+          <Route path="/tax-income/" element={<TaxIncomePage />} />
+          <Route path="/tax-deduction/" element={<TaxDeductionPage />} />
+          <Route path="/tax-calculation/" element={<TaxCalculationPage />} />
+          <Route
+            path="/financial-healthcheck/"
+            element={<CFPFinancialHealthCheck />}
+          />
+          <Route path="/client-info/" element={<CFPClientInfoPage />} />
+          <Route path="/client-income/" element={<CFPClientIncomePage />} />
+          <Route path="/client-expense/" element={<CFPClientExpensePage />} />
+          <Route path="/client-asset/" element={<CFPClientAssetPage />} />
+          <Route path="/client-debt/" element={<CFPClientDebtPage />} />
+        </Routes>
+      </Router>
+    </BrowserRouter>
   )
 }
-
-export default App
