@@ -468,6 +468,13 @@ export default function CFPClientAssetPage() {
                     </td>
                   </tr>
                 ))}
+                {assets.length === 0 && (
+                  <tr>
+                    <td className="py-2 px-4 border text-center" colSpan="9">
+                      ไม่มีสินทรัพย์ที่บันทึกไว้
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 

@@ -79,7 +79,11 @@ export default function CfpSidePanel() {
     {
       label: "การวางแผนเป้าหมายองค์รวม",
       icon: checkIcon,
-      routes: [`/cashflow-base/`, `/cashflow-base-calculated/`],
+      routes: [
+        `/cashflow-base/`,
+        `/cashflow-base-calculated/`,
+        `/cashflow-base-dashboard/`,
+      ],
     },
     {
       label: "ตรวจสุขภาพทางการเงิน",

@@ -1,10 +1,13 @@
-import React from 'react';
-import Header from "../components/clientHeader.jsx";
-import Footer from "../components/footer.jsx";
-import FinancialHealthIllustration from "../assets/importance_of_planning.jpg";
-import FinancialGoalIllustration from "../assets/plan_with_cfp.jpeg";
+import React from "react"
+import Header from "../components/clientHeader.jsx"
+import Footer from "../components/footer.jsx"
+import FinancialHealthIllustration from "../assets/importance_of_planning.jpg"
+import FinancialGoalIllustration from "../assets/plan_with_cfp.jpeg"
+import { useNavigate } from "react-router-dom"
 
 export default function FinancialHealthCheck() {
+  const navigate = useNavigate()
+
   const FinancialHealthSection = () => (
     <section className="bg-white rounded-lg shadow-lg p-6 mb-12">
       <div className="flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-6">
@@ -13,14 +16,15 @@ export default function FinancialHealthCheck() {
             ตรวจสุขภาพทางการเงินของคุณง่าย ๆ ใน 3 นาที!
           </h2>
           <p className="text-gray-600 mb-4">
-            สำรวจสุขภาพทางการเงินของคุณพร้อมรับคำแนะนำเบื้องต้น รู้จักการเงินตัวเองได้ง่าย ๆ ในไม่กี่นาที
+            สำรวจสุขภาพทางการเงินของคุณพร้อมรับคำแนะนำเบื้องต้น
+            รู้จักการเงินตัวเองได้ง่าย ๆ ในไม่กี่นาที
           </p>
-          <a 
-            href="/client-healthcheck-page"
-            className="bg-blue-600 text-white py-2 px-4 rounded-full inline-block"
+          <button
+            onClick={() => navigate(`/client-healthcheck-page`)}
+            className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white py-2 px-4 rounded-full inline-block"
           >
             เริ่มตรวจสุขภาพทางการเงินของคุณกันเถอะ
-          </a>
+          </button>
         </div>
         <div className="lg:w-1/2 flex justify-center">
           <img
@@ -31,7 +35,7 @@ export default function FinancialHealthCheck() {
         </div>
       </div>
     </section>
-  );
+  )
 
   const FinancialGoalSection = () => (
     <section className="bg-white rounded-lg shadow-lg p-6">
@@ -48,18 +52,19 @@ export default function FinancialHealthCheck() {
             วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน
           </h2>
           <p className="text-gray-600 mb-4">
-            สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำ นำไปปรับใช้ได้ทันที
+            สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำ
+            นำไปปรับใช้ได้ทันที
           </p>
-          <a 
-            href="/client-easygoal-page"
-            className="bg-blue-600 text-white py-2 px-4 rounded-full inline-block"
+          <button
+            onClick={() => navigate(`/client-easygoal-page`)}
+            className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white py-2 px-4 rounded-full inline-block"
           >
             เริ่มวิเคราะห์เป้าหมายของคุณกันเถอะ
-          </a>
+          </button>
         </div>
       </div>
     </section>
-  );
+  )
 
   return (
     <div>
@@ -70,5 +75,5 @@ export default function FinancialHealthCheck() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }

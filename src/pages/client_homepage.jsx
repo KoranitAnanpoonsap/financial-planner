@@ -1,7 +1,7 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import React from "react"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
+import { useNavigate } from "react-router-dom"
 import Client_Homepage_pic1 from "../assets/importance_of_planning.jpg"
 import Client_Homepage_pic2 from "../assets/plan_by_yourself.jpg"
 import Client_Homepage_pic3 from "../assets/plan_with_cfp.jpeg"
@@ -16,7 +16,7 @@ export default function ClientHomePage() {
         เป้าหมายชีวิตสำเร็จได้ด้วยนักวางแผนการเงิน CFP<sup>®</sup>
       </p>
     </section>
-  );
+  )
 
   const Features = () => (
     <section className="bg-blue-50 py-8">
@@ -43,28 +43,45 @@ export default function ClientHomePage() {
         </div>
       </div>
     </section>
-  );
-  
+  )
+
+  const navigate = useNavigate()
+
+  const handleClick = (link) => {
+    navigate(link)
+  }
+
   const FeatureCard = ({ title, link, imageSrc }) => (
-    <div className="bg-white shadow-lg rounded-lg p-4">
+    <div
+      className="bg-white shadow-lg rounded-lg p-4 cursor-pointer"
+      onClick={() => handleClick(link)}
+    >
       <img src={imageSrc} alt={title} className="rounded-lg mb-4" />
       <h3 className="text-lg font-semibold text-blue-800 hover:underline">
-        <a href={link}>{title}</a>
+        {title}
       </h3>
     </div>
-  );
+  )
 
   const About = () => (
     <section className="bg-orange-100 py-8">
       <div className="container mx-auto text-center">
         <h2 className="text-xl font-bold mb-4">เกี่ยวกับเรา</h2>
         <p className="text-gray-700">
-        เราเป็นทีมงานนักวางแผนการเงินที่ได้รับการรับรองจาก CFP (Certified Financial Planner) ซึ่งเป็นมาตรฐานระดับสากลที่ยืนยันถึงความเชี่ยวชาญและความน่าเชื่อถือในการให้บริการทางการเงิน ด้วยความมุ่งมั่นในการช่วยเหลือคุณสร้างความมั่นคงทางการเงิน ทีมของเราพร้อมที่จะให้คำปรึกษาและแนะนำวิธีการวางแผนการเงินที่เหมาะสมกับเป้าหมายและความต้องการเฉพาะตัวของคุณ
-        ไม่ว่าคุณจะต้องการวางแผนเพื่อการเกษียณอายุ การลงทุน การจัดการหนี้สิน หรือการวางแผนภาษี เรามีประสบการณ์และความรู้ที่จะช่วยให้คุณตัดสินใจทางการเงินได้อย่างมั่นใจ เราเชื่อมั่นว่าการวางแผนการเงินที่ดีไม่เพียงแต่สร้างความมั่นคงในปัจจุบัน แต่ยังปูทางสู่อนาคตที่มั่นคงและประสบความสำเร็จอีกด้วย
+          เราเป็นทีมงานนักวางแผนการเงินที่ได้รับการรับรองจาก CFP (Certified
+          Financial Planner)
+          ซึ่งเป็นมาตรฐานระดับสากลที่ยืนยันถึงความเชี่ยวชาญและความน่าเชื่อถือในการให้บริการทางการเงิน
+          ด้วยความมุ่งมั่นในการช่วยเหลือคุณสร้างความมั่นคงทางการเงิน
+          ทีมของเราพร้อมที่จะให้คำปรึกษาและแนะนำวิธีการวางแผนการเงินที่เหมาะสมกับเป้าหมายและความต้องการเฉพาะตัวของคุณ
+          ไม่ว่าคุณจะต้องการวางแผนเพื่อการเกษียณอายุ การลงทุน การจัดการหนี้สิน
+          หรือการวางแผนภาษี
+          เรามีประสบการณ์และความรู้ที่จะช่วยให้คุณตัดสินใจทางการเงินได้อย่างมั่นใจ
+          เราเชื่อมั่นว่าการวางแผนการเงินที่ดีไม่เพียงแต่สร้างความมั่นคงในปัจจุบัน
+          แต่ยังปูทางสู่อนาคตที่มั่นคงและประสบความสำเร็จอีกด้วย
         </p>
       </div>
     </section>
-  );
+  )
 
   const FAQ = () => (
     <section className="bg-white py-8">
@@ -75,27 +92,25 @@ export default function ClientHomePage() {
         <FaqItem question="ทำไมฉันจึงต้องไปปรึกษานักวางแผนการเงิน?" />
       </div>
     </section>
-  );
+  )
 
   const FaqItem = ({ question }) => (
     <details className="border-b py-4">
       <summary className="text-blue-600 cursor-pointer">{question}</summary>
-      <p className="mt-2 text-gray-700">
-        เนื้อหาของคำตอบเกี่ยวกับ {question}
-      </p>
+      <p className="mt-2 text-gray-700">เนื้อหาของคำตอบเกี่ยวกับ {question}</p>
     </details>
-  );
+  )
 
   return (
     <div>
-        <Header />
-        <main>
-          <Banner />
-          <Features />
-          <About />
-          <FAQ />
-        </main>
-        <Footer />
-      </div>
+      <Header />
+      <main>
+        <Banner />
+        <Features />
+        <About />
+        <FAQ />
+      </main>
+      <Footer />
+    </div>
   )
 }
