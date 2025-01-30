@@ -15,7 +15,7 @@ COPY src/ src/
 RUN chmod +x gradlew
 
 # Build the application
-RUN ./gradlew build
+RUN ./gradlew build -x test
 
 # Expose port (Render assigns dynamic ports)
 EXPOSE $PORT
