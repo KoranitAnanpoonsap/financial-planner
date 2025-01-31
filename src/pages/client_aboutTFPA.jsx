@@ -83,9 +83,9 @@ const FeatureCard = ({ title, link }) => {
 // Mission Section
 const Mission = () => {
   const missionItems = [
-    'ประวัติสบาคม',
-    'สมาชิกผู้ร่วมก่อตั้งสมาชิกผู้ร่วมก่อตั้ง',
-    'โครงสร้างสบาคม'
+    'ประวัติสมาคม',
+    'สมาชิกผู้ร่วมก่อตั้ง',
+    'โครงสร้างสมาคม'
   ];
 
   return (
