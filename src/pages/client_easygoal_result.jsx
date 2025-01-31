@@ -34,9 +34,9 @@ export default function EasyGoalResult() {
         {/* Results Section */}
         <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
           <h3 className="text-xl font-semibold text-center mb-6">
-            ผลลัพธ์ของเป้าหมาย: {goalName}
+            ผลลัพธ์ของเป้าหมาย {goalName}
           </h3>
-          <p className="text-center text-lg mb-4">เป้าหมาย: {target.toLocaleString()} บาท</p>
+          <p className="text-center text-lg mb-4">มูลค่าเป้าหมาย: {target.toLocaleString()} บาท</p>
 
           <div className="text-center text-lg">
             {difference > 0 ? (
@@ -47,7 +47,7 @@ export default function EasyGoalResult() {
                   {requiredAnnualSavings.toLocaleString()} บาท/ปี
                 </p>
                 <p className="text-lg font-bold text-red-600">
-                  ({requiredMonthlySavings} บาท/เดือน)
+                  ({requiredMonthlySavings.toLocaleString()} บาท/เดือน)
                 </p>
               </>
             ) : (

@@ -18,7 +18,7 @@ export default function ClientHeader() {
             หน้าหลัก
           </span>
           <span
-            onClick={() => navigate(`/about`)}
+            onClick={() => navigate(`/client-aboutTFPA`)}
             className="text-tfpa_blue hover:underline cursor-pointer"
           >
             เกี่ยวกับสมาคม
