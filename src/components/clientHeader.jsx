@@ -36,7 +36,7 @@ export default function ClientHeader() {
             วางแผน
           </span>
           <span
-            onClick={() => navigate(`/faq`)}
+            onClick={() => navigate(`/client-faq`)}
             className="text-tfpa_blue hover:underline cursor-pointer"
           >
             FAQ
