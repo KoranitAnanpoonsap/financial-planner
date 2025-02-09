@@ -1,26 +1,21 @@
 package com.finplanner.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.finplanner.model.CfpInfo;
 import com.finplanner.repository.CfpInfoRepository;
 import com.finplanner.service.CfpInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.springframework.core.io.Resource;
 
 @RestController
 @RequestMapping("/api")
@@ -44,7 +39,9 @@ public class CfpInfoController {
         private String cfpExpertise;
         private String cfpLanguages;
         private String cfpImage;
+        private Integer cfpGender;
 
+        // Getters and setters...
         public String getCfpFirstName() {
             return cfpFirstName;
         }
@@ -172,6 +169,14 @@ public class CfpInfoController {
         public void setCfpImage(String cfpImage) {
             this.cfpImage = cfpImage;
         }
+
+        public Integer getCfpGender() {
+            return cfpGender;
+        }
+
+        public void setCfpGender(Integer cfpGender) {
+            this.cfpGender = cfpGender;
+        }
     }
 
     private final CfpInfoService cfpInfoService;
@@ -179,14 +184,25 @@ public class CfpInfoController {
     @Autowired
     private CfpInfoRepository cfpInfoRepository;
 
-    // The folder where images will be stored:
-    private final Path cfpImagesFolder = Paths.get("cfpimage");
+    // Cloudinary instance for image uploads/deletions
+    private final Cloudinary cloudinary;
 
     @Autowired
     public CfpInfoController(CfpInfoService cfpInfoService) {
         this.cfpInfoService = cfpInfoService;
+        // Initialize Cloudinary with your credentials
+        this.cloudinary = new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", "dyhyjpoel",
+                "api_key", "192676298677891",
+                "api_secret", "pdAI8TSp3E-BCIlPAVuUdhw_BFY"));
     }
 
+    /**
+     * Uploads the image to Cloudinary and returns the secure URL.
+     * Notice: This endpoint does NOT update the CFP record.
+     * The returned URL is temporary and will be saved only if the user clicks
+     * "Save".
+     */
     @PostMapping(value = "/cfp/profile/uploadImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCfpImage(
             @RequestParam("file") MultipartFile file,
@@ -194,87 +210,37 @@ public class CfpInfoController {
             @RequestParam("cfpFirstName") String cfpFirstName,
             @RequestParam("cfpLastName") String cfpLastName) {
         try {
-            // 1) Build a filename from firstName + lastName + extension
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null) {
-                originalFilename = "unknown.jpg"; // fallback
-            }
-            String extension = "";
-            int dotIndex = originalFilename.lastIndexOf('.');
-            if (dotIndex >= 0) {
-                extension = originalFilename.substring(dotIndex);
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("No file selected.");
             }
 
-            // Create the final file name: "firstname_lastname.jpg"
-            String sanitizedFirstName = cfpFirstName.replaceAll("\\s+", "_");
-            String sanitizedLastName = cfpLastName.replaceAll("\\s+", "_");
-            String newFilename = sanitizedFirstName + "_" + sanitizedLastName + extension;
+            // Create a public ID for the image using first and last name
+            String publicId = cfpFirstName.replaceAll("\\s+", "_") + "_" + cfpLastName.replaceAll("\\s+", "_");
 
-            // 2) Get the CFP info from DB
-            CfpInfo cfpInfo = cfpInfoService.getByUuid(cfpUuid);
-            if (cfpInfo == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("CFP not found.");
-            }
+            // Upload the image to Cloudinary
+            @SuppressWarnings("unchecked")
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("public_id", publicId));
 
-            // Get the old filename (if any)
-            String oldFilename = cfpInfo.getCfpImage();
+            // Get the secure URL of the uploaded image
+            String secureUrl = uploadResult.get("secure_url").toString();
 
-            // 3) Ensure the folder exists
-            if (!Files.exists(cfpImagesFolder)) {
-                Files.createDirectories(cfpImagesFolder);
-            }
-
-            // 4) Save the new file to the cfpimage folder
-            Path targetPath = cfpImagesFolder.resolve(newFilename).normalize();
-            Files.copy(file.getInputStream(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-            // 5) Update DB with the new filename
-            cfpInfo.setCfpImage(newFilename);
-            cfpInfoRepository.save(cfpInfo);
-
-            // 6) If there's an old filename, remove the old file if it's different
-            if (oldFilename != null && !oldFilename.isBlank() && !oldFilename.equals(newFilename)) {
-                Path oldFilePath = cfpImagesFolder.resolve(oldFilename).normalize();
-                if (Files.exists(oldFilePath)) {
-                    try {
-                        Files.delete(oldFilePath);
-                    } catch (IOException e) {
-                        System.err.println("Failed to delete old file: " + oldFilePath + " - " + e.getMessage());
-                    }
-                }
-            }
-
-            // 7) Return success and the new filename
-            return ResponseEntity.ok(newFilename);
-
-        } catch (IOException e) {
+            // Do NOT update the DB here.
+            // Return the secure URL so the front-end can update its state temporarily.
+            return ResponseEntity.ok(secureUrl);
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error saving image: " + e.getMessage());
+                    .body("Error uploading image: " + e.getMessage());
         }
     }
 
-    // GET endpoint to serve image files
+    // GET endpoint to serve images is not needed with Cloudinary.
     @GetMapping("/cfp/profile/image/{filename}")
     public ResponseEntity<?> getCfpImage(@PathVariable String filename) {
-        try {
-            Path filePath = cfpImagesFolder.resolve(filename).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists() && resource.isReadable()) {
-                String contentType = Files.probeContentType(filePath);
-                if (contentType == null) {
-                    contentType = "application/octet-stream";
-                }
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error reading image: " + e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                .body("Serving images from local storage is disabled.");
     }
 
     @GetMapping("/cfp/profile/{cfpUuid}")
@@ -285,7 +251,6 @@ public class CfpInfoController {
                 return ResponseEntity.notFound().build();
             }
 
-            // Create & fill the nested DTO
             CfpInfoDTO response = new CfpInfoDTO();
             response.setCfpFirstName(cfpInfo.getCfpFirstName());
             response.setCfpLastName(cfpInfo.getCfpLastName());
@@ -303,6 +268,7 @@ public class CfpInfoController {
             response.setCfpExpertise(cfpInfo.getCfpExpertise());
             response.setCfpLanguages(cfpInfo.getCfpLanguages());
             response.setCfpImage(cfpInfo.getCfpImage());
+            response.setCfpGender(cfpInfo.getCfpGender());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -311,9 +277,40 @@ public class CfpInfoController {
         }
     }
 
+    /**
+     * Updates the CFP profile. If the cfpImage field in the payload is different
+     * from the stored value,
+     * delete the old image from Cloudinary.
+     */
     @PutMapping("/cfp/profile")
     public ResponseEntity<?> updateCfpProfile(@RequestBody CfpInfo payload) {
         try {
+            // Retrieve the current CFP record.
+            CfpInfo current = cfpInfoService.getByUuid(payload.getCfpUuid().toString());
+
+            // If there is an existing image and it differs from the new one, delete the old
+            // image.
+            if (current != null && current.getCfpImage() != null
+                    && payload.getCfpImage() != null
+                    && !current.getCfpImage().equals(payload.getCfpImage())) {
+
+                String oldImageUrl = current.getCfpImage();
+                // Extract the public ID from the URL.
+                // Cloudinary URLs are typically of the form:
+                // https://res.cloudinary.com/<cloud_name>/image/upload/v<version>/<public_id>.<ext>
+                int lastSlash = oldImageUrl.lastIndexOf('/');
+                int dotIndex = oldImageUrl.lastIndexOf('.');
+                if (lastSlash != -1 && dotIndex != -1 && dotIndex > lastSlash) {
+                    String oldPublicId = oldImageUrl.substring(lastSlash + 1, dotIndex);
+                    try {
+                        cloudinary.uploader().destroy(oldPublicId, ObjectUtils.emptyMap());
+                    } catch (Exception e) {
+                        System.err.println("Error deleting old image: " + e.getMessage());
+                    }
+                }
+            }
+
+            // Update the CFP record (including the new image URL, if provided).
             CfpInfo updated = cfpInfoService.updateOrCreateCfpInfo(payload);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
@@ -326,7 +323,6 @@ public class CfpInfoController {
     public ResponseEntity<?> login(
             @RequestParam String email,
             @RequestParam String password) {
-
         Optional<CfpInfo> cfpInfo = cfpInfoService.authenticateCfp(email, password);
         if (cfpInfo.isPresent()) {
             Map<String, Object> response = new HashMap<>();
@@ -347,5 +343,4 @@ public class CfpInfoController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

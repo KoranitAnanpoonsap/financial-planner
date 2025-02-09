@@ -61,6 +61,7 @@ public class CfpInfoService {
         entity.setCfpMainOccupation(payload.getCfpMainOccupation());
         entity.setCfpReasonBecomeCfp(payload.getCfpReasonBecomeCfp());
         entity.setCfpIntroduction(payload.getCfpIntroduction());
+        entity.setCfpGender(payload.getCfpGender());
 
         // Save
         return cfpInfoRepository.save(entity);

@@ -34,7 +34,7 @@ public class CfpInfo {
     @Column(name = "cfp_password", nullable = false)
     private String cfpPassword;
 
-    @Column(name = "cfp_image", length = 100)
+    @Column(name = "cfp_image")
     private String cfpImage;
 
     @Column(name = "cfp_phone_number", nullable = false, length = 20)
@@ -72,6 +72,9 @@ public class CfpInfo {
 
     @Column(name = "cfp_languages")
     private String cfpLanguages;
+
+    @Column(name = "cfp_gender")
+    private Integer cfpGender;
 
     // Getters and Setters for all fields
 
@@ -248,5 +251,13 @@ public class CfpInfo {
 
     public void setCfpUuid(UUID cfpUuid) {
         this.cfpUuid = cfpUuid;
+    }
+
+    public Integer getCfpGender() {
+        return cfpGender;
+    }
+
+    public void setCfpGender(Integer cfpGender) {
+        this.cfpGender = cfpGender;
     }
 }

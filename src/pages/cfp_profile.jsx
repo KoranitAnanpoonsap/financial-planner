@@ -29,7 +29,10 @@ export default function CfpProfilePage() {
   const [linkedin, setLinkedin] = useState("")
   const [saveStatus, setSaveStatus] = useState("")
 
-  // Multi-select for charges
+  // Gender: "0" for male and "1" for female
+  const [genderSelected, setGenderSelected] = useState("0")
+
+  // Multi-select options and states
   const chargeOptions = [
     "คิดค่าบริการจัดทำแผนการเงิน",
     "คิดค่านายหน้าจากการแนะนำผลิตภัณฑ์",
@@ -37,7 +40,6 @@ export default function CfpProfilePage() {
   ]
   const [selectedCharges, setSelectedCharges] = useState([])
 
-  // Multi-select for expertise
   const expertiseOptions = [
     "การวางแผนการเงินแบบองค์รวม",
     "การวางแผนรายรับรายจ่าย",
@@ -54,7 +56,6 @@ export default function CfpProfilePage() {
   ]
   const [selectedExpertise, setSelectedExpertise] = useState([])
 
-  // Multi-select for service area
   const serviceAreaOptions = [
     "กรุงเทพมหานครและปริมณฑล",
     "ภาคเหนือ",
@@ -66,40 +67,31 @@ export default function CfpProfilePage() {
   ]
   const [selectedServiceAreas, setSelectedServiceAreas] = useState([])
 
-  // Multiple text inputs for qualifications
   const [qualifications, setQualifications] = useState([])
-
-  // Multiple text inputs for educationRecord
   const [educationRecords, setEducationRecords] = useState([])
-
-  // Multiple text inputs for languages
   const [languages, setLanguages] = useState([])
 
   const [mainOccupation, setMainOccupation] = useState("")
   const [reasonBecomeCfp, setReasonBecomeCfp] = useState("")
   const [introduction, setIntroduction] = useState("")
 
+  // profileImage will hold a full URL returned from Cloudinary.
   const [profileImage, setProfileImage] = useState("")
   const [fileToUpload, setFileToUpload] = useState(null)
-  const [fileErrorMessage, setFileErrorMessage] = useState("") // specific error for file size
+  const [fileErrorMessage, setFileErrorMessage] = useState("")
 
   // 1) When user selects a file:
   const handleFileChange = (e) => {
-    setFileErrorMessage("") // clear previous file error
+    setFileErrorMessage("")
     if (e.target.files && e.target.files.length > 0) {
       setFileToUpload(e.target.files[0])
     }
   }
 
-  // 2) Upload the file to the server
+  // 2) Upload the file to the server (Cloudinary)
   const handleUploadImage = async () => {
-    if (!fileToUpload) {
-      return
-    }
-    if (!firstName || !lastName) {
-      return
-    }
-
+    if (!fileToUpload) return
+    if (!firstName || !lastName) return
     try {
       const formData = new FormData()
       formData.append("file", fileToUpload)
@@ -117,7 +109,6 @@ export default function CfpProfilePage() {
 
       if (!res.ok) {
         const msg = await res.text()
-        // If message likely indicates file is too big, show Thai error
         if (
           msg.includes("Maximum upload size exceeded") ||
           msg.includes("MaxUploadSizeExceeded") ||
@@ -130,16 +121,10 @@ export default function CfpProfilePage() {
         return
       }
 
-      // The backend returns the raw filename, e.g. "John_Doe.jpg"
-      const savedFilename = await res.text()
-
-      // Append cache-buster: "?v=<timestamp>"
-      const uniqueUrlParam = "?v=" + Date.now()
-      setProfileImage(savedFilename + uniqueUrlParam)
-
-      // Optionally reset the file input
+      // Now, the backend returns the secure URL from Cloudinary.
+      const secureUrl = await res.text()
+      setProfileImage(secureUrl)
       setFileToUpload(null)
-      // If you want to visually clear the file input element, you can do e.target.value = "" in handleFileChange, or add a ref
     } catch (error) {
       if (
         error.message.includes("Maximum upload size exceeded") ||
@@ -152,34 +137,20 @@ export default function CfpProfilePage() {
     }
   }
 
-  // 3) Build the URL to your GET endpoint
-  // If profileImage already has "?v=xxxx", keep that. We'll split it if needed.
-  const baseFilename = profileImage.split("?")[0] // "John_Doe.jpg" (strip query param)
-  const cacheBuster = profileImage.includes("?")
-    ? profileImage.split("?")[1]
-    : ""
-  const imageUrl = baseFilename
-    ? `${import.meta.env.VITE_API_KEY}api/cfp/profile/image/${baseFilename}${
-        cacheBuster ? "?" + cacheBuster : ""
-      }`
-    : ""
+  // Since profileImage now holds the full URL, use it directly:
+  const imageUrl = profileImage
 
-  // ----- Handle Checkboxes for multi-select fields -----
-
+  // ----- Utility functions for checkboxes and multiple text inputs -----
   function handleCheckboxChange(value, selectedValues, setSelectedValues) {
     if (selectedValues.includes(value)) {
-      // If already in array, remove it
       setSelectedValues(selectedValues.filter((v) => v !== value))
     } else {
-      // If not in array, add it
       setSelectedValues([...selectedValues, value])
     }
   }
 
-  // ----- Handle multiple text inputs (qualifications, education, languages) -----
-
   function handleAddItem(setter, items) {
-    setter([...items, ""]) // add empty input
+    setter([...items, ""])
   }
 
   function handleItemChange(index, newValue, items, setter) {
@@ -200,17 +171,12 @@ export default function CfpProfilePage() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_KEY}api/cfp/profile/${cfpUuid}`,
-        {
-          method: "GET",
-        }
+        { method: "GET" }
       )
-      if (!response.ok) {
-        // Possibly no data set yet or an error
-        return
-      }
+      if (!response.ok) return
       const data = await response.json()
 
-      // Populate the states
+      // Populate states from DB (old image remains if not updated)
       setProfileImage(data.cfpImage || "")
       setFirstName(data.cfpFirstName || "")
       setLastName(data.cfpLastName || "")
@@ -218,8 +184,11 @@ export default function CfpProfilePage() {
       setContactEmail(data.cfpContactEmail || "")
       setPhoneNumber(data.cfpPhoneNumber || "")
       setLinkedin(data.cfpLinkedin || "")
-
-      // Parse multi-selects (comma-separated)
+      setGenderSelected(
+        data.cfpGender !== undefined && data.cfpGender !== null
+          ? String(data.cfpGender)
+          : "0"
+      )
       setSelectedCharges(data.cfpCharge ? data.cfpCharge.split(",") : [])
       setSelectedExpertise(
         data.cfpExpertise ? data.cfpExpertise.split(",") : []
@@ -227,8 +196,6 @@ export default function CfpProfilePage() {
       setSelectedServiceAreas(
         data.cfpServiceArea ? data.cfpServiceArea.split(",") : []
       )
-
-      // Parse multiple text inputs
       setQualifications(
         data.cfpQualifications ? data.cfpQualifications.split(",") : []
       )
@@ -236,7 +203,6 @@ export default function CfpProfilePage() {
         data.cfpEducationRecord ? data.cfpEducationRecord.split(",") : []
       )
       setLanguages(data.cfpLanguages ? data.cfpLanguages.split(",") : [])
-
       setMainOccupation(data.cfpMainOccupation || "")
       setReasonBecomeCfp(data.cfpReasonBecomeCfp || "")
       setIntroduction(data.cfpIntroduction || "")
@@ -249,31 +215,25 @@ export default function CfpProfilePage() {
     fetchCfpData()
   }, [])
 
-  // ----- Submit / Save -----
+  // ----- Save / Update Profile -----
   const handleSave = async () => {
-    // 1) Clear the old message so it disappears whenever the user presses "save" again
     setSaveStatus("")
-
     try {
-      // Join multi-select values into comma-separated strings
       const chargeString = selectedCharges.join(",")
       const expertiseString = selectedExpertise.join(",")
       const serviceAreaString = selectedServiceAreas.join(",")
-
-      // Join multiple text inputs with commas
       const qualificationString = qualifications.join(",")
       const educationString = educationRecords.join(",")
       const languagesString = languages.join(",")
-
       const payload = {
-        cfpUuid: cfpUuid, // pass the UUID so the backend knows which record
+        cfpUuid: cfpUuid,
         cfpFirstName: firstName,
         cfpLastName: lastName,
         cfpNickname: nickname,
         cfpContactEmail: contactEmail,
         cfpPhoneNumber: phoneNumber,
         cfpLinkedin: linkedin,
-        cfpImage: profileImage,
+        cfpImage: profileImage, // This will be the new secure URL if the image was uploaded and saved.
         cfpCharge: chargeString,
         cfpExpertise: expertiseString,
         cfpServiceArea: serviceAreaString,
@@ -283,15 +243,14 @@ export default function CfpProfilePage() {
         cfpMainOccupation: mainOccupation,
         cfpReasonBecomeCfp: reasonBecomeCfp,
         cfpIntroduction: introduction,
+        cfpGender: parseInt(genderSelected),
       }
 
       const response = await fetch(
         `${import.meta.env.VITE_API_KEY}api/cfp/profile`,
         {
-          method: "PUT", // or POST depending on your choice
-          headers: {
-            "Content-Type": "application/json",
-          },
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
       )
@@ -307,7 +266,6 @@ export default function CfpProfilePage() {
       <Header />
       <div className="flex flex-1">
         <CfpSidePanel />
-
         <div className="flex-1 p-4">
           <motion.div
             initial="initial"
@@ -325,10 +283,7 @@ export default function CfpProfilePage() {
               <label className="block font-bold text-tfpa_blue">
                 รูปโปรไฟล์
               </label>
-
-              {/* The file input */}
               <input type="file" accept="image/*" onChange={handleFileChange} />
-
               <button
                 type="button"
                 onClick={handleUploadImage}
@@ -336,13 +291,9 @@ export default function CfpProfilePage() {
               >
                 อัปโหลดรูป
               </button>
-
-              {/* Display file error if any */}
               {fileErrorMessage && (
                 <p className="text-red-500 mt-2">{fileErrorMessage}</p>
               )}
-
-              {/* Display the uploaded image if profileImage is set */}
               {imageUrl && (
                 <div className="mt-2">
                   <img
@@ -424,7 +375,32 @@ export default function CfpProfilePage() {
               />
             </div>
 
-            {/* Charges (multi-select checkboxes) */}
+            {/* Gender Selection */}
+            <div className="mb-4">
+              <label className="block font-bold text-tfpa_blue">เพศ</label>
+              <label className="mr-4">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="0"
+                  checked={genderSelected === "0"}
+                  onChange={(e) => setGenderSelected(e.target.value)}
+                />
+                <span className="ml-2">ชาย</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="1"
+                  checked={genderSelected === "1"}
+                  onChange={(e) => setGenderSelected(e.target.value)}
+                />
+                <span className="ml-2">หญิง</span>
+              </label>
+            </div>
+
+            {/* Charges */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 การคิดค่าบริการ
@@ -449,7 +425,7 @@ export default function CfpProfilePage() {
               ))}
             </div>
 
-            {/* Expertise (multi-select checkboxes) */}
+            {/* Expertise */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 ความเชี่ยวชาญพิเศษ
@@ -474,7 +450,7 @@ export default function CfpProfilePage() {
               ))}
             </div>
 
-            {/* Service Area (multi-select checkboxes) */}
+            {/* Service Area */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 พื้นที่ให้บริการ
@@ -499,7 +475,7 @@ export default function CfpProfilePage() {
               ))}
             </div>
 
-            {/* Main occupation */}
+            {/* Main Occupation */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 อาชีพหลัก ณ ปัจจุบัน
@@ -512,7 +488,7 @@ export default function CfpProfilePage() {
               />
             </div>
 
-            {/* Qualifications (multiple text input) */}
+            {/* Qualifications */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 คุณวุฒิวิชาชีพ/ใบอนุญาต
@@ -552,7 +528,7 @@ export default function CfpProfilePage() {
               </button>
             </div>
 
-            {/* Education Record (multiple text input) */}
+            {/* Education Record */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 ประวัติการศึกษา
@@ -622,7 +598,7 @@ export default function CfpProfilePage() {
               ></textarea>
             </div>
 
-            {/* Languages (multiple text input) */}
+            {/* Languages */}
             <div className="mb-4">
               <label className="block font-bold text-tfpa_blue">
                 ภาษาที่ให้บริการคำปรึกษา
