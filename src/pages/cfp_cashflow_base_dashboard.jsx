@@ -24,32 +24,56 @@ import {
   PointElement,
   Title,
   Tooltip,
+  Filler, ArcElement,
 } from "chart.js"
 import ChartDataLabels from "chartjs-plugin-datalabels"
 import html2canvas from "html2canvas"
 // Register Chart.js components
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartDataLabels
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    ChartDataLabels,
+    Filler,
 )
-Chart.defaults.set("plugins.datalabels", {
-  formatter: function (value, context) {
-    return (
-      Number(value).toLocaleString("en-us", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }) + " บาท"
-    )
+Chart.overrides.line.plugins = {
+  datalabels: {
+    formatter: function (value, context) {
+      if(value>=100000 || value<=-100000){
+        return (
+            (Number(value)/1000000).toFixed(2) + " ล้านบาท"
+        )
+      }
+      else if(value>=10000 || value<=-10000) {
+        return (
+            (Number(value) / 10000).toFixed(2) + " หมื่นบาท"
+        )
+      }
+      else {
+        return (
+            Number(value).toFixed(2) + " บาท"
+        )
+      }
+    },
+    align: -45,
+    color: "black",
+  }
+}
+const lineChartProps = {
+  borderWidth: 3,
+  fill: {
+    target: 'origin',
+    above: 'rgba(146,202,104,0.5)',
+    below: 'rgba(255,109,109,0.5)',
   },
-  align: -45,
-  color: "black",
-})
+  borderColor: 'rgba(0,51,117,0.75)',
+  tension: 0.25,
+}
+
 const pageVariants = {
   initial: { opacity: 0 },
   in: { opacity: 1 },
@@ -72,7 +96,7 @@ export default function CFPCashflowBaseDashboard() {
   const [portfolioReturn, setPortfolioReturn] = useState(0)
   const [check, setCheck] = useState([])
 
-  const years = [1, 2, 3, 4, 5]
+  const years = [1, 2, 3, 4, 5, 6]
 
   useEffect(() => {
     fetchAllData()
@@ -186,13 +210,19 @@ export default function CFPCashflowBaseDashboard() {
       }
     })
     const chartData = {
-      labels: [1, 2, 3, 4, 5],
+      labels: years,
       datasets: [
         {
           label: "กระแสเงินสดสุทธิหลังหักเป้าหมาย",
           data: data,
-          borderWidth: 1,
-          borderColor: "#FF6384",
+          borderWidth: lineChartProps.borderWidth,
+          // borderColor: (context) => {
+          //   const values = context.dataset.data;
+          //   return values.map((val) => (val >= 0 ? "green" : "red")); // Green for positive, Red for negative
+          // },
+          borderColor: lineChartProps.borderColor,
+          fill: lineChartProps.fill,
+          tension: lineChartProps.tension,
         },
       ],
     }
@@ -305,8 +335,10 @@ export default function CFPCashflowBaseDashboard() {
         {
           label: "กระเเสเงินสดสุทธิ",
           data: data,
-          borderWidth: 1,
-          borderColor: "#FF6384",
+          borderWidth: lineChartProps.borderWidth,
+          borderColor: lineChartProps.borderColor,
+          fill: lineChartProps.fill,
+          tension: lineChartProps.tension,
         },
       ],
     }
@@ -366,7 +398,7 @@ export default function CFPCashflowBaseDashboard() {
             <center>
               <button
                 onClick={print}
-                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 text-2xl font-bold mt-8 rounded-2xl"
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 text-2xl font-bold rounded-2xl"
               >
                 Print
               </button>
