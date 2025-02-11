@@ -100,7 +100,7 @@ export default function CFPGoalBaseDashboard() {
         )}
         <img
           className="my-2"
-          src="/src/assets/dashboard_picture_image.png"
+          src="/src/assets/dashboard_image.png"
           alt="Dashboard Picture Image"
         />
       </div>
@@ -226,7 +226,7 @@ export default function CFPGoalBaseDashboard() {
                 <center>
                   <button
                     onClick={print}
-                    className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 text-2xl font-bold mt-8 rounded-2xl"
+                    className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-8 py-2 text-2xl font-bold rounded-2xl"
                   >
                     Print
                   </button>
