@@ -291,8 +291,8 @@ export default function CFPCashflowBaseCalculated() {
 
                   {/* Goals */}
                   {goals.map((goal) => (
-                    <tr key={goal.clientGoalName}>
-                      <td className="py-2 px-4 border text-lg text-red-600 font-ibm font-semibold">
+                    <tr key={goal.clientGoalName} className='text-[#397D54]'>
+                      <td className="py-2 px-4 border text-lg font-ibm font-semibold">
                         การออมเพื่อเป้าหมาย {goal.clientGoalName}
                       </td>
                       {calculationResults.map((r, i) => {
@@ -303,7 +303,7 @@ export default function CFPCashflowBaseCalculated() {
                         return (
                           <td
                             key={i}
-                            className="py-2 px-4 border text-right text-red-600 font-ibm font-semibold"
+                            className="py-2 px-4 border text-right font-ibm font-semibold"
                           >
                             {Number(val).toLocaleString("en-US", {
                               minimumFractionDigits: 2,
