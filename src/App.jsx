@@ -34,6 +34,7 @@ import CFPClientIncomePage from "./pages/cfp_client_income"
 import CFPClientExpensePage from "./pages/cfp_client_expense"
 import CFPClientAssetPage from "./pages/cfp_client_asset"
 import CFPClientDebtPage from "./pages/cfp_client_debt"
+import RetirementGoalDashboard from "./pages/retirement-goal-dashboard.jsx"
 import ClientMarketPlace from "./pages/client_marketplace"
 import ClientInfo from "./pages/client_info.jsx"
 import ClientStatusPage from "./pages/client_status.jsx"
@@ -99,6 +100,10 @@ export default function App() {
         <Route
           path="/retirement-goal-calculated/"
           element={<RetirementGoalCalculated />}
+        />
+        <Route
+          path="/retirement-goal-dashboard/"
+          element={<RetirementGoalDashboard />}
         />
         <Route path="/tax-income/" element={<TaxIncomePage />} />
         <Route path="/tax-deduction/" element={<TaxDeductionPage />} />

@@ -140,7 +140,7 @@ export default function RetirementGoalCalculated() {
   }
 
   const handleDashboard = () => {
-    navigate(`/dashboard`)
+    navigate(`/retirement-goal-dashboard`)
   }
 
   // Format numbers with appropriate decimal places and locale
@@ -150,6 +150,10 @@ export default function RetirementGoalCalculated() {
   const afterInflationReturnPercent = (discountRate * 100).toFixed(2)
   const portionPercent = (retiredExpensePortion * 100).toFixed(0)
 
+  const handleNavigateBack = () => {
+    navigate(`/retirement-goal/`)
+  }
+
   return (
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
@@ -157,21 +161,14 @@ export default function RetirementGoalCalculated() {
         <CfpClientSidePanel />
         <div className="flex-1 p-4 space-y-8">
           {/* Top Navigation Buttons */}
-          <div className="flex space-x-4 justify-center">
+          <div className="flex space-x-4 justify-end">
             <button
-              className="bg-gray-200 px-4 py-2 rounded font-bold text-tfpa_blue"
-              onClick={handleNavigateGeneralGoal}
+                onClick={handleNavigateBack}
+                className="bg-gray-300 hover:bg-gray-400 text-tfpa_blue px-4 py-2 rounded font-ibm font-bold"
             >
-              เป้าหมายทั่วไป
-            </button>
-            <button
-              className="bg-tfpa_gold px-4 py-2 rounded font-bold text-white"
-              onClick={handleNavigateRetirement}
-            >
-              เป้าหมายเกษียณ
+              กลับ
             </button>
           </div>
-
           <motion.div
             initial="initial"
             animate="in"
@@ -179,6 +176,7 @@ export default function RetirementGoalCalculated() {
             variants={pageVariants}
             transition={pageTransition}
           >
+
             {/* Retirement Goal Details */}
             {retirementGoal && (
               <div className="bg-tfpa_gold p-8 mx-64 rounded-2xl space-y-8 text-tfpa_blue font-bold">
