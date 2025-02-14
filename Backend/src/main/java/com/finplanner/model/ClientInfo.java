@@ -21,7 +21,7 @@ public class ClientInfo {
 
     @ManyToOne
     @JoinColumn(name = "cfp_of_this_client", referencedColumnName = "cfp_uuid")
-    private CfpInfo cfpOfThisClient; // Foreign key reference to CfpInfo
+    private CfpInfo cfpOfThisClient;
 
     @Column(name = "client_status", length = 20)
     private String clientStatus;

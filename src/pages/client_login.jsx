@@ -52,8 +52,9 @@ export default function ClientLogin() {
 
       if (response.ok) {
         const data = await response.json()
-        const clientId = data.clientId
-        navigate(`/client-homepage/${clientId}`)
+        const clientLoginUuid = data.clientUuid
+        localStorage.setItem("clientLoginUuid", clientLoginUuid)
+        navigate(`/client-homepage`)
       } else {
         const errorMessage = await response.text()
         console.error("Error during login:", errorMessage)

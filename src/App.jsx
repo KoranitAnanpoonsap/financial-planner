@@ -3,7 +3,6 @@ import "@fontsource/ibm-plex-sans-thai"
 import "@fontsource/prompt"
 import ClientLogin from "./pages/client_login"
 import PlannerLogin from "./pages/planner_login"
-import AdminLogin from "./pages/admin_login"
 import LoginSelection from "./pages/login_selection"
 import Register from "./pages/register"
 import CfpHomepage from "./pages/cfp_homepage"
@@ -35,6 +34,9 @@ import CFPClientIncomePage from "./pages/cfp_client_income"
 import CFPClientExpensePage from "./pages/cfp_client_expense"
 import CFPClientAssetPage from "./pages/cfp_client_asset"
 import CFPClientDebtPage from "./pages/cfp_client_debt"
+import ClientMarketPlace from "./pages/client_marketplace"
+import ClientInfo from "./pages/client_info.jsx"
+import ClientStatusPage from "./pages/client_status.jsx"
 
 export default function App() {
   return (
@@ -44,12 +46,14 @@ export default function App() {
         <Route path="/" element={<LoginSelection />} />
         <Route path="/client-login" element={<ClientLogin />} />
         <Route path="/planner-login" element={<PlannerLogin />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/cfp-homepage/" element={<CfpHomepage />} />
         <Route path="/client-homepage" element={<ClientHomepage />} />
         <Route path="/client-aboutTFPA" element={<ClientAboutTFPA />} />
         <Route path="/client-faq" element={<ClientFAQ />} />
+        <Route path="/client-marketplace" element={<ClientMarketPlace />} />
+        <Route path="/client-information" element={<ClientInfo />} />
+        <Route path="/client-status" element={<ClientStatusPage />} />
         <Route
           path="/client-precalculation-page"
           element={<ClientPrecalculationPage />}

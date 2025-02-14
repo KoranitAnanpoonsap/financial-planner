@@ -1,8 +1,10 @@
 package com.finplanner.controller;
 
 import com.finplanner.model.CfpClientInfoSidePanel;
+import com.finplanner.model.CfpInfo;
 import com.finplanner.model.ClientInfo;
 import com.finplanner.model.ClientInfoDTO;
+import com.finplanner.repository.CfpInfoRepository;
 import com.finplanner.repository.ClientInfoRepository;
 import com.finplanner.service.ClientInfoService;
 
@@ -24,6 +26,9 @@ public class ClientInfoController {
 
     @Autowired
     private ClientInfoService clientInfoService;
+
+    @Autowired
+    private CfpInfoRepository cfpInfoRepository;
 
     private final ClientInfoRepository clientInfoRepository;
 
@@ -59,7 +64,7 @@ public class ClientInfoController {
         Optional<ClientInfo> clientInfo = clientInfoService.authenticateClient(email, password);
         if (clientInfo.isPresent()) {
             Map<String, Object> response = new HashMap<>();
-            response.put("clientId", clientInfo.get().getClientId());
+            response.put("clientUuid", clientInfo.get().getClientUuid());
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
@@ -128,6 +133,80 @@ public class ClientInfoController {
                     return ResponseEntity.ok(saved);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/status/{clientUuid}")
+    public ResponseEntity<?> updateClientStatusAndCfp(@PathVariable String clientUuid,
+            @RequestBody Map<String, Object> updates) {
+        try {
+            UUID uuid = UUID.fromString(clientUuid);
+            Optional<ClientInfo> clientOpt = clientInfoRepository.findByClientUuid(uuid);
+            if (!clientOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+            }
+            ClientInfo client = clientOpt.get();
+
+            // Update CFP association if provided.
+            if (updates.containsKey("cfpOfThisClient")) {
+                String newCfpUuid = updates.get("cfpOfThisClient").toString();
+                Optional<CfpInfo> cfpOpt = cfpInfoRepository.findByCfpUuid(UUID.fromString(newCfpUuid));
+                if (!cfpOpt.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No CFP found with provided UUID");
+                }
+                client.setCfpOfThisClient(cfpOpt.get());
+            }
+
+            // Update client status if provided.
+            if (updates.containsKey("clientStatus")) {
+                String newStatus = updates.get("clientStatus").toString();
+                if (Arrays.asList("ส่งคำร้อง", "กำลังดำเนินการ", "ดำเนินการเรียบร้อย").contains(newStatus)) {
+                    client.setClientStatus(newStatus);
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid status value");
+                }
+            }
+
+            ClientInfo updated = clientInfoRepository.save(client);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UUID format");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating client");
+        }
+    }
+
+    @PutMapping("/cfp/{clientUuid}")
+    public ResponseEntity<?> updateClientCfp(
+            @PathVariable String clientUuid,
+            @RequestBody Map<String, String> updates) {
+
+        Optional<ClientInfo> clientOpt = clientInfoRepository.findByClientUuid(UUID.fromString(clientUuid));
+        if (!clientOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        ClientInfo client = clientOpt.get();
+
+        // If request body has "cfpOfThisClient"
+        if (updates.containsKey("cfpOfThisClient")) {
+            String newCfpUuidStr = updates.get("cfpOfThisClient");
+            // 1) Convert to UUID
+            UUID cfpUuid = UUID.fromString(newCfpUuidStr);
+
+            // 2) Fetch the CfpInfo entity from DB
+            Optional<CfpInfo> cfpOpt = cfpInfoRepository.findByCfpUuid(cfpUuid);
+            if (!cfpOpt.isPresent()) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body("No CFP found with UUID: " + newCfpUuidStr);
+            }
+
+            // 3) Set the CfpInfo object on the client
+            client.setCfpOfThisClient(cfpOpt.get());
+        }
+
+        clientInfoRepository.save(client);
+        return ResponseEntity.ok(client);
     }
 
     // Update Client Status and Dates by clientUuid

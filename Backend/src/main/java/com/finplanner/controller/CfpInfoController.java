@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -241,6 +242,11 @@ public class CfpInfoController {
     public ResponseEntity<?> getCfpImage(@PathVariable String filename) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
                 .body("Serving images from local storage is disabled.");
+    }
+
+    @GetMapping("/cfp/all")
+    public ResponseEntity<List<CfpInfo>> getAllCfps() {
+        return ResponseEntity.ok(cfpInfoRepository.findAll());
     }
 
     @GetMapping("/cfp/profile/{cfpUuid}")

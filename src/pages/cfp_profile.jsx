@@ -4,6 +4,38 @@ import Header from "../components/cfpHeader.jsx"
 import CfpSidePanel from "../components/cfpSidePanel.jsx"
 import { motion } from "framer-motion"
 
+// Mapping objects for each category
+const chargeMapping = {
+  1: "คิดค่าบริการจัดทำแผนการเงิน",
+  2: "คิดค่านายหน้าจากการแนะนำผลิตภัณฑ์",
+  3: "คิดค่าธรรมเนียมการให้คำปรึกษาเป็นรายชั่วโมง",
+}
+
+const expertiseMapping = {
+  1: "การวางแผนการเงินแบบองค์รวม",
+  2: "การวางแผนรายรับรายจ่าย",
+  3: "การวางแผนลงทุน (จัดพอร์ตการลงทุน/ ปรับพอร์ต)",
+  4: "การวางแผนบริหารจัดการหนี้สิน",
+  5: "การวางแผนประกันชีวิตและสุขภาพ",
+  6: "การวางแผนประกันวินาศภัย (รถ บ้าน อื่นๆ)",
+  7: "การวางแผนเกษียณอายุ (ตั้งเป้าหมาย/ลงทุนเพื่อเกษียณ)",
+  8: "การวางแผนการศึกษาบุตร",
+  9: "การวางแผนภาษีบุคคลธรรมดา",
+  10: "การวางแผนภาษีนิติบุคคลและการจดทะเบียนนิติบุคคล",
+  11: "การวางแผนมรดก/การจัดทำพินัยกรรม",
+  12: "Family holding company & Family charter",
+}
+
+const serviceAreaMapping = {
+  1: "กรุงเทพมหานครและปริมณฑล",
+  2: "ภาคเหนือ",
+  3: "ภาคกลาง",
+  4: "ภาคตะวันออก",
+  5: "ภาคตะวันออกเฉียงเหนือ",
+  6: "ภาคตะวันตก",
+  7: "ภาคใต้",
+}
+
 const pageVariants = {
   initial: { opacity: 0 },
   in: { opacity: 1 },
@@ -32,39 +64,9 @@ export default function CfpProfilePage() {
   // Gender: "0" for male and "1" for female
   const [genderSelected, setGenderSelected] = useState("0")
 
-  // Multi-select options and states
-  const chargeOptions = [
-    "คิดค่าบริการจัดทำแผนการเงิน",
-    "คิดค่านายหน้าจากการแนะนำผลิตภัณฑ์",
-    "คิดค่าธรรมเนียมการให้คำปรึกษาเป็นรายชั่วโมง",
-  ]
+  // For the multi-select categories we now store the mapping keys (as strings)
   const [selectedCharges, setSelectedCharges] = useState([])
-
-  const expertiseOptions = [
-    "การวางแผนการเงินแบบองค์รวม",
-    "การวางแผนรายรับรายจ่าย",
-    "การวางแผนลงทุน (จัดพอร์ตการลงทุน/ ปรับพอร์ต)",
-    "การวางแผนบริหารจัดการหนี้สิน",
-    "การวางแผนประกันชีวิตและสุขภาพ",
-    "การวางแผนประกันวินาศภัย (รถ บ้าน อื่นๆ)",
-    "การวางแผนเกษียณอายุ (ตั้งเป้าหมาย/ลงทุนเพื่อเกษียณ)",
-    "การวางแผนการศึกษาบุตร",
-    "การวางแผนภาษีบุคคลธรรมดา",
-    "การวางแผนภาษีนิติบุคคลและการจดทะเบียนนิติบุคคล",
-    "การวางแผนมรดก/การจัดทำพินัยกรรม",
-    "Family holding company & Family charter",
-  ]
   const [selectedExpertise, setSelectedExpertise] = useState([])
-
-  const serviceAreaOptions = [
-    "กรุงเทพมหานครและปริมณฑล",
-    "ภาคเหนือ",
-    "ภาคกลาง",
-    "ภาคตะวันออก",
-    "ภาคตะวันออกเฉียงเหนือ",
-    "ภาคตะวันตก",
-    "ภาคใต้",
-  ]
   const [selectedServiceAreas, setSelectedServiceAreas] = useState([])
 
   const [qualifications, setQualifications] = useState([])
@@ -189,12 +191,19 @@ export default function CfpProfilePage() {
           ? String(data.cfpGender)
           : "0"
       )
-      setSelectedCharges(data.cfpCharge ? data.cfpCharge.split(",") : [])
+      // For the mapped fields, assume backend returns comma-separated numeric keys.
+      setSelectedCharges(
+        data.cfpCharge ? Array.from(new Set(data.cfpCharge.split(","))) : []
+      )
       setSelectedExpertise(
-        data.cfpExpertise ? data.cfpExpertise.split(",") : []
+        data.cfpExpertise
+          ? Array.from(new Set(data.cfpExpertise.split(",")))
+          : []
       )
       setSelectedServiceAreas(
-        data.cfpServiceArea ? data.cfpServiceArea.split(",") : []
+        data.cfpServiceArea
+          ? Array.from(new Set(data.cfpServiceArea.split(",")))
+          : []
       )
       setQualifications(
         data.cfpQualifications ? data.cfpQualifications.split(",") : []
@@ -219,6 +228,7 @@ export default function CfpProfilePage() {
   const handleSave = async () => {
     setSaveStatus("")
     try {
+      // Since we store the mapping keys directly, just join them
       const chargeString = selectedCharges.join(",")
       const expertiseString = selectedExpertise.join(",")
       const serviceAreaString = selectedServiceAreas.join(",")
@@ -405,21 +415,21 @@ export default function CfpProfilePage() {
               <label className="block font-bold text-tfpa_blue">
                 การคิดค่าบริการ
               </label>
-              {chargeOptions.map((charge) => (
-                <div key={charge}>
+              {Object.keys(chargeMapping).map((key) => (
+                <div key={key}>
                   <label>
                     <input
                       type="checkbox"
-                      checked={selectedCharges.includes(charge)}
+                      checked={selectedCharges.includes(key)}
                       onChange={() =>
                         handleCheckboxChange(
-                          charge,
+                          key,
                           selectedCharges,
                           setSelectedCharges
                         )
                       }
                     />
-                    <span className="ml-2">{charge}</span>
+                    <span className="ml-2">{chargeMapping[key]}</span>
                   </label>
                 </div>
               ))}
@@ -430,21 +440,21 @@ export default function CfpProfilePage() {
               <label className="block font-bold text-tfpa_blue">
                 ความเชี่ยวชาญพิเศษ
               </label>
-              {expertiseOptions.map((item) => (
-                <div key={item}>
+              {Object.keys(expertiseMapping).map((key) => (
+                <div key={key}>
                   <label>
                     <input
                       type="checkbox"
-                      checked={selectedExpertise.includes(item)}
+                      checked={selectedExpertise.includes(key)}
                       onChange={() =>
                         handleCheckboxChange(
-                          item,
+                          key,
                           selectedExpertise,
                           setSelectedExpertise
                         )
                       }
                     />
-                    <span className="ml-2">{item}</span>
+                    <span className="ml-2">{expertiseMapping[key]}</span>
                   </label>
                 </div>
               ))}
@@ -455,21 +465,21 @@ export default function CfpProfilePage() {
               <label className="block font-bold text-tfpa_blue">
                 พื้นที่ให้บริการ
               </label>
-              {serviceAreaOptions.map((area) => (
-                <div key={area}>
+              {Object.keys(serviceAreaMapping).map((key) => (
+                <div key={key}>
                   <label>
                     <input
                       type="checkbox"
-                      checked={selectedServiceAreas.includes(area)}
+                      checked={selectedServiceAreas.includes(key)}
                       onChange={() =>
                         handleCheckboxChange(
-                          area,
+                          key,
                           selectedServiceAreas,
                           setSelectedServiceAreas
                         )
                       }
                     />
-                    <span className="ml-2">{area}</span>
+                    <span className="ml-2">{serviceAreaMapping[key]}</span>
                   </label>
                 </div>
               ))}
