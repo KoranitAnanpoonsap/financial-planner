@@ -22,10 +22,10 @@ public class RegistrationController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String nationalId,
-            @RequestParam String title,
+            @RequestParam Integer title,
             @RequestParam String firstName,
             @RequestParam String lastName,
-            @RequestParam String gender,
+            @RequestParam Integer gender,
             @RequestParam String phoneNumber,
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate dateOfBirth) {
 

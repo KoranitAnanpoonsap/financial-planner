@@ -6,17 +6,18 @@ public class ClientInfoDTO {
 
     private Integer clientId;
     private String clientFormatId;
-    private String clientStatus;
+    private Integer clientStatus;
     private LocalDate clientStartDate;
     private LocalDate clientCompletionDate;
     private String clientEmail;
     private String clientNationalId;
-    private String clientTitle;
+    private Integer clientTitle;
     private String clientFirstName;
     private String clientLastName;
-    private String clientGender;
+    private Integer clientGender;
     private String clientPhoneNumber;
     private LocalDate clientDateOfBirth;
+    private CfpInfo cfpOfThisClient;
 
     public Integer getClientId() {
         return clientId;
@@ -34,11 +35,11 @@ public class ClientInfoDTO {
         this.clientFormatId = clientFormatId;
     }
 
-    public String getClientStatus() {
+    public Integer getClientStatus() {
         return clientStatus;
     }
 
-    public void setClientStatus(String clientStatus) {
+    public void setClientStatus(Integer clientStatus) {
         this.clientStatus = clientStatus;
     }
 
@@ -74,11 +75,11 @@ public class ClientInfoDTO {
         this.clientNationalId = clientNationalId;
     }
 
-    public String getClientTitle() {
+    public Integer getClientTitle() {
         return clientTitle;
     }
 
-    public void setClientTitle(String clientTitle) {
+    public void setClientTitle(Integer clientTitle) {
         this.clientTitle = clientTitle;
     }
 
@@ -98,11 +99,11 @@ public class ClientInfoDTO {
         this.clientLastName = clientLastName;
     }
 
-    public String getClientGender() {
+    public Integer getClientGender() {
         return clientGender;
     }
 
-    public void setClientGender(String clientGender) {
+    public void setClientGender(Integer clientGender) {
         this.clientGender = clientGender;
     }
 
@@ -120,5 +121,13 @@ public class ClientInfoDTO {
 
     public void setClientDateOfBirth(LocalDate clientDateOfBirth) {
         this.clientDateOfBirth = clientDateOfBirth;
+    }
+
+    public CfpInfo getCfpOfThisClient() {
+        return cfpOfThisClient;
+    }
+
+    public void setCfpOfThisClient(CfpInfo cfpOfThisClient) {
+        this.cfpOfThisClient = cfpOfThisClient;
     }
 }

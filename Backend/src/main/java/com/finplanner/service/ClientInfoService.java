@@ -60,11 +60,18 @@ public class ClientInfoService {
                                         .collect(Collectors.toList());
                 }
 
-                // 2. Optional filtering by status
+                // 2. Optional filtering by status (convert filterStatus to an integer)
                 if (filterStatus != null && !filterStatus.trim().isEmpty()) {
-                        clients = clients.stream()
-                                        .filter(client -> client.getClientStatus().equals(filterStatus))
-                                        .collect(Collectors.toList());
+                        try {
+                                int filterStatusInt = Integer.parseInt(filterStatus);
+                                clients = clients.stream()
+                                                .filter(client -> client.getClientStatus() != null
+                                                                && client.getClientStatus().equals(filterStatusInt))
+                                                .collect(Collectors.toList());
+                        } catch (NumberFormatException e) {
+                                // If conversion fails, you might want to log or ignore the filter
+                                System.err.println("Invalid filterStatus value: " + filterStatus);
+                        }
                 }
 
                 // 3. Separate lists: those with date vs. those without date
@@ -77,7 +84,6 @@ public class ClientInfoService {
                                 .collect(Collectors.toList());
 
                 // 4. Sort clients with date
-                // Default to sorting by date ascending unless sortBy/sortDir indicate otherwise
                 Comparator<ClientInfo> comparatorWithDate = Comparator.comparing(
                                 ClientInfo::getClientStartDate,
                                 Comparator.nullsLast(Comparator.naturalOrder()));
@@ -93,14 +99,12 @@ public class ClientInfoService {
                         }
                 }
 
-                // Apply the comparator to the with-date list
                 clientsWithStartDate = clientsWithStartDate.stream()
                                 .sorted(comparatorWithDate)
                                 .collect(Collectors.toList());
 
                 // 5. Sort clients without date by clientFormatId (ascending by default)
                 Comparator<ClientInfo> comparatorWithoutDate = Comparator.comparing(ClientInfo::getClientFormatId);
-
                 clientsWithoutStartDate = clientsWithoutStartDate.stream()
                                 .sorted(comparatorWithoutDate)
                                 .collect(Collectors.toList());
@@ -108,18 +112,17 @@ public class ClientInfoService {
                 // 6. Combine both lists (with-date first, then no-date)
                 List<ClientInfo> sortedClients = Stream.concat(
                                 clientsWithStartDate.stream(),
-                                clientsWithoutStartDate.stream()).collect(Collectors.toList());
+                                clientsWithoutStartDate.stream())
+                                .collect(Collectors.toList());
 
                 // 7. Handle pagination
                 int totalItems = sortedClients.size();
                 int totalPages = (int) Math.ceil((double) totalItems / size);
-
                 int fromIndex = page * size;
                 int toIndex = Math.min(fromIndex + size, totalItems);
                 if (fromIndex > toIndex) {
                         fromIndex = toIndex;
                 }
-
                 List<ClientInfo> paginatedClients = sortedClients.subList(fromIndex, toIndex);
 
                 // 8. Build response map

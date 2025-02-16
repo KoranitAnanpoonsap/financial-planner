@@ -101,6 +101,7 @@ public class ClientInfoController {
             dto.setClientGender(client.getClientGender());
             dto.setClientPhoneNumber(client.getClientPhoneNumber());
             dto.setClientDateOfBirth(client.getClientDateOfBirth());
+            dto.setCfpOfThisClient(client.getCfpOfThisClient());
 
             return ResponseEntity.ok(dto);
         } else {
@@ -158,12 +159,8 @@ public class ClientInfoController {
 
             // Update client status if provided.
             if (updates.containsKey("clientStatus")) {
-                String newStatus = updates.get("clientStatus").toString();
-                if (Arrays.asList("ส่งคำร้อง", "กำลังดำเนินการ", "ดำเนินการเรียบร้อย").contains(newStatus)) {
-                    client.setClientStatus(newStatus);
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid status value");
-                }
+                Integer newStatus = (Integer) updates.get("clientStatus");
+                client.setClientStatus(newStatus);
             }
 
             ClientInfo updated = clientInfoRepository.save(client);
@@ -224,17 +221,13 @@ public class ClientInfoController {
 
             // Update status if provided
             if (updates.containsKey("clientStatus")) {
-                String newStatus = updates.get("clientStatus").toString();
-                if (Arrays.asList("ส่งคำร้อง", "กำลังดำเนินการ", "ดำเนินการเรียบร้อย").contains(newStatus)) {
-                    client.setClientStatus(newStatus);
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid status value");
-                }
+                Integer newStatus = (Integer) updates.get("clientStatus");
+                client.setClientStatus(newStatus);
             }
 
             // Update start date if status is "กำลังดำเนินการ" or "ดำเนินการเรียบร้อย"
             if (updates.containsKey("clientStartDate")) {
-                if (Arrays.asList("กำลังดำเนินการ", "ดำเนินการเรียบร้อย").contains(client.getClientStatus())) {
+                if (Arrays.asList(2, 3).contains(client.getClientStatus())) {
                     String startDateStr = updates.get("clientStartDate").toString();
                     LocalDate startDate = LocalDate.parse(startDateStr); // Ensure correct format
                     client.setClientStartDate(startDate);
@@ -246,7 +239,7 @@ public class ClientInfoController {
 
             // Update completion date if status is "ดำเนินการเรียบร้อย"
             if (updates.containsKey("clientCompletionDate")) {
-                if ("ดำเนินการเรียบร้อย".equals(client.getClientStatus())) {
+                if (3 == (client.getClientStatus())) {
                     String completionDateStr = updates.get("clientCompletionDate").toString();
                     LocalDate completionDate = LocalDate.parse(completionDateStr); // Ensure correct format
                     client.setClientCompletionDate(completionDate);

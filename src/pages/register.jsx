@@ -41,6 +41,18 @@ export default function RegisterPage() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
 
+  // Mapping for title and gender
+  const titleMapping = {
+    นาย: 1, // Mr.
+    นาง: 2, // Mrs.
+    นางสาว: 3, // Miss
+  }
+
+  const genderMapping = {
+    ชาย: 0, // Male
+    หญิง: 1, // Female
+  }
+
   const handleBack = () => {
     navigate("/client-login")
   }
@@ -110,10 +122,10 @@ export default function RegisterPage() {
       clientEmail: email,
       clientPassword: password,
       clientNationalId: idNumber,
-      clientTitle: title,
+      clientTitle: titleMapping[title], // Convert to number
       clientFirstName: firstName,
       clientLastName: lastName,
-      clientGender: gender,
+      clientGender: genderMapping[gender], // Convert to number
       clientPhoneNumber: phone,
       clientDateOfBirth: birthdate, // Ensure it's in 'YYYY-MM-DD' format
     }
@@ -290,7 +302,7 @@ export default function RegisterPage() {
             <div className="flex justify-center mt-4">
               <button
                 onClick={handleBack}
-                className="px-6 py-2 bg-slate-300 rounded-3xl text-tfpa_blue font-ibm transition-colors duration-300 hover:bg-gray-300"
+                className="px-6 py-2 bg-slate-300 rounded-3xl text-tfpa_blue font-ibm transition-colors duration-300 hover:bg-gray-400"
               >
                 กลับ
               </button>
@@ -304,7 +316,7 @@ export default function RegisterPage() {
       {showPrivacyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded p-6 max-w-2xl w-full">
-            <h2 className="text-center text-xl font-bold mb-4 font-ibm">
+            <h2 className="text-center text-tfpa_blue_hover text-xl font-bold mb-4 font-ibm">
               ข้อมูลสำคัญ
               <br />
               ความเป็นส่วนตัวและคุ้มครองข้อมูลของคุณ
@@ -359,7 +371,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={handleClosePrivacyModal}
-                className="px-4 py-2 rounded font-bold bg-gray-300 text-gray-700"
+                className="px-4 py-2 rounded font-bold bg-gray-300 hover:bg-gray-400 text-gray-700"
               >
                 ปิด
               </button>
@@ -368,7 +380,7 @@ export default function RegisterPage() {
                 onClick={handleConfirmPrivacy}
                 className={`px-4 py-2 rounded font-bold ${
                   acceptedPrivacy
-                    ? "bg-tfpa_gold text-white"
+                    ? "bg-tfpa_gold hover:bg-tfpa_gold_hover text-white"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >

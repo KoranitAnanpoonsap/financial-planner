@@ -86,27 +86,27 @@ export default function ClientHeader() {
                       setDropdownOpen(false)
                       navigate(`/client-information`)
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-200"
+                    className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200 font-ibm"
                   >
-                    Client Info
+                    ข้อมูลส่วนตัว
                   </button>
                   <button
                     onClick={() => {
                       setDropdownOpen(false)
                       navigate(`/client-status`)
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-200"
+                    className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200 font-ibm"
                   >
-                    CFP Client Status
+                    สถานะปรึกษากับ CFP
                   </button>
                   <button
                     onClick={() => {
                       setDropdownOpen(false)
                       handleLogout()
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-200"
+                    className="block text-sm px-4 py-2 text-left w-full hover:bg-gray-200 font-ibm"
                   >
-                    Logout
+                    ออกจากระบบ
                   </button>
                 </div>
               )}

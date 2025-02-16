@@ -21,6 +21,27 @@ const pageTransition = {
   duration: 0.3,
 }
 
+// Mapping for client status
+const statusMapping = {
+  1: "ส่งคำร้อง",
+  2: "กำลังดำเนินการ",
+  3: "ดำเนินการเรียบร้อย",
+}
+
+// Updated function to get status classes based on numeric value
+const getStatusClass = (status) => {
+  switch (status) {
+    case 1:
+      return "bg-red-500 text-white"
+    case 2:
+      return "bg-tfpa_gold text-white"
+    case 3:
+      return "bg-green-500 text-white"
+    default:
+      return "bg-gray-200 text-black"
+  }
+}
+
 export default function ClientsPage() {
   const [clients, setClients] = useState([])
   const [currentPage, setCurrentPage] = useState(0) // Zero-indexed
@@ -222,20 +243,6 @@ export default function ClientsPage() {
     setCurrentPage(0) // Reset to first page
   }
 
-  // Function to determine status styling
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "ส่งคำร้อง":
-        return "bg-red-500 text-white"
-      case "กำลังดำเนินการ":
-        return "bg-tfpa_gold text-white"
-      case "ดำเนินการเรียบร้อย":
-        return "bg-green-500 text-white"
-      default:
-        return "bg-gray-200 text-black"
-    }
-  }
-
   return (
     <div className="flex flex-col min-h-screen font-ibm">
       <Header />
@@ -265,9 +272,9 @@ export default function ClientsPage() {
                   onChange={(e) => handleFilterStatus(e.target.value)}
                 >
                   <option value="">ทั้งหมด</option>
-                  <option value="ส่งคำร้อง">ส่งคำร้อง</option>
-                  <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                  <option value="ดำเนินการเรียบร้อย">ดำเนินการเรียบร้อย</option>
+                  <option value={1}>ส่งคำร้อง</option>
+                  <option value={2}>กำลังดำเนินการ</option>
+                  <option value={3}>ดำเนินการเรียบร้อย</option>
                 </select>
                 <button
                   className={`px-4 py-2 rounded ${
@@ -324,43 +331,43 @@ export default function ClientsPage() {
                       >
                         <div className="relative">
                           <Listbox.Button
-                            className={`w-full border rounded-lg px-2 py-1 ${getStatusClass(
+                            className={`w-full border rounded-lg px-4 py-1 ${getStatusClass(
                               client.clientStatus
                             )} focus:outline-none`}
                           >
-                            {client.clientStatus}
+                            {statusMapping[client.clientStatus]}
                           </Listbox.Button>
                           <Listbox.Options className="absolute z-10 mt-1 w-full bg-gray-100 border border-gray-300 rounded-md shadow-lg">
-                            <Listbox.Option value="ส่งคำร้อง">
+                            <Listbox.Option value={1}>
                               {({ active }) => (
                                 <span
                                   className={`block px-4 py-2 ${
                                     active ? "bg-gray-300" : ""
                                   }`}
                                 >
-                                  ส่งคำร้อง
+                                  {statusMapping[1]}
                                 </span>
                               )}
                             </Listbox.Option>
-                            <Listbox.Option value="กำลังดำเนินการ">
+                            <Listbox.Option value={2}>
                               {({ active }) => (
                                 <span
                                   className={`block px-4 py-2 ${
                                     active ? "bg-gray-300" : ""
                                   }`}
                                 >
-                                  กำลังดำเนินการ
+                                  {statusMapping[2]}
                                 </span>
                               )}
                             </Listbox.Option>
-                            <Listbox.Option value="ดำเนินการเรียบร้อย">
+                            <Listbox.Option value={3}>
                               {({ active }) => (
                                 <span
                                   className={`block px-4 py-2 ${
                                     active ? "bg-gray-300" : ""
                                   }`}
                                 >
-                                  ดำเนินการเรียบร้อย
+                                  {statusMapping[3]}
                                 </span>
                               )}
                             </Listbox.Option>
@@ -369,8 +376,8 @@ export default function ClientsPage() {
                       </Listbox>
                     </td>
                     <td className="py-2 px-4 border">
-                      {(client.clientStatus === "กำลังดำเนินการ" ||
-                        client.clientStatus === "ดำเนินการเรียบร้อย") && (
+                      {(client.clientStatus === 2 ||
+                        client.clientStatus === 3) && (
                         <DatePicker
                           selected={
                             client.clientStartDate
@@ -392,8 +399,7 @@ export default function ClientsPage() {
                         />
                       )}
                       {!(
-                        client.clientStatus === "กำลังดำเนินการ" ||
-                        client.clientStatus === "ดำเนินการเรียบร้อย"
+                        client.clientStatus === 2 || client.clientStatus === 3
                       ) && (
                         <span>
                           {client.clientStartDate
@@ -406,7 +412,7 @@ export default function ClientsPage() {
                       )}
                     </td>
                     <td className="py-2 px-4 border">
-                      {client.clientStatus === "ดำเนินการเรียบร้อย" && (
+                      {client.clientStatus === 3 && (
                         <DatePicker
                           selected={
                             client.clientCompletionDate
@@ -427,7 +433,7 @@ export default function ClientsPage() {
                           placeholderText="DD/MM/YYYY"
                         />
                       )}
-                      {client.clientStatus !== "ดำเนินการเรียบร้อย" && (
+                      {client.clientStatus !== 3 && (
                         <span>
                           {client.clientCompletionDate
                             ? format(

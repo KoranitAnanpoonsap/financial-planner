@@ -58,6 +58,13 @@ const modalVariants = {
   exit: { y: 20, opacity: 0 },
 }
 
+// Client status mapping (numbers to text)
+const statusMapping = {
+  1: "ส่งคำร้อง",
+  2: "กำลังดำเนินการ",
+  3: "ดำเนินการเรียบร้อย",
+}
+
 function CfpModal({
   cfp,
   onClose,
@@ -82,6 +89,9 @@ function CfpModal({
 
   const imageUrl =
     cfp.cfpImage && cfp.cfpImage.trim() !== "" ? cfp.cfpImage : personIcon
+
+  const checkboxClass =
+    "form-checkbox h-4 w-4 text-white bg-gray-400 border-gray-400 rounded-sm focus:ring-0 mr-2"
 
   const modalContent = (
     <div
@@ -135,7 +145,9 @@ function CfpModal({
           <div>
             {charges.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">การคิดค่าบริการ</h4>
+                <h4 className="font-bold text-tfpa_blue text-left">
+                  การคิดค่าบริการ
+                </h4>
                 <ul className="list-disc list-inside">
                   {charges.map((item, idx) => (
                     <li key={idx}>
@@ -147,7 +159,9 @@ function CfpModal({
             )}
             {expertise.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">การให้บริการ</h4>
+                <h4 className="font-bold text-tfpa_blue text-left">
+                  การให้บริการ
+                </h4>
                 <ul className="list-disc list-inside">
                   {expertise.map((item, idx) => (
                     <li key={idx}>
@@ -159,7 +173,9 @@ function CfpModal({
             )}
             {serviceAreas.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">พื้นที่ให้บริการ</h4>
+                <h4 className="font-bold text-tfpa_blue text-left">
+                  พื้นที่ให้บริการ
+                </h4>
                 <ul className="list-disc list-inside">
                   {serviceAreas.map((item, idx) => (
                     <li key={idx}>
@@ -171,13 +187,15 @@ function CfpModal({
             )}
             {cfp.cfpMainOccupation && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">อาชีพหลัก</h4>
+                <h4 className="font-bold text-tfpa_blue text-left">
+                  อาชีพหลัก
+                </h4>
                 <p>{cfp.cfpMainOccupation}</p>
               </div>
             )}
             {qualifications.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">
+                <h4 className="font-bold text-tfpa_blue text-left">
                   คุณวุฒิวิชาชีพ/ใบอนุญาต
                 </h4>
                 <ul className="list-disc list-inside">
@@ -189,7 +207,9 @@ function CfpModal({
             )}
             {educationRecords.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">ประวัติการศึกษา</h4>
+                <h4 className="font-bold text-tfpa_blue text-left">
+                  ประวัติการศึกษา
+                </h4>
                 <ul className="list-disc list-inside">
                   {educationRecords.map((item, idx) => (
                     <li key={idx}>{item.trim()}</li>
@@ -199,7 +219,7 @@ function CfpModal({
             )}
             {cfp.cfpReasonBecomeCfp && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">
+                <h4 className="font-bold text-tfpa_blue text-left">
                   เหตุผลที่มาเป็นนักวางแผนการเงิน CFP
                 </h4>
                 <p className="whitespace-pre-line">{cfp.cfpReasonBecomeCfp}</p>
@@ -207,7 +227,7 @@ function CfpModal({
             )}
             {languages.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue">
+                <h4 className="font-bold text-tfpa_blue text-left">
                   ภาษาที่ให้บริการคำปรึกษา
                 </h4>
                 <ul className="list-disc list-inside">
@@ -222,8 +242,7 @@ function CfpModal({
             <div className="mt-6 border-t pt-4">
               {onSendRequestClick ? (
                 <>
-                  {clientStatus === "ส่งคำร้อง" ||
-                  clientStatus === "กำลังดำเนินการ" ? (
+                  {clientStatus === 1 || clientStatus === 2 ? (
                     <>
                       <button
                         disabled
@@ -234,7 +253,7 @@ function CfpModal({
                       <p className="text-red-600 mt-2">
                         คุณได้ส่งคำร้องไปหา CFP{" "}
                         {clientCfp
-                          ? `${clientCfp.cfpFirstName} ${clientCfp.cfpLastName}`
+                          ? `${clientCfp.cfpFirstName} ${clientCfp.cfpLastName} `
                           : ""}
                         แล้ว
                       </p>
@@ -308,26 +327,17 @@ export default function MarketplacePage() {
       )
       if (res.ok) {
         const data = await res.json()
+        // Convert numeric clientStatus using mapping
+        const statusText = statusMapping[data.clientStatus] || ""
         setClientAlreadyHasCfp(
           !!data.cfpOfThisClient &&
             ["ส่งคำร้อง", "กำลังดำเนินการ", "ดำเนินการเรียบร้อย"].includes(
-              data.clientStatus
+              statusText
             )
         )
         setClientStatus(data.clientStatus)
         setClientData(data)
-        if (data.cfpOfThisClient && data.cfpOfThisClient.cfpUuid) {
-          const resCfp = await fetch(
-            `${import.meta.env.VITE_API_KEY}api/cfp/profile/${
-              data.cfpOfThisClient.cfpUuid
-            }`
-          )
-          if (resCfp.ok) {
-            const cfpDetails = await resCfp.json()
-            cfpDetails.cfpUuid = data.cfpOfThisClient.cfpUuid
-            setClientCfpData(cfpDetails)
-          }
-        }
+        setClientCfpData(data.cfpOfThisClient)
       }
     } catch (error) {
       console.error("Error checking client info:", error)
@@ -412,10 +422,10 @@ export default function MarketplacePage() {
   // 5) Send request: Update both CFP association and status via API
   const handleSendRequest = async () => {
     if (!clientLoginUuid || !selectedCfp) return
-    if (clientAlreadyHasCfp && clientStatus !== "ดำเนินการเรียบร้อย") return
+    if (clientAlreadyHasCfp && clientStatus !== 3) return
     const payload = {
       cfpOfThisClient: selectedCfp.cfpUuid,
-      clientStatus: "ส่งคำร้อง",
+      clientStatus: 1, // numeric 1 represents "ส่งคำร้อง"
     }
     try {
       const res = await fetch(
@@ -428,7 +438,7 @@ export default function MarketplacePage() {
       )
       if (res.ok) {
         setClientAlreadyHasCfp(true)
-        setClientStatus("ส่งคำร้อง")
+        setClientStatus(1)
         await checkClientAlreadyHasCfp()
       } else {
         console.error("Failed to assign CFP to client")
@@ -499,7 +509,7 @@ export default function MarketplacePage() {
                       >
                         <input
                           type="checkbox"
-                          className={checkboxClass + " mt-1"}
+                          className={checkboxClass}
                           checked={selectedExpertiseFilters.includes(key)}
                           onChange={() =>
                             toggleFilterValue(
@@ -561,7 +571,7 @@ export default function MarketplacePage() {
                         >
                           <input
                             type="checkbox"
-                            className={checkboxClass + " mt-1"}
+                            className={checkboxClass}
                             checked={selectedChargeFilters.includes(key)}
                             onChange={() =>
                               toggleFilterValue(

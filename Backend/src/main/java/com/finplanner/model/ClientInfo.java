@@ -23,8 +23,8 @@ public class ClientInfo {
     @JoinColumn(name = "cfp_of_this_client", referencedColumnName = "cfp_uuid")
     private CfpInfo cfpOfThisClient;
 
-    @Column(name = "client_status", length = 20)
-    private String clientStatus;
+    @Column(name = "client_status")
+    private Integer clientStatus;
 
     @Column(name = "client_start_date")
     private LocalDate clientStartDate;
@@ -41,8 +41,8 @@ public class ClientInfo {
     @Column(name = "client_national_id", nullable = false, length = 20)
     private String clientNationalId;
 
-    @Column(name = "client_title", nullable = false, length = 6)
-    private String clientTitle;
+    @Column(name = "client_title", nullable = false)
+    private Integer clientTitle;
 
     @Column(name = "client_firstname", nullable = false, length = 50)
     private String clientFirstName;
@@ -50,8 +50,8 @@ public class ClientInfo {
     @Column(name = "client_lastname", nullable = false, length = 50)
     private String clientLastName;
 
-    @Column(name = "client_gender", nullable = false, length = 4)
-    private String clientGender;
+    @Column(name = "client_gender", nullable = false)
+    private Integer clientGender;
 
     @Column(name = "client_phone_number", nullable = false, length = 12)
     private String clientPhoneNumber;
@@ -89,11 +89,11 @@ public class ClientInfo {
         this.cfpOfThisClient = cfpOfThisClient;
     }
 
-    public String getClientStatus() {
+    public Integer getClientStatus() {
         return clientStatus;
     }
 
-    public void setClientStatus(String clientStatus) {
+    public void setClientStatus(Integer clientStatus) {
         this.clientStatus = clientStatus;
     }
 
@@ -137,11 +137,11 @@ public class ClientInfo {
         this.clientNationalId = clientNationalId;
     }
 
-    public String getClientTitle() {
+    public Integer getClientTitle() {
         return clientTitle;
     }
 
-    public void setClientTitle(String clientTitle) {
+    public void setClientTitle(Integer clientTitle) {
         this.clientTitle = clientTitle;
     }
 
@@ -161,11 +161,11 @@ public class ClientInfo {
         this.clientLastName = clientLastName;
     }
 
-    public String getClientGender() {
+    public Integer getClientGender() {
         return clientGender;
     }
 
-    public void setClientGender(String clientGender) {
+    public void setClientGender(Integer clientGender) {
         this.clientGender = clientGender;
     }
 

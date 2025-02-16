@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import { motion } from "framer-motion"
@@ -7,9 +6,14 @@ import { FaArrowDown } from "react-icons/fa"
 
 export default function ClientStatusPage() {
   const clientLoginUuid = localStorage.getItem("clientLoginUuid") || "0"
-  const navigate = useNavigate()
   const [clientInfo, setClientInfo] = useState(null)
-  const [isCancelling, setIsCancelling] = useState(false)
+
+  // Mapping for client status (number to text)
+  const statusMapping = {
+    1: "ส่งคำร้อง",
+    2: "กำลังดำเนินการ",
+    3: "ดำเนินการเรียบร้อย",
+  }
 
   useEffect(() => {
     fetchData()
@@ -28,21 +32,15 @@ export default function ClientStatusPage() {
   }
 
   const handleCancel = async () => {
-    setIsCancelling(true)
     // Call backend API to dissociate the client from the CFP
-    const res = await fetch(
+    await fetch(
       `${
         import.meta.env.VITE_API_KEY
       }api/clients/dissociate/${clientLoginUuid}`,
       { method: "PUT" }
     )
-    if (res.ok) {
-      alert("Request cancelled successfully")
-      fetchData()
-    } else {
-      alert("Error cancelling request")
-    }
-    setIsCancelling(false)
+    // Immediately refresh data after cancellation
+    fetchData()
   }
 
   const formatDate = (dateString) => {
@@ -64,21 +62,20 @@ export default function ClientStatusPage() {
       <div className="flex items-center justify-between">
         <div>
           <p className="font-bold text-tfpa_blue">
-            ส่งคำร้อง {cfpName ? `ไปหา ${cfpName}` : ""}
+            {statusMapping[1]} {cfpName ? `ไปหา CFP ${cfpName}` : ""}
           </p>
-          {clientInfo.clientStatus === "ส่งคำร้อง" && (
+          {clientInfo.clientStatus === 1 && (
             <p className="text-sm text-gray-600">
               คำร้องของคุณอยู่ในขั้นตอนการส่งคำร้อง
             </p>
           )}
         </div>
-        {clientInfo.clientStatus === "ส่งคำร้อง" && (
+        {clientInfo.clientStatus === 1 && (
           <button
             onClick={handleCancel}
-            disabled={isCancelling}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
           >
-            {isCancelling ? "Cancelling..." : "Cancel"}
+            Cancel
           </button>
         )}
       </div>
@@ -89,7 +86,7 @@ export default function ClientStatusPage() {
   const renderInProgressBlock = () => {
     return (
       <div>
-        <p className="font-bold text-tfpa_blue">กำลังดำเนินการ</p>
+        <p className="font-bold text-tfpa_blue">{statusMapping[2]}</p>
         {clientInfo.clientStartDate && (
           <p className="text-sm text-gray-600">
             เริ่มวันที่: {formatDate(clientInfo.clientStartDate)}
@@ -103,7 +100,7 @@ export default function ClientStatusPage() {
   const renderCompletedBlock = () => {
     return (
       <div>
-        <p className="font-bold text-tfpa_blue">ดำเนินการเรียบร้อย</p>
+        <p className="font-bold text-tfpa_blue">{statusMapping[3]}</p>
         <div className="text-sm text-gray-600">
           {clientInfo.clientStartDate && (
             <p>เริ่มวันที่: {formatDate(clientInfo.clientStartDate)}</p>
@@ -130,23 +127,20 @@ export default function ClientStatusPage() {
           <h3 className="text-tfpa_blue font-bold text-lg mb-6 text-center">
             สถานะปรึกษากับ CFP
           </h3>
-          {clientInfo ? (
+          {clientInfo && (
             <div className="bg-white shadow rounded p-6">
               {/* Case: Client has not chosen any CFP yet */}
-              {(!clientInfo.clientStatus ||
-                clientInfo.clientStatus.trim() === "") && (
+              {clientInfo.clientStatus == null && (
                 <div className="text-center text-gray-600">
                   ยังไม่ได้เลือก CFP
                 </div>
               )}
 
-              {/* Case: Client status is "ส่งคำร้อง" */}
-              {clientInfo.clientStatus === "ส่งคำร้อง" && (
-                <>{renderSendRequestBlock()}</>
-              )}
+              {/* Case: Client status is "ส่งคำร้อง" (1) */}
+              {clientInfo.clientStatus === 1 && renderSendRequestBlock()}
 
-              {/* Case: Client status is "กำลังดำเนินการ" */}
-              {clientInfo.clientStatus === "กำลังดำเนินการ" && (
+              {/* Case: Client status is "กำลังดำเนินการ" (2) */}
+              {clientInfo.clientStatus === 2 && (
                 <>
                   {renderSendRequestBlock()}
                   <div className="flex justify-center my-4">
@@ -156,8 +150,8 @@ export default function ClientStatusPage() {
                 </>
               )}
 
-              {/* Case: Client status is "ดำเนินการเรียบร้อย" */}
-              {clientInfo.clientStatus === "ดำเนินการเรียบร้อย" && (
+              {/* Case: Client status is "ดำเนินการเรียบร้อย" (3) */}
+              {clientInfo.clientStatus === 3 && (
                 <>
                   {renderSendRequestBlock()}
                   <div className="flex justify-center my-4">
@@ -171,8 +165,6 @@ export default function ClientStatusPage() {
                 </>
               )}
             </div>
-          ) : (
-            <p className="text-center">Loading...</p>
           )}
         </motion.div>
       </div>

@@ -59,8 +59,21 @@ export default function CFPClientInfoPage() {
     return `${dayStr} / ${monthStr} / ${thaiYear}`
   }
 
+  // Options for display
   const titleOptions = ["นาย", "นาง", "นางสาว"]
   const genderOptions = ["ชาย", "หญิง"]
+
+  // Mapping for converting stored number to text
+  const titleMapping = {
+    1: "นาย",
+    2: "นาง",
+    3: "นางสาว",
+  }
+
+  const genderMapping = {
+    0: "ชาย",
+    1: "หญิง",
+  }
 
   return (
     <div className="flex flex-col min-h-screen font-ibm">
@@ -147,18 +160,18 @@ export default function CFPClientInfoPage() {
               <div className="text-tfpa_blue space-y-4">
                 <div>{clientInfo?.clientNationalId || "-"}</div>
                 <div>
-                  {/* Display as radio-like but read-only */}
+                  {/* Display title as radio-like but read-only */}
                   <div className="flex items-center space-x-4">
-                    {titleOptions.map((title) => (
-                      <div key={title} className="flex items-center space-x-2">
+                    {titleOptions.map((option) => (
+                      <div key={option} className="flex items-center space-x-2">
                         <div
                           className={`w-4 h-4 rounded-full ${
-                            clientInfo?.clientTitle === title
+                            titleMapping[clientInfo?.clientTitle] === option
                               ? "bg-tfpa_blue"
                               : "border border-tfpa_blue"
                           }`}
                         ></div>
-                        <span>{title}</span>
+                        <span>{option}</span>
                       </div>
                     ))}
                   </div>
@@ -166,12 +179,13 @@ export default function CFPClientInfoPage() {
                 <div>{clientInfo?.clientFirstName || "-"}</div>
                 <div>{clientInfo?.clientLastName || "-"}</div>
                 <div>
+                  {/* Display gender as radio-like but read-only */}
                   <div className="flex items-center space-x-4">
                     {genderOptions.map((g) => (
                       <div key={g} className="flex items-center space-x-2">
                         <div
                           className={`w-4 h-4 rounded-full ${
-                            clientInfo?.clientGender === g
+                            genderMapping[clientInfo?.clientGender] === g
                               ? "bg-tfpa_blue"
                               : "border border-tfpa_blue"
                           }`}
