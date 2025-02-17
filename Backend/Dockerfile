@@ -1,15 +1,13 @@
-# Use a base image with JDK 23 (adjust if a specific image is needed)
+# Stage 1: Build the application using Gradle
+FROM gradle:8.10.2-jdk23 AS builder
+WORKDIR /home/app
+COPY . .
+RUN ./gradlew clean build --no-daemon
+
+# Stage 2: Create the runtime image
 FROM openjdk:23
-
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy your executable JAR into the container
-# (Adjust the path if your JAR is located elsewhere)
-COPY build/libs/finplanner-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the port your app uses (commonly 8080)
+# Copy the JAR built in the previous stage. Adjust the path if necessary.
+COPY --from=builder /home/app/build/libs/finplanner-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
