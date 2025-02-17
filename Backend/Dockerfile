@@ -2,7 +2,8 @@
 FROM gradle:8.10.2-jdk23 AS builder
 WORKDIR /home/app
 COPY . .
-RUN ./gradlew clean build --no-daemon
+# Grant execute permission and run the build
+RUN chmod +x gradlew && ./gradlew clean build --no-daemon
 
 # Stage 2: Create the runtime image
 FROM openjdk:23
