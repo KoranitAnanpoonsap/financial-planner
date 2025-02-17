@@ -28,7 +28,7 @@ export default function ClientHeader() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header className="bg-white border-b border-gray-200 relative z-50 drop-shadow-md">
       <div className="container mx-auto flex justify-between items-center py-4">
         <div className="flex items-center space-x-4">
           <img src={logo} alt="TFPA Logo" className="h-12" />
