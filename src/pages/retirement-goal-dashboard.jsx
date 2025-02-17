@@ -7,6 +7,7 @@ import { calculateRetirementGoal } from "../utils/calculations.js"
 import { motion } from "framer-motion"
 import html2canvas from "html2canvas"
 import dashboard_image from "../assets/dashboard_image.png"
+import dashboard_retirement_image from "../assets/dashboard_retirement_image.jpg"
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -179,7 +180,7 @@ export default function RetirementGoalDashboard() {
           {formatNumber(retirementGoalAmount)} บาท
         </div>
         <img
-          className="my-2"
+          className="my-2 rounded-xl"
           src={dashboard_image}
           alt="Dashboard Picture Image"
         />
@@ -191,9 +192,7 @@ export default function RetirementGoalDashboard() {
     return (
       <div className="text-xl flex flex-row w-full items-start justify-between border-black border-2 rounded-2xl p-4 gap-8">
         <div className="flex flex-col">
-          <div className="text-2xl mb-2 text-tfpa_blue_hover">
-            ข้อมูลส่วนตัวสำหรับเกษียณ
-          </div>
+          <div className="text-2xl mb-2">ข้อมูลส่วนตัวสำหรับเกษียณ</div>
           <div className="m-2">อายุปัจจุบัน: {clientCurrentAge} ปี</div>
           {/*<div className="m-2">ระยะเวลาเป้าหมาย: {Goal.goalPeriod} ปี</div>*/}
           <div className="m-2">อายุเกษียณ: {clientRetirementAge} ปี</div>
@@ -202,7 +201,7 @@ export default function RetirementGoalDashboard() {
         <div className="flex h-full items-center">
           <img
             className="w-60 rounded-xl"
-            src="src/assets/dashboard_retirement_image.jpg"
+            src={dashboard_retirement_image}
             alt="Dashboard Retirement Image"
           />
         </div>
@@ -213,9 +212,7 @@ export default function RetirementGoalDashboard() {
   const DashBoardRetirementFinance = () => {
     return (
       <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
-        <div className="text-2xl text-tfpa_blue_hover mb-2">
-          รายละเอียดการเงินหลังเกษียณ
-        </div>
+        <div className="text-2xl mb-2">รายละเอียดการเงินหลังเกษียณ</div>
         <div className="m-2">
           รายจ่ายต่อปี ณ วันเกษียณ: {formatNumber(newFvCurrentExpense)} บาท
         </div>
