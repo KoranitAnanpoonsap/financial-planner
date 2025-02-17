@@ -1,8 +1,21 @@
-import React from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
+
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 // Helper function to determine gauge color and financial advice
 const getFinancialAdvice = (type, value) => {
@@ -12,19 +25,22 @@ const getFinancialAdvice = (type, value) => {
     if (value >= 3)
       advice = {
         status: "คุณมีสภาพคล่องที่ดีเยี่ยม",
-        message: "รักษาระดับสภาพคล่องทางการเงินให้อยู่ในเกณฑ์ที่ดีและมั่นคงอยู่เสมอ เพื่อให้สามารถบริหารจัดการกระแสเงินสดได้อย่างมีประสิทธิภาพ พร้อมรองรับค่าใช้จ่ายที่ไม่คาดคิดและสร้างโอกาสทางการเงินในอนาคตได้อย่างมั่นใจ",
+        message:
+          "รักษาระดับสภาพคล่องทางการเงินให้อยู่ในเกณฑ์ที่ดีและมั่นคงอยู่เสมอ เพื่อให้สามารถบริหารจัดการกระแสเงินสดได้อย่างมีประสิทธิภาพ พร้อมรองรับค่าใช้จ่ายที่ไม่คาดคิดและสร้างโอกาสทางการเงินในอนาคตได้อย่างมั่นใจ",
         color: "#10b981",
       }
     else if (value >= 1)
       advice = {
         status: "พอใช้",
-        message: "พยายามเพิ่มสินทรัพย์ที่มีสภาพคล่องสูงเพื่อเสริมสร้างความมั่นคงทางการเงิน ควบคู่ไปกับการบริหารรายรับและรายจ่ายให้สมดุล เพื่อให้มีความพร้อมในการรับมือกับเหตุการณ์ไม่คาดฝัน และลดความเสี่ยงด้านสภาพคล่องในระยะยาว",
+        message:
+          "พยายามเพิ่มสินทรัพย์ที่มีสภาพคล่องสูงเพื่อเสริมสร้างความมั่นคงทางการเงิน ควบคู่ไปกับการบริหารรายรับและรายจ่ายให้สมดุล เพื่อให้มีความพร้อมในการรับมือกับเหตุการณ์ไม่คาดฝัน และลดความเสี่ยงด้านสภาพคล่องในระยะยาว",
         color: "#facc15",
       }
     else
       advice = {
         status: "ยังไม่เพียงพอ",
-        message: "ควรทบทวนพฤติกรรมการใช้จ่ายและวางแผนการเงินให้รอบคอบมากขึ้น โดยเน้นการลดรายจ่ายที่ไม่จำเป็น และเพิ่มการออมเงินสำรองฉุกเฉินให้เพียงพอ เพื่อป้องกันปัญหาสภาพคล่องทางการเงินในอนาคตและลดความเสี่ยงทางการเงินที่อาจเกิดขึ้น",
+        message:
+          "ควรทบทวนพฤติกรรมการใช้จ่ายและวางแผนการเงินให้รอบคอบมากขึ้น โดยเน้นการลดรายจ่ายที่ไม่จำเป็น และเพิ่มการออมเงินสำรองฉุกเฉินให้เพียงพอ เพื่อป้องกันปัญหาสภาพคล่องทางการเงินในอนาคตและลดความเสี่ยงทางการเงินที่อาจเกิดขึ้น",
         color: "#f87171",
       }
   }
@@ -33,19 +49,22 @@ const getFinancialAdvice = (type, value) => {
     if (value < 0.2)
       advice = {
         status: "คุณมีหนี้ในระดับที่ดี",
-        message: "ควบคุมภาระหนี้ให้อยู่ในระดับที่เหมาะสม โดยบริหารจัดการการชำระหนี้อย่างมีวินัย และรักษาสัดส่วนหนี้ต่อรายได้ให้อยู่ในเกณฑ์ที่ปลอดภัย เพื่อให้สามารถใช้ประโยชน์จากสินเชื่ออย่างมีประสิทธิภาพโดยไม่เป็นภาระทางการเงินในระยะยาว",
+        message:
+          "ควบคุมภาระหนี้ให้อยู่ในระดับที่เหมาะสม โดยบริหารจัดการการชำระหนี้อย่างมีวินัย และรักษาสัดส่วนหนี้ต่อรายได้ให้อยู่ในเกณฑ์ที่ปลอดภัย เพื่อให้สามารถใช้ประโยชน์จากสินเชื่ออย่างมีประสิทธิภาพโดยไม่เป็นภาระทางการเงินในระยะยาว",
         color: "#10b981",
       }
     else if (value < 0.4)
       advice = {
         status: "พอใช้",
-        message: "ระมัดระวังการก่อหนี้เพิ่มโดยไม่จำเป็น และพยายามลดภาระหนี้สินลงอย่างต่อเนื่อง ควรวางแผนการชำระหนี้อย่างเป็นระบบ และปรับโครงสร้างหนี้หากจำเป็น เพื่อป้องกันไม่ให้หนี้สินกลายเป็นภาระทางการเงินที่มากเกินไปในอนาคต",
+        message:
+          "ระมัดระวังการก่อหนี้เพิ่มโดยไม่จำเป็น และพยายามลดภาระหนี้สินลงอย่างต่อเนื่อง ควรวางแผนการชำระหนี้อย่างเป็นระบบ และปรับโครงสร้างหนี้หากจำเป็น เพื่อป้องกันไม่ให้หนี้สินกลายเป็นภาระทางการเงินที่มากเกินไปในอนาคต",
         color: "#facc15",
       }
     else
       advice = {
         status: "คุณมีความเสี่ยงด้านการชำระหนี้",
-        message: "ควรทบทวนและลดค่าใช้จ่ายที่ไม่จำเป็นเพื่อลดภาระหนี้สิน พร้อมทั้งพิจารณาการรีไฟแนนซ์หรือปรับโครงสร้างหนี้เพื่อให้การชำระหนี้เป็นไปอย่างมีประสิทธิภาพมากขึ้น ควรให้ความสำคัญกับการลดหนี้เป็นอันดับแรก เพื่อป้องกันความเสี่ยงด้านการเงินและเพิ่มความมั่นคงในระยะยาว",
+        message:
+          "ควรทบทวนและลดค่าใช้จ่ายที่ไม่จำเป็นเพื่อลดภาระหนี้สิน พร้อมทั้งพิจารณาการรีไฟแนนซ์หรือปรับโครงสร้างหนี้เพื่อให้การชำระหนี้เป็นไปอย่างมีประสิทธิภาพมากขึ้น ควรให้ความสำคัญกับการลดหนี้เป็นอันดับแรก เพื่อป้องกันความเสี่ยงด้านการเงินและเพิ่มความมั่นคงในระยะยาว",
         color: "#f87171",
       }
   }
@@ -54,19 +73,22 @@ const getFinancialAdvice = (type, value) => {
     if (value >= 0.2)
       advice = {
         status: "ยอดเยี่ยม",
-        message: "การออมของคุณอยู่ในระดับที่ดี ซึ่งเป็นรากฐานสำคัญของความมั่นคงทางการเงิน ควรนำเงินออมไปต่อยอดด้วยการลงทุนที่เหมาะสมกับเป้าหมายและความเสี่ยงที่ยอมรับได้ เพื่อให้เงินเติบโตและสร้างโอกาสทางการเงินที่ดีขึ้นในอนาคต",
+        message:
+          "การออมของคุณอยู่ในระดับที่ดี ซึ่งเป็นรากฐานสำคัญของความมั่นคงทางการเงิน ควรนำเงินออมไปต่อยอดด้วยการลงทุนที่เหมาะสมกับเป้าหมายและความเสี่ยงที่ยอมรับได้ เพื่อให้เงินเติบโตและสร้างโอกาสทางการเงินที่ดีขึ้นในอนาคต",
         color: "#10b981",
       }
     else if (value >= 0.1)
       advice = {
         status: "ปานกลาง",
-        message: "คุณมีการออมอยู่ในระดับที่พอใช้ได้ แต่ควรเพิ่มอัตราการออมให้สูงขึ้นเพื่อให้สามารถบรรลุเป้าหมายทางการเงินในอนาคตได้อย่างมั่นคง ลองวางแผนงบประมาณให้รัดกุมขึ้น และพิจารณาลดค่าใช้จ่ายที่ไม่จำเป็น เพื่อเพิ่มสัดส่วนการออมและเสริมสร้างความมั่นคงทางการเงินของคุณ",
+        message:
+          "คุณมีการออมอยู่ในระดับที่พอใช้ได้ แต่ควรเพิ่มอัตราการออมให้สูงขึ้นเพื่อให้สามารถบรรลุเป้าหมายทางการเงินในอนาคตได้อย่างมั่นคง ลองวางแผนงบประมาณให้รัดกุมขึ้น และพิจารณาลดค่าใช้จ่ายที่ไม่จำเป็น เพื่อเพิ่มสัดส่วนการออมและเสริมสร้างความมั่นคงทางการเงินของคุณ",
         color: "#facc15",
       }
     else
       advice = {
         status: "ยังไม่เพียงพอ",
-        message: "ปัจจุบันอัตราการออมของคุณยังอยู่ในระดับที่ต่ำ ซึ่งอาจส่งผลต่อความมั่นคงทางการเงินในระยะยาว ควรพยายามเพิ่มสัดส่วนการออมด้วยการควบคุมค่าใช้จ่ายที่ไม่จำเป็น และกำหนดเป้าหมายการออมที่ชัดเจน เพื่อให้มีเงินสำรองเพียงพอสำหรับอนาคตและลดความเสี่ยงทางการเงิน",
+        message:
+          "ปัจจุบันอัตราการออมของคุณยังอยู่ในระดับที่ต่ำ ซึ่งอาจส่งผลต่อความมั่นคงทางการเงินในระยะยาว ควรพยายามเพิ่มสัดส่วนการออมด้วยการควบคุมค่าใช้จ่ายที่ไม่จำเป็น และกำหนดเป้าหมายการออมที่ชัดเจน เพื่อให้มีเงินสำรองเพียงพอสำหรับอนาคตและลดความเสี่ยงทางการเงิน",
         color: "#f87171",
       }
   }
@@ -128,54 +150,60 @@ export default function FinancialResults() {
   return (
     <div>
       <Header />
-      <main className="container mx-auto py-12">
-        <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
-          <h2 className="text-2xl font-bold">
-            ผลการตรวจสุขภาพการเงินของคุณ
-          </h2>
-          <p className="text-lg">
-            การรู้สถานะทางการเงินของคุณคือก้าวแรกที่สำคัญ
-            สร้างแผนการเงินที่ดีเพื่ออนาคตที่ดีกว่า!
-          </p>
-        </section>
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="flex-1"
+      >
+        <main className="container mx-auto py-12">
+          <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
+            <h2 className="text-2xl font-bold">ผลการตรวจสุขภาพการเงินของคุณ</h2>
+            <p className="text-lg">
+              การรู้สถานะทางการเงินของคุณคือก้าวแรกที่สำคัญ
+              สร้างแผนการเงินที่ดีเพื่ออนาคตที่ดีกว่า!
+            </p>
+          </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <GaugeChart
-            value={value1}
-            label="ด้านสภาพคล่องพื้นฐาน"
-            type="liquidity"
-          />
-          <GaugeChart value={value2} label="ด้านการชำระหนี้" type="debt" />
-          <GaugeChart value={value3} label="ด้านการออม" type="savings" />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <GaugeChart
+              value={value1}
+              label="ด้านสภาพคล่องพื้นฐาน"
+              type="liquidity"
+            />
+            <GaugeChart value={value2} label="ด้านการชำระหนี้" type="debt" />
+            <GaugeChart value={value3} label="ด้านการออม" type="savings" />
+          </div>
 
-        <section className="bg-gray-100 p-6 rounded-lg shadow-md mt-6 text-center">
-          <h3 className="text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
-          <p className="text-gray-700 mb-4">
-            <strong>ด้านสภาพคล่อง:</strong>{" "}
-            {getFinancialAdvice("liquidity", value1).message}
-          </p>
-          <p className="text-gray-700 mb-4">
-            <strong>ด้านหนี้สิน:</strong>{" "}
-            {getFinancialAdvice("debt", value2).message}
-          </p>
-          <p className="text-gray-700">
-            <strong>ด้านการออม:</strong>{" "}
-            {getFinancialAdvice("savings", value3).message}
-          </p>
-        </section>
+          <section className="bg-gray-100 p-6 rounded-lg shadow-md mt-6 text-center">
+            <h3 className="text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
+            <p className="text-gray-700 mb-4">
+              <strong>ด้านสภาพคล่อง:</strong>{" "}
+              {getFinancialAdvice("liquidity", value1).message}
+            </p>
+            <p className="text-gray-700 mb-4">
+              <strong>ด้านหนี้สิน:</strong>{" "}
+              {getFinancialAdvice("debt", value2).message}
+            </p>
+            <p className="text-gray-700">
+              <strong>ด้านการออม:</strong>{" "}
+              {getFinancialAdvice("savings", value3).message}
+            </p>
+          </section>
 
-        <div className="text-center mt-6">
-          <button
-            onClick={() => navigate(`/client-healthcheck-page`)}
-            className="bg-tfpa_blue text-white font-bold py-2 px-6 rounded-lg hover:bg-tfpa_blue_hover"
-          >
-            กรอกข้อมูลใหม่
-          </button>
-        </div>
-      </main>
+          <div className="text-center mt-6">
+            <button
+              onClick={() => navigate(`/client-healthcheck-page`)}
+              className="bg-tfpa_blue text-white font-bold py-2 px-6 rounded-lg hover:bg-tfpa_blue_hover"
+            >
+              กรอกข้อมูลใหม่
+            </button>
+          </div>
+        </main>
+      </motion.div>
       <Footer />
     </div>
   )
 }
-

@@ -1,9 +1,22 @@
-import React from "react"
+import { motion } from "framer-motion"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import FinancialHealthIllustration from "../assets/Financial-Healthcheck.jpg"
 import FinancialGoalIllustration from "../assets/EasyGoal.png"
 import { useNavigate } from "react-router-dom"
+
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 export default function FinancialHealthCheck() {
   const navigate = useNavigate()
@@ -30,7 +43,7 @@ export default function FinancialHealthCheck() {
           <img
             src={FinancialHealthIllustration}
             alt="Financial Health Illustration"
-            className="max-w-full h-auto"
+            className="max-w-full h-auto rounded-xl"
           />
         </div>
       </div>
@@ -44,7 +57,7 @@ export default function FinancialHealthCheck() {
           <img
             src={FinancialGoalIllustration}
             alt="Financial Goal Illustration"
-            className="max-w-full h-auto"
+            className="max-w-full h-auto rounded-xl"
           />
         </div>
         <div className="lg:w-1/2">
@@ -69,10 +82,19 @@ export default function FinancialHealthCheck() {
   return (
     <div>
       <Header />
-      <main className="container mx-auto py-12">
-        <FinancialHealthSection />
-        <FinancialGoalSection />
-      </main>
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="flex-1"
+      >
+        <main className="container mx-auto py-12">
+          <FinancialHealthSection />
+          <FinancialGoalSection />
+        </main>
+      </motion.div>
       <Footer />
     </div>
   )
