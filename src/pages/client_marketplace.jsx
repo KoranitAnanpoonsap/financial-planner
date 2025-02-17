@@ -72,6 +72,7 @@ function CfpModal({
   alreadyRequested,
   clientStatus,
   clientCfp,
+  isLoggedIn, // new prop
 }) {
   if (!cfp) return null
 
@@ -240,34 +241,42 @@ function CfpModal({
 
             {/* Send Request Button & Confirmation Message */}
             <div className="mt-6 border-t pt-4">
-              {onSendRequestClick ? (
+              {!isLoggedIn ? (
                 <>
-                  {clientStatus === 1 || clientStatus === 2 ? (
-                    <>
-                      <button
-                        disabled
-                        className="bg-gray-400 text-white py-2 px-4 rounded"
-                      >
-                        ส่งคำร้อง
-                      </button>
-                      <p className="text-red-600 mt-2">
-                        คุณได้ส่งคำร้องไปหา CFP{" "}
-                        {clientCfp
-                          ? `${clientCfp.cfpFirstName} ${clientCfp.cfpLastName} `
-                          : ""}
-                        แล้ว
-                      </p>
-                    </>
-                  ) : (
-                    <button
-                      onClick={onSendRequestClick}
-                      className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
-                    >
-                      ส่งคำร้อง
-                    </button>
-                  )}
+                  <button
+                    disabled
+                    className="bg-gray-400 text-white py-2 px-4 rounded"
+                  >
+                    ส่งคำร้อง
+                  </button>
+                  <p className="text-red-600 mt-2">
+                    กรุณาเข้าสู่ระบบก่อนส่งคำร้อง
+                  </p>
                 </>
-              ) : null}
+              ) : clientStatus === 1 || clientStatus === 2 ? (
+                <>
+                  <button
+                    disabled
+                    className="bg-gray-400 text-white py-2 px-4 rounded"
+                  >
+                    ส่งคำร้อง
+                  </button>
+                  <p className="text-green-600 mt-2">
+                    คุณได้ส่งคำร้องไปหา CFP{" "}
+                    {clientCfp
+                      ? `${clientCfp.cfpFirstName} ${clientCfp.cfpLastName}`
+                      : ""}{" "}
+                    แล้ว
+                  </p>
+                </>
+              ) : (
+                <button
+                  onClick={onSendRequestClick}
+                  className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
+                >
+                  ส่งคำร้อง
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -280,6 +289,8 @@ function CfpModal({
 
 export default function MarketplacePage() {
   const clientLoginUuid = localStorage.getItem("clientLoginUuid") || null
+  // Use clientLoginUuid = "0" to indicate a logged-out client.
+  const isLoggedIn = clientLoginUuid && clientLoginUuid !== "0"
   const [allCfps, setAllCfps] = useState([])
   const [filteredCfps, setFilteredCfps] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -641,10 +652,11 @@ export default function MarketplacePage() {
             <CfpModal
               cfp={selectedCfp}
               onClose={closeModal}
-              onSendRequestClick={clientLoginUuid ? handleSendRequest : null}
+              onSendRequestClick={isLoggedIn ? handleSendRequest : null}
               alreadyRequested={clientAlreadyHasCfp}
               clientStatus={clientStatus}
               clientCfp={clientCfpData}
+              isLoggedIn={isLoggedIn}
             />
           )}
         </AnimatePresence>
