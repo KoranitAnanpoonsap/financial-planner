@@ -18,9 +18,13 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Remove package-lock and node_modules
+        run: |
+          rm -rf package-lock.json node_modules
+
       - name: Install Dependencies & Build
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Deploy to GitHub Pages
