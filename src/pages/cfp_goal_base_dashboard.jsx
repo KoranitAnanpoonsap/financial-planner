@@ -88,7 +88,9 @@ export default function CFPGoalBaseDashboard() {
   const DashBoardGoalBasedEfficient = () => {
     return (
       <div className="text-3xl flex flex-col w-full items-center border-black border-2 rounded-2xl p-4">
-        <div className="mb-8">เป้าหมาย: {Goal.goalName}</div>
+        <div className="mb-8 text-tfpa_blue_hover">
+          เป้าหมาย: {Goal.goalName}
+        </div>
         <div className="m-2">จากสถานะทางการเงินในปัจจุบัน</div>
         {GoalAnnualSaving <= Number(Goal.netIncome).toLocaleString() ? (
           <div className="text-[green] m-2">
@@ -100,7 +102,7 @@ export default function CFPGoalBaseDashboard() {
           </div>
         )}
         <img
-          className="my-2"
+          className="my-2 rounded-2xl"
           src={dashboard_image}
           alt="Dashboard Picture Image"
         />
@@ -111,7 +113,9 @@ export default function CFPGoalBaseDashboard() {
   const DashBoardGoalBasedGoalDetail = () => {
     return (
       <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
-        <div className="text-2xl mb-2">รายละเอียดเป้าหมาย</div>
+        <div className="text-2xl text-tfpa_blue_hover mb-2">
+          รายละเอียดเป้าหมาย
+        </div>
         <div className="m-2">
           จํานวนเงินเพื่อเป้าหมาย:{" "}
           {Goal.goalValue.toLocaleString("en-th", {
@@ -146,7 +150,9 @@ export default function CFPGoalBaseDashboard() {
   const DashBoardGoalBasedPortfolio = () => {
     return (
       <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
-        <div className="text-2xl mb-2">สถานะการเงินในปัจจุบัน</div>
+        <div className="text-2xl text-tfpa_blue_hover mb-2">
+          สถานะการเงินในปัจจุบัน
+        </div>
         <div className="m-2">
           กระเเสเงินสดสุทธิต่อปี:{" "}
           {Number(Goal.netIncome).toLocaleString("en-th", {

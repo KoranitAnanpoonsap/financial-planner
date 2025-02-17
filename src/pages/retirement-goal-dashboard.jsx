@@ -173,7 +173,7 @@ export default function RetirementGoalDashboard() {
   const DashBoardRetirementMain = () => {
     return (
       <div className="text-3xl flex flex-col w-full items-center border-black border-2 rounded-2xl p-4">
-        <div className="m-2">เป้าหมายเกษียณ</div>
+        <div className="m-2 text-4xl">เป้าหมายเกษียณ</div>
         <div className="m-2">
           จำนวนเงินที่ต้องมีทั้งหมด ณ วันเกษียณ{" "}
           {formatNumber(retirementGoalAmount)} บาท
@@ -191,7 +191,9 @@ export default function RetirementGoalDashboard() {
     return (
       <div className="text-xl flex flex-row w-full items-start justify-between border-black border-2 rounded-2xl p-4 gap-8">
         <div className="flex flex-col">
-          <div className="text-2xl mb-2">ข้อมูลส่วนตัวสำหรับเกษียณ</div>
+          <div className="text-2xl mb-2 text-tfpa_blue_hover">
+            ข้อมูลส่วนตัวสำหรับเกษียณ
+          </div>
           <div className="m-2">อายุปัจจุบัน: {clientCurrentAge} ปี</div>
           {/*<div className="m-2">ระยะเวลาเป้าหมาย: {Goal.goalPeriod} ปี</div>*/}
           <div className="m-2">อายุเกษียณ: {clientRetirementAge} ปี</div>
@@ -211,7 +213,9 @@ export default function RetirementGoalDashboard() {
   const DashBoardRetirementFinance = () => {
     return (
       <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
-        <div className="text-2xl mb-2">รายละเอียดการเงินหลังเกษียณ</div>
+        <div className="text-2xl text-tfpa_blue_hover mb-2">
+          รายละเอียดการเงินหลังเกษียณ
+        </div>
         <div className="m-2">
           รายจ่ายต่อปี ณ วันเกษียณ: {formatNumber(newFvCurrentExpense)} บาท
         </div>
