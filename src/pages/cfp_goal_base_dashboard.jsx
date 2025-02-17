@@ -6,6 +6,7 @@ import CfpClientSidePanel from "../components/cfpClientSidePanel.jsx"
 import { calculateGoal } from "../utils/calculations.js"
 import { motion } from "framer-motion"
 import html2canvas from "html2canvas"
+import dashboard_image from "../assets/dashboard_image.png"
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -100,7 +101,7 @@ export default function CFPGoalBaseDashboard() {
         )}
         <img
           className="my-2"
-          src="/src/assets/dashboard_image.png"
+          src={dashboard_image}
           alt="Dashboard Picture Image"
         />
       </div>
