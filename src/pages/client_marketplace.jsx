@@ -613,7 +613,7 @@ export default function MarketplacePage() {
         </div>
         {/* CFP Cards */}
         <div className="flex-1 bg-gray-100 p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className=" mx-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredCfps.map((cfp) => {
               const cardImage =
                 cfp.cfpImage && cfp.cfpImage.trim() !== ""
@@ -623,7 +623,7 @@ export default function MarketplacePage() {
                 <div
                   key={cfp.cfpUuid}
                   onClick={() => openModal(cfp.cfpUuid)}
-                  className="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg transition-transform hover:-translate-y-1 text-center"
+                  className="bg-white p-4 rounded-xl shadow cursor-pointer hover:shadow-lg transition-transform hover:-translate-y-1 text-center"
                 >
                   <div className="flex justify-center mb-2">
                     <img
