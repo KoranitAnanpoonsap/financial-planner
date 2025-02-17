@@ -1,27 +1,15 @@
-# Use OpenJDK 23 as the base image
-FROM openjdk:23-jdk-slim
+# Use a base image with JDK 23 (adjust if a specific image is needed)
+FROM openjdk:23
 
-# Set work directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy Gradle files
-COPY gradlew .
-COPY gradle/ gradle/
-COPY build.gradle .
-COPY settings.gradle .
-COPY src/ src/
+# Copy your executable JAR into the container
+# (Adjust the path if your JAR is located elsewhere)
+COPY build/libs/finplanner-0.0.1-SNAPSHOT.jar app.jar
 
-# Grant execute permissions to Gradle wrapper
-RUN chmod +x gradlew
+# Expose the port your app uses (commonly 8080)
+EXPOSE 8080
 
-# Build the application (skip tests)
-RUN ./gradlew build -x test
-
-# Copy the JAR file explicitly
-RUN cp build/libs/*.jar app.jar
-
-# Expose the port (Render dynamically assigns ports)
-EXPOSE $PORT
-
-# Start the application
-CMD ["java", "-jar", "app.jar"]
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "app.jar"]
