@@ -8,6 +8,7 @@ import Register from "./pages/register"
 import CfpHomepage from "./pages/cfp_homepage"
 import ClientHomepage from "./pages/client_homepage"
 import ClientAboutTFPA from "./pages/client_aboutTFPA"
+import ClientPlanningImportance from "./pages/client_planningimportance"
 import ClientFAQ from "./pages/client_faq"
 import ClientPrecalculationPage from "./pages/client_precalculation_page"
 import ClientHealthcheckPage from "./pages/client_healthcheck_page"
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/cfp-homepage/" element={<CfpHomepage />} />
         <Route path="/client-homepage" element={<ClientHomepage />} />
+        <Route path="/client-planningimportance" element={<ClientPlanningImportance />} />
         <Route path="/client-aboutTFPA" element={<ClientAboutTFPA />} />
         <Route path="/client-faq" element={<ClientFAQ />} />
         <Route path="/client-marketplace" element={<ClientMarketPlace />} />
