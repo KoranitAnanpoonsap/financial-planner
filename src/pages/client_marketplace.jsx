@@ -6,6 +6,10 @@ import Footer from "../components/footer.jsx"
 import personIcon from "../assets/man.png"
 import wallpaper from "../assets/login_wallpaper.jpg"
 
+// Import rc-checkbox and its styles
+import Checkbox from "rc-checkbox"
+import "rc-checkbox/assets/index.css"
+
 // Page transition variants
 const pageVariants = {
   initial: { opacity: 0 },
@@ -91,9 +95,6 @@ function CfpModal({
   const imageUrl =
     cfp.cfpImage && cfp.cfpImage.trim() !== "" ? cfp.cfpImage : personIcon
 
-  const checkboxClass =
-    "form-checkbox h-4 w-4 text-white bg-gray-400 border-gray-400 rounded-sm focus:ring-0 mr-2"
-
   const modalContent = (
     <div
       className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50 font-ibm"
@@ -146,10 +147,10 @@ function CfpModal({
           <div>
             {charges.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue text-left">
+                <h4 className="font-bold text-tfpa_blue text-center">
                   การคิดค่าบริการ
                 </h4>
-                <ul className="list-disc list-inside">
+                <ul className="list-disc list-inside text-center">
                   {charges.map((item, idx) => (
                     <li key={idx}>
                       {chargeMapping[item.trim()] || item.trim()}
@@ -355,7 +356,7 @@ export default function MarketplacePage() {
     }
   }
 
-  // 3) Filter logic
+  // 3) Filter logic (with sort by cfpFormatId)
   const handleFilter = () => {
     let updated = [...allCfps]
     if (searchTerm.trim() !== "") {
@@ -400,6 +401,12 @@ export default function MarketplacePage() {
         return areaArray.map((a) => a.trim()).includes(selectedServiceArea)
       })
     }
+    // --- Sort the CFPs by their numeric ID extracted from cfpFormatId ---
+    updated.sort((a, b) => {
+      const idA = parseInt(a.cfpFormatId.replace(/\D/g, ""), 10) || 0
+      const idB = parseInt(b.cfpFormatId.replace(/\D/g, ""), 10) || 0
+      return idA - idB
+    })
     setFilteredCfps(updated)
   }
 
@@ -478,8 +485,6 @@ export default function MarketplacePage() {
     }
   }
 
-  const checkboxClass =
-    "form-checkbox h-4 w-4 text-white bg-gray-400 border-gray-400 rounded-sm focus:ring-0 mr-2"
   const dropdownClass =
     "border p-2 rounded text-sm w-full hover:bg-gray-100 transition-colors"
 
@@ -507,20 +512,18 @@ export default function MarketplacePage() {
               กับนักวางแผนการเงิน CFP<sup>®</sup>
             </h1>
             {/* Filter & Search Container */}
-            <div className="bg-white rounded shadow p-4 text-gray-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left: Service checkboxes */}
+            <div className="bg-white rounded-xl shadow py-4 px-4 text-gray-800">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-32">
+                {/* Left: Service (Expertise) checkboxes */}
                 <div>
                   <h3 className="font-bold text-gray-700 mb-2">การให้บริการ</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-56 gap-y-2 text-sm">
                     {Object.entries(expertiseMapping).map(([key, value]) => (
                       <label
                         key={key}
-                        className="flex items-start gap-2 leading-snug"
+                        className="flex flex-nowrap items-center gap-2"
                       >
-                        <input
-                          type="checkbox"
-                          className={checkboxClass}
+                        <Checkbox
                           checked={selectedExpertiseFilters.includes(key)}
                           onChange={() =>
                             toggleFilterValue(
@@ -529,8 +532,9 @@ export default function MarketplacePage() {
                               setSelectedExpertiseFilters
                             )
                           }
+                          className="w-4 h-4"
                         />
-                        <span>{value}</span>
+                        <span className="whitespace-nowrap">{value}</span>
                       </label>
                     ))}
                   </div>
@@ -571,18 +575,16 @@ export default function MarketplacePage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-700 mb-2">
+                    <h3 className="font-bold text-gray-700 mb-2 text-center">
                       การคิดค่าบริการ
                     </h3>
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-1 text-sm text-center">
                       {Object.entries(chargeMapping).map(([key, value]) => (
                         <label
                           key={key}
-                          className="flex items-start gap-2 leading-snug"
+                          className="flex flex-nowrap items-center gap-2 px-32 justify-left"
                         >
-                          <input
-                            type="checkbox"
-                            className={checkboxClass}
+                          <Checkbox
                             checked={selectedChargeFilters.includes(key)}
                             onChange={() =>
                               toggleFilterValue(
@@ -591,8 +593,9 @@ export default function MarketplacePage() {
                                 setSelectedChargeFilters
                               )
                             }
+                            className="w-4 h-4"
                           />
-                          <span>{value}</span>
+                          <span className="whitespace-nowrap">{value}</span>
                         </label>
                       ))}
                     </div>
@@ -613,7 +616,7 @@ export default function MarketplacePage() {
         </div>
         {/* CFP Cards */}
         <div className="flex-1 bg-gray-100 p-4">
-          <div className=" mx-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="mx-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredCfps.map((cfp) => {
               const cardImage =
                 cfp.cfpImage && cfp.cfpImage.trim() !== ""
