@@ -20,7 +20,7 @@ export default function FinancialHealthForm() {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
-    cashFlow: "",
+    annualExpense: "",
     liquidAssets: "",
     annualIncome: "",
     debtPayments: "",
@@ -45,8 +45,8 @@ export default function FinancialHealthForm() {
     )
 
     const value1 =
-      numericData.cashFlow !== 0
-        ? numericData.liquidAssets / numericData.cashFlow
+      numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings) !== 0
+        ? numericData.liquidAssets / (numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings))
         : 0
     const value2 =
       numericData.annualIncome !== 0
@@ -83,11 +83,11 @@ export default function FinancialHealthForm() {
             </p>
             <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
               <InputField
-                label="กระแสเงินสด"
-                name="cashFlow"
-                value={formData.cashFlow}
+                label="รายได้"
+                name="annualIncome"
+                value={formData.annualIncome}
                 onChange={handleInputChange}
-                info="รายได้ที่สามารถใช้จ่ายหรือออมได้หลังจากหักค่าใช้จ่ายจำเป็นแล้ว"
+                info="รายได้ทั้งหมดที่ได้รับในหนึ่งเดือน เช่น เงินเดือน โบนัส รายได้เสริม"
               />
               <InputField
                 label="สินทรัพย์สภาพคล่อง"
@@ -97,11 +97,11 @@ export default function FinancialHealthForm() {
                 info="สินทรัพย์ที่สามารถเปลี่ยนเป็นเงินสดได้ง่าย เช่น เงินฝากธนาคาร"
               />
               <InputField
-                label="รายรับรวม"
-                name="annualIncome"
-                value={formData.annualIncome}
+                label="รายจ่าย"
+                name="annualExpense"
+                value={formData.annualExpense}
                 onChange={handleInputChange}
-                info="รายได้ทั้งหมดที่ได้รับในหนึ่งปี เช่น เงินเดือน โบนัส รายได้เสริม"
+                info="รายจ่ายทั้งหมดในหนึ่งเดือน เช่น ค่าน้ำ ค่าไฟ ค่าเพื่อบันเทิง"
               />
               <InputField
                 label="เงินใช้คืนหนี้สิน"
@@ -115,7 +115,7 @@ export default function FinancialHealthForm() {
                 name="annualSavings"
                 value={formData.annualSavings}
                 onChange={handleInputChange}
-                info="จำนวนเงินที่สามารถออมได้ในแต่ละปีหลังจากหักค่าใช้จ่ายทั้งหมด"
+                info="จำนวนเงินที่สามารถออมได้ในแต่ละเดือนหลังจากหักค่าใช้จ่ายทั้งหมด"
               />
               <button
                 type="submit"
