@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { useNavigate } from "react-router-dom" // Import useNavigate
+import { useNavigate } from "react-router-dom"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 
@@ -17,7 +17,7 @@ const pageTransition = {
 }
 
 export default function FinancialHealthForm() {
-  const navigate = useNavigate() // Initialize navigation
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     cashFlow: "",
@@ -44,7 +44,6 @@ export default function FinancialHealthForm() {
       Object.entries(formData).map(([key, value]) => [key, Number(value) || 0])
     )
 
-    // Perform calculations
     const value1 =
       numericData.cashFlow !== 0
         ? numericData.liquidAssets / numericData.cashFlow
@@ -58,7 +57,6 @@ export default function FinancialHealthForm() {
         ? numericData.annualSavings / numericData.annualIncome
         : 0
 
-    // Navigate to the results page with calculated values
     navigate(`/client-healthcheck-result`, {
       state: { value1, value2, value3 },
     })
@@ -89,30 +87,35 @@ export default function FinancialHealthForm() {
                 name="cashFlow"
                 value={formData.cashFlow}
                 onChange={handleInputChange}
+                info="รายได้ที่สามารถใช้จ่ายหรือออมได้หลังจากหักค่าใช้จ่ายจำเป็นแล้ว"
               />
               <InputField
                 label="สินทรัพย์สภาพคล่อง"
                 name="liquidAssets"
                 value={formData.liquidAssets}
                 onChange={handleInputChange}
+                info="สินทรัพย์ที่สามารถเปลี่ยนเป็นเงินสดได้ง่าย เช่น เงินฝากธนาคาร"
               />
               <InputField
                 label="รายรับรวม"
                 name="annualIncome"
                 value={formData.annualIncome}
                 onChange={handleInputChange}
+                info="รายได้ทั้งหมดที่ได้รับในหนึ่งปี เช่น เงินเดือน โบนัส รายได้เสริม"
               />
               <InputField
-                label="เงินใช้ระคืนหนี้สิน"
+                label="เงินใช้คืนหนี้สิน"
                 name="debtPayments"
                 value={formData.debtPayments}
                 onChange={handleInputChange}
+                info="จำนวนเงินที่ต้องจ่ายคืนสำหรับหนี้สิน เช่น ค่างวดบ้าน รถ หรือสินเชื่อส่วนบุคคล"
               />
               <InputField
                 label="เงินออม"
                 name="annualSavings"
                 value={formData.annualSavings}
                 onChange={handleInputChange}
+                info="จำนวนเงินที่สามารถออมได้ในแต่ละปีหลังจากหักค่าใช้จ่ายทั้งหมด"
               />
               <button
                 type="submit"
@@ -129,11 +132,17 @@ export default function FinancialHealthForm() {
   )
 }
 
-function InputField({ label, name, value, onChange }) {
+function InputField({ label, name, value, onChange, info }) {
   return (
-    <div className="mb-4">
+    <div className="mb-4 relative">
       <label className="block text-gray-700 font-medium mb-2" htmlFor={name}>
         {label} <span className="text-gray-500">(ต่อเดือน)</span>
+        <span className="ml-2 text-blue-600 cursor-pointer relative group">
+          ℹ️
+          <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+            {info}
+          </span>
+        </span>
       </label>
       <input
         type="text"
