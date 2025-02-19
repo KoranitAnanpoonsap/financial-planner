@@ -53,10 +53,10 @@ export default function EasyGoalResult() {
 
           {/* Results Section */}
           <div className="bg-white p-6 rounded-lg inset-shadow ring-1 ring-gray-700 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-center mb-6">
+            <h3 className="text-tfpa_blue text-xl font-semibold text-center mb-6">
               ผลลัพธ์ของเป้าหมาย {goalName}
             </h3>
-            <p className="text-center text-lg mb-4">
+            <p className="text-tfpa_blue text-center text-lg mb-4">
               มูลค่าเป้าหมาย: {target.toLocaleString()} บาท
             </p>
 
@@ -64,9 +64,9 @@ export default function EasyGoalResult() {
               {difference > 0 ? (
                 <>
                   <p className="mb-4 text-red-600">
-                    คุณยังมีเงินไม่เพียงพอสำหรับเป้าหมายนี้
+                  “เงินรวมตอนนี้ของคุณยังไม่เพียงพอกับเป้าหมายนี้”
                   </p>
-                  <p>คุณต้องออมเพิ่มอีก:</p>
+                  <p>แต่คุณสามารถปรับเเผนการ เพื่อบรรลุเป้าหมายคุณได้ตามคำแนะนำนี้ <br></br> จำนวนเงินที่ต้องเก็บออมเพิ่ม: <br></br> <br></br></p>
                   <p className="text-3xl font-bold text-red-600">
                     {requiredAnnualSavings.toLocaleString()} บาท/ปี
                   </p>
