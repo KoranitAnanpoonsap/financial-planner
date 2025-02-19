@@ -26,7 +26,7 @@ export default function FinancialPlanningPage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-tfpa_blue p-8 text-center text-white">
+  <section className="bg-tfpa_blue p-16 text-center text-white">
     <h1 className="text-4xl font-bold mb-4">ทำไมการวางแผนการเงินถึงสำคัญ?</h1>
     <p className="text-xl">สร้างความมั่นคงทางการเงินผ่านการวางแผนอย่างเป็นระบบ</p>
   </section>
@@ -115,10 +115,10 @@ const ExamplesSection = () => {
   
   // Updated Content Card Component with Image
   const ContentCard = ({ title, description, imageSrc }) => (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+    <div className="bg-tfpa_blue rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
       <div className="p-6">
-        <h3 className="text-xl font-semibold text-tfpa_blue mb-3">{title}</h3>
-        <p className="text-gray-700 mb-4">{description}</p>
+        <h3 className="text-xl font-semibold text-white mb-3">{title}</h3>
+        <p className="text-white mb-4">{description}</p>
       </div>
       <div className="h-48 w-full overflow-hidden">
         <img 

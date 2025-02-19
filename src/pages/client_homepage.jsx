@@ -109,8 +109,8 @@ const FeatureCard = ({ title, link, imageSrc }) => {
 const About = () => (
   <section className="bg-tfpa_gold p-8">
     <div className="container mx-auto text-center">
-      <h2 className="text-xl font-bold text-white mb-4">เกี่ยวกับเรา</h2>
-      <p className="text-white">
+      <h2 className="text-xl font-bold text-tfpa_blue mb-4">เกี่ยวกับเรา</h2>
+      <p className="text-tfpa_blue">
         เราเป็นทีมงานนักวางแผนการเงินที่ได้รับการรับรองจาก CFP (Certified
         Financial Planner)
         ซึ่งเป็นมาตรฐานระดับสากลที่ยืนยันถึงความเชี่ยวชาญและความน่าเชื่อถือในการให้บริการทางการเงิน
