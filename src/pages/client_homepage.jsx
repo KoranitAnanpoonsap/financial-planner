@@ -1,5 +1,7 @@
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { FaChevronDown } from "react-icons/fa"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import Client_Homepage_pic1 from "../assets/importance_of_planning.jpg"
@@ -32,7 +34,7 @@ export default function ClientHomePage() {
         transition={pageTransition}
         className="flex-1"
       >
-        <main>
+        <main className="font-ibm">
           <Banner />
           <Features />
           <About />
@@ -49,8 +51,7 @@ const Banner = () => (
   <section className="w-full">
     <img src={wallpaper} alt="Banner" className="w-full h-auto" />
   </section>
-);
-
+)
 
 // Features Section
 const Features = () => (
@@ -126,7 +127,7 @@ const About = () => (
   </section>
 )
 
-// FAQ Section
+// FAQ Section with Animated FAQ Items
 const FAQ = () => (
   <section className="bg-white py-8">
     <div className="container mx-auto">
@@ -138,12 +139,38 @@ const FAQ = () => (
   </section>
 )
 
-// FAQ Item Component
-const FaqItem = ({ question }) => (
-  <details className="border-b py-4">
-    <summary className="text-tfpa_blue cursor-pointer text-lg font-semibold">
-      {question}
-    </summary>
-    <p className="mt-2 text-gray-700">เนื้อหาของคำตอบเกี่ยวกับ {question}</p>
-  </details>
-)
+// FAQ Item Component with Smooth Animation and Animated Arrow
+const FaqItem = ({ question }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const toggleOpen = () => setIsOpen((prev) => !prev)
+
+  return (
+    <div className="border-b py-4">
+      <div
+        onClick={toggleOpen}
+        className="flex justify-between items-center text-tfpa_blue cursor-pointer text-lg font-semibold"
+      >
+        <span>{question}</span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <FaChevronDown />
+        </motion.span>
+      </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-2 text-gray-700 overflow-hidden"
+          >
+            <p>เนื้อหาของคำตอบเกี่ยวกับ {question}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
