@@ -8,17 +8,38 @@ import exampleImage3 from "../assets/insurance.jpg"
 import exampleImage4 from "../assets/debtplanning.png"
 import exampleImage5 from "../assets/educationfee.jpg"
 import exampleImage6 from "../assets/heritage.png"
+import { motion } from "framer-motion"
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
 
 export default function FinancialPlanningPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow font-ibm">
-        <Banner />
-        <ContentSection />
-        <ExamplesSection />
-        <CtaSection />
-      </main>
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
+        <main className="flex-grow font-ibm">
+          <Banner />
+          <ContentSection />
+          <ExamplesSection />
+          <CtaSection />
+        </main>
+      </motion.div>
       <Footer />
     </div>
   )
@@ -146,7 +167,7 @@ const CtaSection = () => (
         </p>
         <Link
           to="/client-precalculation-page"
-          className="bg-tfpa_blue hover:bg-tfpa_blue text-white font-semibold py-3 px-8 rounded-lg transition-colors inline-block"
+          className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white font-semibold py-3 px-8 rounded-lg transition-colors inline-block"
         >
           ทำการทดสอบด้วยตนเอง
         </Link>
