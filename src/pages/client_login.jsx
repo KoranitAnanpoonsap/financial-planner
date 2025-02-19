@@ -33,7 +33,9 @@ export default function ClientLogin() {
   // Handlers
   const handleEmailChange = (e) => setEmail(e.target.value)
   const handlePasswordChange = (e) => setPassword(e.target.value)
-  const togglePasswordVisibility = () => setShowPassword(!showPassword)
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev)
+  }
 
   const handleLogin = async () => {
     setFormError("") // Clear any previous error message
@@ -131,9 +133,7 @@ export default function ClientLogin() {
             />
             <button
               type="button"
-              onMouseDown={togglePasswordVisibility}
-              onMouseUp={togglePasswordVisibility}
-              onMouseLeave={() => setShowPassword(false)}
+              onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-ibm"
             >
               {showPassword ? "ซ่อน" : "แสดง"}
