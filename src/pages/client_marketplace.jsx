@@ -147,10 +147,10 @@ function CfpModal({
           <div>
             {charges.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-bold text-tfpa_blue text-center">
+                <h4 className="font-bold text-tfpa_blue text-left">
                   การคิดค่าบริการ
                 </h4>
-                <ul className="list-disc list-inside text-center">
+                <ul className="list-disc list-inside text-left">
                   {charges.map((item, idx) => (
                     <li key={idx}>
                       {chargeMapping[item.trim()] || item.trim()}
