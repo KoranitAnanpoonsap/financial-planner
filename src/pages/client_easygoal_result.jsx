@@ -52,7 +52,7 @@ export default function EasyGoalResult() {
           </section>
 
           {/* Results Section */}
-          <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+          <div className="bg-white p-6 rounded-lg inset-shadow ring-1 ring-gray-700 max-w-2xl mx-auto">
             <h3 className="text-xl font-semibold text-center mb-6">
               ผลลัพธ์ของเป้าหมาย {goalName}
             </h3>
