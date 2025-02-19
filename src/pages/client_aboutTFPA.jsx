@@ -19,9 +19,9 @@ export default function FinancialPlannerPage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-blue-800 p-8 text-center text-white">
+  <section className="bg-tfpa_blue p-8 text-center text-white">
     <h1 className="text-4xl font-bold mb-4">
-      เที่ยวกับสมาคมนักวางแผนการเงิน
+      เกี่ยวกับสมาคมนักวางแผนการเงิน
     </h1>
     <p className="text-xl">
       Thai Financial Planners Association
@@ -45,7 +45,7 @@ const Features = () => {
   return (
     <section className="bg-gray-50 py-12">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">
+        <h2 className="text-3xl font-bold text-center text-tfpa_blue mb-8">
           สมาคมนักวางแผนการเงิน
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -71,7 +71,7 @@ const FeatureCard = ({ title, link }) => {
       className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
       onClick={() => navigate(link)}
     >
-      <h3 className="text-xl font-semibold text-blue-800 text-center">
+      <h3 className="text-xl font-semibold text-tfpa_blue text-center">
         <Link to={link} className="hover:underline">
           {title}
         </Link>
@@ -91,7 +91,7 @@ const Mission = () => {
   return (
     <section className="bg-white py-12">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">
+        <h2 className="text-3xl font-bold text-center text-tfpa_blue mb-8">
           พันธกิจ
         </h2>
         <ul className="space-y-4 max-w-2xl mx-auto">

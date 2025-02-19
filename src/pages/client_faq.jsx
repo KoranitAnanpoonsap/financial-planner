@@ -18,7 +18,7 @@ export default function FAQPage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-blue-800 p-8 text-center text-white">
+  <section className="bg-tfpa_blue p-8 text-center text-white">
     <h1 className="text-4xl font-bold mb-4">คำถามที่พบบ่อย</h1>
     <p className="text-xl">คำถามและข้อกังวลทั่วไปที่ผู้ใช้หรือลูกค้ามีเกี่ยวกับบริการและทรัพยากรที่เรานำเสนอ</p>
   </section>
@@ -38,7 +38,7 @@ const FAQSection = () => {
   return (
     <section className="bg-white py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-2xl font-bold text-center text-blue-800 mb-8">
+        <h2 className="text-2xl font-bold text-center text-tfpa_blue mb-8">
           คำถามที่พบบ่อยทั่วไปบางส่วน
         </h2>
         <div className="space-y-6">
@@ -54,7 +54,7 @@ const FAQSection = () => {
 // FAQ Item Component
 const FaqItem = ({ question }) => (
   <details className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-    <summary className="text-blue-800 cursor-pointer text-lg font-semibold">
+    <summary className="text-tfpa_blue cursor-pointer text-lg font-semibold">
       {question}
     </summary>
     <p className="mt-2 text-gray-700 pl-4">

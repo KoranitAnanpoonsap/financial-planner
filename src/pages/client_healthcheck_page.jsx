@@ -3,6 +3,8 @@ import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
+import wallpaper from "../assets/Financial-Healthcheck.jpg"
+
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -63,7 +65,14 @@ export default function FinancialHealthForm() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${wallpaper})`, }}
+      />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       <Header />
       <motion.div
         initial="initial"
@@ -71,12 +80,13 @@ export default function FinancialHealthForm() {
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
-        className="flex-1"
+        className="flex-1 relative z-10 flex flex-col justify-center"
       >
-        <main className="container mx-auto py-12">
-          <section className="bg-white rounded-lg shadow-lg p-6 mb-12">
-            <h2 className="text-2xl font-bold text-blue-800 mb-4 text-center">
-              ตรวจสุขภาพทางการเงินของคุณง่าย ๆ ใน 3 นาที!
+        <main className="container mx-auto py-12 flex-1">
+          <section className="bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-lg mx-auto">
+            <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">
+              ตรวจสุขภาพทางการเงินของคุณง่าย ๆ 
+              ใน 3 นาที!
             </h2>
             <p className="text-gray-600 mb-8 text-center">
               กรอกข้อมูลเบื้องต้นเพื่อให้เราช่วยคุณตรวจสอบสุขภาพการเงิน
@@ -119,7 +129,7 @@ export default function FinancialHealthForm() {
               />
               <button
                 type="submit"
-                className="w-full bg-yellow-500 text-white font-bold py-2 px-4 rounded-md hover:bg-yellow-600"
+                className="w-full bg-tfpa_gold text-white font-bold py-2 px-4 rounded-md hover:bg-yellow-600"
               >
                 คำนวณ
               </button>

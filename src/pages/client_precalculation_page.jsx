@@ -25,7 +25,7 @@ export default function FinancialHealthCheck() {
     <section className="bg-white rounded-lg shadow-lg p-6 mb-12">
       <div className="flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-6">
         <div className="lg:w-1/2">
-          <h2 className="text-2xl font-bold text-blue-800 mb-4">
+          <h2 className="text-2xl font-bold text-tfpa_blue mb-4">
             ตรวจสุขภาพทางการเงินของคุณง่าย ๆ ใน 3 นาที!
           </h2>
           <p className="text-gray-600 mb-4">
@@ -61,7 +61,7 @@ export default function FinancialHealthCheck() {
           />
         </div>
         <div className="lg:w-1/2">
-          <h2 className="text-2xl font-bold text-blue-800 mb-4">
+          <h2 className="text-2xl font-bold text-tfpa_blue mb-4">
             วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน
           </h2>
           <p className="text-gray-600 mb-4">

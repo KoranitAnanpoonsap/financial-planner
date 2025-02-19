@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/clientHeader.jsx";
 import Footer from "../components/footer.jsx";
+import wallpaper from "../assets/EasyGoal.png"
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -39,7 +40,14 @@ export default function EasyGoal() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${wallpaper})`, }}
+      />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       <Header />
       <motion.div
         initial="initial"
@@ -47,16 +55,12 @@ export default function EasyGoal() {
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
-        className="flex-1"
+        className="flex-1 relative z-10 flex flex-col justify-center"
       >
-        <main className="container mx-auto py-12">
-          <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
-            <h2 className="text-2xl font-bold">วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน</h2>
-            <p className="text-lg">สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำที่นำไปใช้ได้ทันที</p>
-          </section>
-
-          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-center mb-6">ข้อมูลเบื้องต้นที่จะช่วยให้คุณบรรลุเป้าหมายได้เร็วขึ้น</h3>
+        <main className="container mx-auto py-12 flex-1">
+          <form onSubmit={handleSubmit} className="bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-lg mx-auto">
+            <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน</h2>
+            <p className="text-gray-600 mb-8 text-center">สำรวจเป้าหมายทางการเงินของคุณในไม่กี่ขั้นตอน พร้อมคำแนะนำที่นำไปใช้ได้ทันที</p>
 
             <InputField label="ชื่อเป้าหมาย" value={goalName} setValue={setGoalName} tooltip="ชื่อของเป้าหมายที่คุณต้องการบรรลุ เช่น ซื้อบ้าน, รถยนต์, เกษียณอายุ" />
             <InputField label="จำนวนเงิน" value={targetAmount} setValue={setTargetAmount} tooltip="จำนวนเงินที่คุณต้องใช้เพื่อบรรลุเป้าหมายนี้" suffix="บาท" />
@@ -65,7 +69,7 @@ export default function EasyGoal() {
             <InputField label="ผลตอบแทนต่อปีของการลงทุน" value={expectedReturn} setValue={setExpectedReturn} tooltip="อัตราผลตอบแทนที่คุณคาดหวังจากการลงทุน" suffix="%" />
 
             <div className="text-center">
-              <button type="submit" className="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600">คำนวณ</button>
+              <button type="submit" className="bg-tfpa_gold text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600">คำนวณ</button>
             </div>
           </form>
         </main>

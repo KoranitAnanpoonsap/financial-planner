@@ -86,7 +86,7 @@ const getFinancialAdvice = (type, value) => {
       }
     else if (value >= 0.1)
       advice = {
-        status: "ปานกลาง",
+        status: "พอใช้",
         message:
           "คุณมีการออมอยู่ในระดับที่พอใช้ได้ แต่ควรเพิ่มอัตราการออมให้สูงขึ้นเพื่อให้สามารถบรรลุเป้าหมายทางการเงินในอนาคตได้อย่างมั่นคง ลองวางแผนงบประมาณให้รัดกุมขึ้น และพิจารณาลดค่าใช้จ่ายที่ไม่จำเป็น เพื่อเพิ่มสัดส่วนการออมและเสริมสร้างความมั่นคงทางการเงินของคุณ",
         color: "#facc15",
@@ -168,7 +168,7 @@ export default function FinancialResults() {
         className="flex-1"
       >
         <main className="container mx-auto py-12">
-          <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
+          <section className="bg-tfpa_blue text-white p-6 text-center rounded-lg mb-8">
             <h2 className="text-2xl font-bold">ผลการตรวจสุขภาพการเงินของคุณ</h2>
             <p className="text-lg">
               การรู้สถานะทางการเงินของคุณคือก้าวแรกที่สำคัญ
@@ -205,7 +205,7 @@ export default function FinancialResults() {
           <div className="text-center mt-6">
             <button
               onClick={() => navigate(`/client-healthcheck-page`)}
-              className="bg-tfpa_blue text-white font-bold py-2 px-6 rounded-lg hover:bg-tfpa_blue_hover"
+              className="bg-tfpa_gold text-white font-bold py-2 px-6 rounded-lg hover:bg-tfpa_blue_hover"
             >
               กรอกข้อมูลใหม่
             </button>

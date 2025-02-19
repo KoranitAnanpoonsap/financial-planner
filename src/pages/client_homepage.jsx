@@ -45,7 +45,7 @@ export default function ClientHomePage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-tfpa_gold p-8 text-center text-white">
+  <section className="bg-tfpa_blue p-8 text-center text-white">
     <h2 className="text-2xl font-bold">
       CFP<sup>®</sup> Professionals deliver “The Standard of Excellence”
     </h2>
@@ -110,7 +110,7 @@ const FeatureCard = ({ title, link, imageSrc }) => {
 
 // About Section
 const About = () => (
-  <section className="bg-tfpa_gold p-8">
+  <section className="bg-tfpa_blue p-8">
     <div className="container mx-auto text-center">
       <h2 className="text-xl font-bold text-white mb-4">เกี่ยวกับเรา</h2>
       <p className="text-white">

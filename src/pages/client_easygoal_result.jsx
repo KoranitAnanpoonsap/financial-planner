@@ -42,7 +42,7 @@ export default function EasyGoalResult() {
       >
         <main className="container mx-auto py-12">
           {/* Header Section */}
-          <section className="bg-blue-900 text-white p-6 text-center rounded-lg mb-8">
+          <section className="bg-tfpa_blue text-white p-6 text-center rounded-lg mb-8">
             <h2 className="text-2xl font-bold">
               ผลการคำนวณเป้าหมายทางการเงินของคุณ
             </h2>
@@ -91,7 +91,7 @@ export default function EasyGoalResult() {
             {/* Action Buttons */}
             <div className="text-center mt-6">
               <button
-                className="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600"
+                className="bg-tfpa_gold text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600"
                 onClick={() => navigate(`/client-easygoal-page`)}
               >
                 ลองคำนวณใหม่
