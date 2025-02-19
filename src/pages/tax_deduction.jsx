@@ -404,45 +404,60 @@ export default function TaxDeductionPage() {
 
             {/* Personal and Family Deductions */}
             <div className="space-y-4">
+              {/* Header for deduction column */}
+              <div className="grid grid-cols-8 items-center gap-x-2">
+                <div className="col-span-4"></div>
+                <div></div>
+                <div className="text-right">
+                  <span className="text-tfpa_blue font-bold inline-block w-24">
+                    ค่าลดหย่อน
+                  </span>
+                </div>
+              </div>
+
               {/* Marital Status */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">สถานภาพสมรส</span>
-                <div className="flex items-center space-x-4 w-1/2">
-                  <select
-                    value={deductionData.maritalStatus}
-                    onChange={(e) => {
-                      const value =
-                        parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
-                      setDeductionData((prev) => ({
-                        ...prev,
-                        maritalStatus: value,
-                      }))
-                    }}
-                    onBlur={(e) =>
-                      handleUpdate(
-                        "maritalStatus",
-                        parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
-                      )
-                    }
-                    className="border border-gray-300 rounded px-2 py-1 w-64 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
-                  >
-                    {MARITAL_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="text-tfpa_gold font-bold">
-                    {displayValues.maritalStatusDeduction}
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
+                  สถานภาพสมรส
+                </span>
+                <select
+                  value={deductionData.maritalStatus}
+                  onChange={(e) => {
+                    const value =
+                      parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
+                    setDeductionData((prev) => ({
+                      ...prev,
+                      maritalStatus: value,
+                    }))
+                  }}
+                  onBlur={(e) =>
+                    handleUpdate(
+                      "maritalStatus",
+                      parseInt(e.target.value, 10) || MARITAL_STATUS.SELECT
+                    )
+                  }
+                  className="border col-span-1 border-gray-300 rounded px-2 py-1 w-48 focus:outline-none focus:ring-2 focus:ring-tfpa_blue"
+                >
+                  {MARITAL_STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
+                    {displayValues.maritalStatusDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
                 </div>
               </div>
 
               {/* Child */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">บุตร จำนวน</span>
-                <div className="flex items-center space-x-4 w-1/2">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
+                  บุตร จำนวน
+                </span>
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.child}
@@ -464,11 +479,13 @@ export default function TaxDeductionPage() {
                       })
                     }}
                     onBlur={(e) => handleBlur("child", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">คน</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">คน</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.childDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -476,18 +493,18 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Child2561 */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   บุตรตั้งแต่คนที่ 2 เป็นต้นไปที่เกิดในหรือหลังปี พ.ศ. 2561
                   จำนวน
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.child2561}
                     onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
-                      const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                      const value = Math.max(0, Number(e.target.value))
                       setDeductionData((prev) => {
                         const totalChildren =
                           prev.child + value + prev.adoptedChild
@@ -502,11 +519,13 @@ export default function TaxDeductionPage() {
                       })
                     }}
                     onBlur={(e) => handleBlur("child2561", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">คน</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">คน</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.child2561Deduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -514,17 +533,17 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Adopted Child */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   บุตรบุญธรรม จำนวน
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.adoptedChild}
                     onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
-                      const value = Math.max(0, Number(e.target.value)) // Ensure non-negative
+                      const value = Math.max(0, Number(e.target.value))
                       setDeductionData((prev) => {
                         const totalChildren =
                           prev.child + prev.child2561 + value
@@ -538,11 +557,13 @@ export default function TaxDeductionPage() {
                       })
                     }}
                     onBlur={(e) => handleBlur("adoptedChild", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">คน</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">คน</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.adoptedChildDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -550,12 +571,12 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Parental Care */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   ค่าอุปการะเลี้ยงดูบิดามารดา อายุเกิน60ปี รายได้ไม่เกิน30,000
                   จำนวน
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.parentalCare}
@@ -567,11 +588,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("parentalCare", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">คน</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">คน</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.parentalCareDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -579,11 +602,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Disabled Care */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   อุปการะเลี้ยงดูคนพิการหรือทุพพลภาพ จำนวน
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.disabledCare}
@@ -595,11 +618,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("disabledCare", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-16 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">คน</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">คน</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.disabledCareDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -607,11 +632,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Prenatal Care */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   ค่าฝากครรภ์และค่าคลอดบุตร
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.prenatalCare}
@@ -626,11 +651,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("prenatalCare", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.prenatalCareDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -638,11 +665,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Parent Health Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   ประกันสุขภาพบิดามารดา
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.parentHealthInsurance}
@@ -659,11 +686,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("parentHealthInsurance", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.parentHealthInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -678,12 +707,23 @@ export default function TaxDeductionPage() {
 
             {/* Insurance, Savings, and Investments Deductions */}
             <div className="space-y-4">
+              {/* Header for deduction column */}
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <div className="col-span-4"></div>
+                <div></div>
+                <div className="text-right">
+                  <span className="text-tfpa_blue font-bold inline-block w-24">
+                    ค่าลดหย่อน
+                  </span>
+                </div>
+              </div>
+
               {/* Life Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เบี้ยประกันชีวิต
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.lifeInsurance}
@@ -698,26 +738,27 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("lifeInsurance", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.lifeInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
                 </div>
               </div>
 
-              {/* add portion of Pension Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue">
+              {/* -เพิ่มส่วน เบี้ยประกันชีวิตแบบบำนาญ */}
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   -เพิ่มส่วน เบี้ยประกันชีวิตแบบบำนาญ
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
-                  <div className="w-28" />
-                  <span className="w-3"></span>
-                  <span className="text-tfpa_gold font-bold">
+                <div></div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.portionPensionInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -725,37 +766,39 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Health Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เบี้ยประกันสุขภาพ
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.healthInsurance}
                     onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
-                      const inputValue = Math.max(0, Number(e.target.value)) // Ensure value is not negative
+                      const inputValue = Math.max(0, Number(e.target.value))
                       setDeductionData((prev) => {
-                        let healthIns = Math.min(inputValue, 25000) // Limit healthInsurance to 25,000
-                        const lifeIns = prev.lifeInsurance || 0 // Get the current value of lifeInsurance
+                        let healthIns = Math.min(inputValue, 25000)
+                        const lifeIns = prev.lifeInsurance || 0
                         if (lifeIns + healthIns > 100000) {
-                          healthIns -= lifeIns + healthIns - 100000 // Adjust healthInsurance to ensure total does not exceed 100,000
+                          healthIns -= lifeIns + healthIns - 100000
                         }
                         return {
                           ...prev,
-                          healthInsurance: healthIns, // Set the adjusted healthInsurance value
+                          healthInsurance: healthIns,
                         }
                       })
                     }}
                     onBlur={(e) =>
                       handleBlur("healthInsurance", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.healthInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -763,11 +806,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Pension Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เบี้ยประกันชีวิตแบบบำนาญ
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.pensionInsurance}
@@ -784,11 +827,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("pensionInsurance", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.pensionInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -796,11 +841,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Spouse No Income Life Insurance */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เบี้ยประกันชีวิต คู่สมรสไม่มีรายได้
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.spouseNoIncomeLifeInsurance}
@@ -817,11 +862,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("spouseNoIncomeLifeInsurance", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.spouseNoIncomeLifeInsuranceDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -829,11 +876,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* RMF */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนรวมเพื่อการเลี้ยงชีพ (RMF)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.rmf}
@@ -849,11 +896,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("rmf", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.rmfDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -861,11 +910,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* SSF */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนรวมเพื่อการออม (SSF)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.ssf}
@@ -881,11 +930,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("ssf", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.ssfDeduction.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -893,11 +944,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Government Pension Fund */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนบำเหน็จบำนาญราชการ (กบข.)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.govPensionFund}
@@ -913,11 +964,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("govPensionFund", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.govPensionFundDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -925,11 +978,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* PVD */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนสำรองเลี้ยงชีพ (PVD)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.pvd}
@@ -945,11 +998,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("pvd", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.pvdDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -957,11 +1012,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Nation Savings Fund */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนการออมแห่งชาติ (กอช.)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.nationSavingsFund}
@@ -978,11 +1033,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("nationSavingsFund", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.nationSavingsFundDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -990,11 +1047,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Social Security Premium */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เบี้ยประกันสังคม
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.socialSecurityPremium}
@@ -1011,11 +1068,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("socialSecurityPremium", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.socialSecurityPremiumDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -1023,11 +1082,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Social Enterprise */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เงินลงทุนธุรกิจ social enterprise
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.socialEnterprise}
@@ -1044,11 +1103,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("socialEnterprise", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.socialEnterpriseDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -1056,11 +1117,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Thai ESG */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   กองทุนรวมไทยเพื่อความยั่งยืน (Thai ESG)
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.thaiEsg}
@@ -1076,11 +1137,13 @@ export default function TaxDeductionPage() {
                       }))
                     }
                     onBlur={(e) => handleBlur("thaiEsg", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.thaiEsgDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -1111,12 +1174,23 @@ export default function TaxDeductionPage() {
 
             {/* Donations Deductions */}
             <div className="space-y-4">
+              {/* Header for deduction column */}
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <div className="col-span-4"></div>
+                <div></div>
+                <div className="text-right">
+                  <span className="text-tfpa_blue font-bold inline-block w-24">
+                    ค่าลดหย่อน
+                  </span>
+                </div>
+              </div>
+
               {/* General Donation */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เงินบริจาคทั่วไป
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.generalDonation}
@@ -1137,11 +1211,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("generalDonation", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.generalDonationDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -1149,12 +1225,12 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Educational Donation */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เงินบริจาคเพื่อการศึกษา การกีฬา การพัฒนาสังคม
                   เพื่อประโยชน์สาธารณะ และรพ.รัฐ
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.eduDonation}
@@ -1173,11 +1249,13 @@ export default function TaxDeductionPage() {
                       }))
                     }}
                     onBlur={(e) => handleBlur("eduDonation", e.target.value)}
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.eduDonationDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
@@ -1185,11 +1263,11 @@ export default function TaxDeductionPage() {
               </div>
 
               {/* Political Party Donation */}
-              <div className="flex items-center justify-between">
-                <span className="text-tfpa_blue font-bold">
+              <div className="grid grid-cols-8 items-center auto-cols-max gap-x-2">
+                <span className="text-tfpa_blue font-bold col-span-4">
                   เงินบริจาคให้พรรคการเมือง
                 </span>
-                <div className="flex items-center space-x-4 w-1/2">
+                <div className="flex items-center">
                   <input
                     type="number"
                     value={deductionData.politicalPartyDonation}
@@ -1206,11 +1284,13 @@ export default function TaxDeductionPage() {
                     onBlur={(e) =>
                       handleBlur("politicalPartyDonation", e.target.value)
                     }
-                    onFocus={handleInputFocus} // Add onFocus handler
+                    onFocus={handleInputFocus}
                     className="border border-gray-300 rounded px-2 py-1 w-24 text-right"
                   />
-                  <span className="text-tfpa_blue font-bold">บาท</span>
-                  <span className="text-tfpa_gold font-bold">
+                  <span className="text-tfpa_blue font-bold ml-2">บาท</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-tfpa_gold font-bold inline-block w-24">
                     {displayValues.politicalPartyDonationDeduct.toLocaleString()}
                   </span>
                   <span className="text-tfpa_blue font-bold"> บาท</span>
