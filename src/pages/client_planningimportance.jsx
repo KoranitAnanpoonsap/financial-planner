@@ -26,7 +26,7 @@ export default function FinancialPlanningPage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-tfpa_blue p-8 text-center text-white">
+  <section className="bg-tfpa_blue p-16 text-center text-white">
     <h1 className="text-4xl font-bold mb-4">ทำไมการวางแผนการเงินถึงสำคัญ?</h1>
     <p className="text-xl">
       สร้างความมั่นคงทางการเงินผ่านการวางแผนอย่างเป็นระบบ

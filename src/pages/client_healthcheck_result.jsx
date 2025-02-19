@@ -186,18 +186,18 @@ export default function FinancialResults() {
             <GaugeChart value={value3} label="ด้านการออม" type="savings" />
           </div>
 
-          <section className="bg-tfpa_gold p-6 rounded-lg shadow-md mt-6 text-center">
-            <h3 className="text-white text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
-            <p className="text-white mb-4">
-              <strong>ด้านสภาพคล่องพื้นฐาน:</strong>{" "}
+          <section className="bg-white p-6 rounded-lg inset-shadow ring-1 ring-gray-700 mt-6">
+            <h3 className="text-tfpa_blue text-xl text-center font-semibold mb-4">คำแนะนำทางการเงิน</h3>
+            <p className="text-gray-700 mb-4">
+              <strong>ด้านสภาพคล่องพื้นฐาน:</strong>{" "} <br></br>
               {getFinancialAdvice("liquidity", value1).message}
             </p>
-            <p className="text-white mb-4">
-              <strong>ด้านการชำระหนี้:</strong>{" "}
+            <p className="text-gray-700 mb-4">
+              <strong>ด้านการชำระหนี้:</strong>{" "} <br></br>
               {getFinancialAdvice("debt", value2).message}
             </p>
-            <p className="text-white">
-              <strong>ด้านการออม:</strong>{" "}
+            <p className="text-gray-700 mb-4">
+              <strong>ด้านการออม:</strong>{" "} <br></br>
               {getFinancialAdvice("savings", value3).message}
             </p>
           </section>
