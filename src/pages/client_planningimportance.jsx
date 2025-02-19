@@ -13,7 +13,7 @@ export default function FinancialPlanningPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow font-ibm">
         <Banner />
         <ContentSection />
         <ExamplesSection />
@@ -119,10 +119,10 @@ const ExamplesSection = () => {
 
 // Updated Content Card Component with Image
 const ContentCard = ({ title, description, imageSrc }) => (
-  <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+  <div className="bg-tfpa_blue rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden">
     <div className="p-6">
-      <h3 className="text-xl font-semibold text-tfpa_blue mb-3">{title}</h3>
-      <p className="text-gray-700 mb-4">{description}</p>
+      <h3 className="text-xl font-semibold text-white mb-3">{title}</h3>
+      <p className="text-white mb-4">{description}</p>
     </div>
     <div className="h-48 w-full overflow-hidden">
       <img
