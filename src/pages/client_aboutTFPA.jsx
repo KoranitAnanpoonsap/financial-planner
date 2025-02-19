@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/clientHeader.jsx";
 import Footer from "../components/footer.jsx";
+import wallpaper from "../assets/planner.jpg"
 
 export default function FinancialPlannerPage() {
   return (
@@ -19,13 +20,16 @@ export default function FinancialPlannerPage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-tfpa_blue p-8 text-center text-white">
-    <h1 className="text-4xl font-bold mb-4">
-      เกี่ยวกับสมาคมนักวางแผนการเงิน
-    </h1>
-    <p className="text-xl">
-      Thai Financial Planners Association
-    </p>
+  <section className="relative bg-cover bg-center" style={{ backgroundImage: `url(${wallpaper})` }}>
+    <div className="absolute inset-0 bg-tfpa_blue opacity-70"></div>
+    <div className="relative z-10 max-w-6xl mx-auto px-4 py-10 text-white text-center">
+      <h1 className="text-tfpa_gold text-4xl font-bold mb-4">
+        เกี่ยวกับสมาคมนักวางแผนการเงิน
+      </h1>
+      <p className="text-xl">
+        Thai Financial Planners Association
+      </p>
+    </div>
   </section>
 );
 

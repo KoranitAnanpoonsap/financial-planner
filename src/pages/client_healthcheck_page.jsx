@@ -66,14 +66,8 @@ export default function FinancialHealthForm() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${wallpaper})`, }}
-      />
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       <Header />
+  
       <motion.div
         initial="initial"
         animate="in"
@@ -82,16 +76,23 @@ export default function FinancialHealthForm() {
         transition={pageTransition}
         className="flex-1 relative z-10 flex flex-col justify-center"
       >
-        <main className="container mx-auto py-12 flex-1">
-          <section className="bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-lg mx-auto">
-            <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">
-              ตรวจสุขภาพทางการเงินของคุณง่าย ๆ 
-              ใน 3 นาที!
-            </h2>
-            <p className="text-gray-600 mb-8 text-center">
-              กรอกข้อมูลเบื้องต้นเพื่อให้เราช่วยคุณตรวจสอบสุขภาพการเงิน
-            </p>
-            <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
+        <main className="container mx-auto py-12 flex-1 relative overflow-hidden">
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${wallpaper})` }}
+          />
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+  
+          
+            <form onSubmit={handleSubmit} className="relative bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-xl mx-auto">
+              <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">
+                ตรวจสุขภาพทางการเงินของคุณง่าย ๆ ใน 3 นาที!
+              </h2>
+              <p className="text-gray-600 mb-8 text-center">
+                กรอกข้อมูลเบื้องต้นเพื่อให้เราช่วยคุณตรวจสอบสุขภาพการเงิน
+              </p>
               <InputField
                 label="รายได้"
                 name="annualIncome"
@@ -99,7 +100,7 @@ export default function FinancialHealthForm() {
                 onChange={handleInputChange}
                 info="รายได้ทั้งหมดที่ได้รับในหนึ่งเดือน เช่น เงินเดือน โบนัส รายได้เสริม"
               />
-              <InputField
+              <InputField_liquid
                 label="สินทรัพย์สภาพคล่อง"
                 name="liquidAssets"
                 value={formData.liquidAssets}
@@ -134,12 +135,12 @@ export default function FinancialHealthForm() {
                 คำนวณ
               </button>
             </form>
-          </section>
         </main>
       </motion.div>
+  
       <Footer />
     </div>
-  )
+  )  
 }
 
 function InputField({ label, name, value, onChange, info }) {
@@ -147,6 +148,30 @@ function InputField({ label, name, value, onChange, info }) {
     <div className="mb-4 relative">
       <label className="block text-gray-700 font-medium mb-2" htmlFor={name}>
         {label} <span className="text-gray-500">(ต่อเดือน)</span>
+        <span className="ml-2 text-blue-600 cursor-pointer relative group">
+          ℹ️
+          <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+            {info}
+          </span>
+        </span>
+      </label>
+      <input
+        type="text"
+        name={name}
+        id={name}
+        value={value}
+        onChange={onChange}
+        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+      />
+    </div>
+  )
+}
+
+function InputField_liquid({ label, name, value, onChange, info }) {
+  return (
+    <div className="mb-4 relative">
+      <label className="block text-gray-700 font-medium mb-2" htmlFor={name}>
+        {label}
         <span className="ml-2 text-blue-600 cursor-pointer relative group">
           ℹ️
           <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">

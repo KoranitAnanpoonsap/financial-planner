@@ -5,6 +5,7 @@ import Footer from "../components/footer.jsx"
 import Client_Homepage_pic1 from "../assets/importance_of_planning.jpg"
 import Client_Homepage_pic2 from "../assets/plan_by_yourself.jpg"
 import Client_Homepage_pic3 from "../assets/plan_with_cfp.jpeg"
+import wallpaper from "../assets/client_homepage_banner.jpg"
 
 // Page transition variants
 const pageVariants = {
@@ -45,15 +46,11 @@ export default function ClientHomePage() {
 
 // Banner Section
 const Banner = () => (
-  <section className="bg-tfpa_blue p-8 text-center text-white">
-    <h2 className="text-2xl font-bold">
-      CFP<sup>®</sup> Professionals deliver “The Standard of Excellence”
-    </h2>
-    <p className="mt-4 text-lg">
-      เป้าหมายชีวิตสำเร็จได้ด้วยนักวางแผนการเงิน CFP<sup>®</sup>
-    </p>
+  <section className="w-full">
+    <img src={wallpaper} alt="Banner" className="w-full h-auto" />
   </section>
-)
+);
+
 
 // Features Section
 const Features = () => (
@@ -110,7 +107,7 @@ const FeatureCard = ({ title, link, imageSrc }) => {
 
 // About Section
 const About = () => (
-  <section className="bg-tfpa_blue p-8">
+  <section className="bg-tfpa_gold p-8">
     <div className="container mx-auto text-center">
       <h2 className="text-xl font-bold text-white mb-4">เกี่ยวกับเรา</h2>
       <p className="text-white">

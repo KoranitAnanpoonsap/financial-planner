@@ -112,7 +112,7 @@ const GaugeChart = ({ value, label, type }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center">
-      <h3 className="text-lg font-semibold mb-2">{label}</h3>
+      <h3 className="text-tfpa_blue text-lg font-semibold mb-2">{label}</h3>
       <div className="w-44 h-44 flex justify-center items-center">
         <RadialBarChart
           width={180}
@@ -186,17 +186,17 @@ export default function FinancialResults() {
             <GaugeChart value={value3} label="ด้านการออม" type="savings" />
           </div>
 
-          <section className="bg-gray-100 p-6 rounded-lg shadow-md mt-6 text-center">
-            <h3 className="text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
-            <p className="text-gray-700 mb-4">
-              <strong>ด้านสภาพคล่อง:</strong>{" "}
+          <section className="bg-tfpa_gold p-6 rounded-lg shadow-md mt-6 text-center">
+            <h3 className="text-white text-xl font-semibold mb-4">คำแนะนำทางการเงิน</h3>
+            <p className="text-white mb-4">
+              <strong>ด้านสภาพคล่องพื้นฐาน:</strong>{" "}
               {getFinancialAdvice("liquidity", value1).message}
             </p>
-            <p className="text-gray-700 mb-4">
-              <strong>ด้านหนี้สิน:</strong>{" "}
+            <p className="text-white mb-4">
+              <strong>ด้านการชำระหนี้:</strong>{" "}
               {getFinancialAdvice("debt", value2).message}
             </p>
-            <p className="text-gray-700">
+            <p className="text-white">
               <strong>ด้านการออม:</strong>{" "}
               {getFinancialAdvice("savings", value3).message}
             </p>
