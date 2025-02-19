@@ -90,7 +90,7 @@ export default function FinancialHealthCheck() {
         transition={pageTransition}
         className="flex-1"
       >
-        <main className="container mx-auto py-12">
+        <main className="container mx-auto py-12 font-ibm">
           <FinancialHealthSection />
           <FinancialGoalSection />
         </main>
