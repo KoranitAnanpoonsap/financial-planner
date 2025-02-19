@@ -55,7 +55,7 @@ const Banner = () => (
 
 // Features Section
 const Features = () => (
-  <section className="bg-blue-50 py-8">
+  <section className="bg-blue-50 py-11">
     <div className="container mx-auto">
       <h2 className="text-center text-xl font-bold text-tfpa_blue mb-6">
         เป้าหมายชัด สุขภาพการเงินดี มาลองเช็ก ง่าย ๆ ด้วยตัวเอง
@@ -129,9 +129,9 @@ const About = () => (
 
 // FAQ Section with Animated FAQ Items
 const FAQ = () => (
-  <section className="bg-white py-8">
-    <div className="container mx-auto">
-      <h2 className="text-xl font-bold text-center text-tfpa_blue mb-6">FAQ</h2>
+  <section className="bg-white py-11">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 className="text-xl font-bold text-center text-tfpa_blue mb-3">FAQ</h2>
       <FaqItem question="TFPA คืออะไร?" />
       <FaqItem question="ประโยชน์ของการวางแผนทางการเงิน?" />
       <FaqItem question="ทำไมฉันจึงต้องไปปรึกษานักวางแผนการเงิน?" />
