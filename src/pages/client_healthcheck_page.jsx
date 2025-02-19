@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
+import { AiOutlineInfoCircle } from "react-icons/ai" // Import the info icon
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import wallpaper from "../assets/Financial-Healthcheck.jpg"
-
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -47,8 +47,12 @@ export default function FinancialHealthForm() {
     )
 
     const value1 =
-      numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings) !== 0
-        ? numericData.liquidAssets / (numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings))
+      numericData.annualIncome -
+        (numericData.annualExpense + numericData.annualSavings) !==
+      0
+        ? numericData.liquidAssets /
+          (numericData.annualIncome -
+            (numericData.annualExpense + numericData.annualSavings))
         : 0
     const value2 =
       numericData.annualIncome !== 0
@@ -67,7 +71,7 @@ export default function FinancialHealthForm() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-  
+
       <motion.div
         initial="initial"
         animate="in"
@@ -76,17 +80,25 @@ export default function FinancialHealthForm() {
         transition={pageTransition}
         className="flex-1 relative z-10 flex flex-col justify-center"
       >
-        <main className="container mx-auto py-12 flex-1 relative overflow-hidden">
-          {/* Background Image */}
+        {/* Main container with background image */}
+        <main className="relative min-h-screen overflow-hidden font-ibm">
+          {/* Wallpaper that fills horizontally */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${wallpaper})` }}
+            className="absolute inset-0 bg-center"
+            style={{
+              backgroundImage: `url(${wallpaper})`,
+              backgroundSize: "100% auto",
+              backgroundRepeat: "no-repeat",
+            }}
           />
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-  
-          
-            <form onSubmit={handleSubmit} className="relative bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-xl mx-auto">
+          {/* Content container for the form */}
+          <div className="container mx-auto py-12 relative z-10">
+            <form
+              onSubmit={handleSubmit}
+              className="relative bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-xl mx-auto"
+            >
               <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">
                 ตรวจสุขภาพทางการเงินของคุณง่าย ๆ ใน 3 นาที!
               </h2>
@@ -99,6 +111,7 @@ export default function FinancialHealthForm() {
                 value={formData.annualIncome}
                 onChange={handleInputChange}
                 info="รายได้ทั้งหมดที่ได้รับในหนึ่งเดือน เช่น เงินเดือน โบนัส รายได้เสริม"
+                unit="(ต่อเดือน)"
               />
               <InputField_liquid
                 label="สินทรัพย์สภาพคล่อง"
@@ -113,6 +126,7 @@ export default function FinancialHealthForm() {
                 value={formData.annualExpense}
                 onChange={handleInputChange}
                 info="รายจ่ายทั้งหมดในหนึ่งเดือน เช่น ค่าน้ำ ค่าไฟ ค่าเพื่อบันเทิง"
+                unit="(ต่อเดือน)"
               />
               <InputField
                 label="เงินใช้คืนหนี้สิน"
@@ -120,6 +134,7 @@ export default function FinancialHealthForm() {
                 value={formData.debtPayments}
                 onChange={handleInputChange}
                 info="จำนวนเงินที่ต้องจ่ายคืนสำหรับหนี้สิน เช่น ค่างวดบ้าน รถ หรือสินเชื่อส่วนบุคคล"
+                unit="(ต่อเดือน)"
               />
               <InputField
                 label="เงินออม"
@@ -127,6 +142,7 @@ export default function FinancialHealthForm() {
                 value={formData.annualSavings}
                 onChange={handleInputChange}
                 info="จำนวนเงินที่สามารถออมได้ในแต่ละเดือนหลังจากหักค่าใช้จ่ายทั้งหมด"
+                unit="(ต่อเดือน)"
               />
               <button
                 type="submit"
@@ -135,25 +151,29 @@ export default function FinancialHealthForm() {
                 คำนวณ
               </button>
             </form>
+          </div>
         </main>
       </motion.div>
-  
+
       <Footer />
     </div>
-  )  
+  )
 }
 
-function InputField({ label, name, value, onChange, info }) {
+function InputField({ label, name, value, onChange, info, unit }) {
   return (
     <div className="mb-4 relative">
-      <label className="block text-gray-700 font-medium mb-2" htmlFor={name}>
-        {label} <span className="text-gray-500">(ต่อเดือน)</span>
-        <span className="ml-2 text-blue-600 cursor-pointer relative group">
-          ℹ️
-          <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
-            {info}
+      <label htmlFor={name} className="block mb-2">
+        <div className="flex items-center">
+          <span className="text-gray-700 font-bold">{label}</span>
+          {unit && <span className="text-gray-500 ml-1">{unit}</span>}
+          <span className="ml-2 cursor-pointer relative group">
+            <AiOutlineInfoCircle className="text-gray-600" />
+            <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+              {info}
+            </span>
           </span>
-        </span>
+        </div>
       </label>
       <input
         type="text"
@@ -170,14 +190,16 @@ function InputField({ label, name, value, onChange, info }) {
 function InputField_liquid({ label, name, value, onChange, info }) {
   return (
     <div className="mb-4 relative">
-      <label className="block text-gray-700 font-medium mb-2" htmlFor={name}>
-        {label}
-        <span className="ml-2 text-blue-600 cursor-pointer relative group">
-          ℹ️
-          <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
-            {info}
+      <label htmlFor={name} className="block mb-2">
+        <div className="flex items-center">
+          <span className="text-gray-700 font-bold">{label}</span>
+          <span className="ml-2 cursor-pointer relative group">
+            <AiOutlineInfoCircle className="text-gray-600" />
+            <span className="absolute left-0 bottom-full mb-2 w-60 p-2 text-sm text-white bg-gray-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+              {info}
+            </span>
           </span>
-        </span>
+        </div>
       </label>
       <input
         type="text"
