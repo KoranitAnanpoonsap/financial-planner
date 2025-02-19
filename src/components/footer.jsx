@@ -6,9 +6,9 @@ import youtube from "../assets/youtube.png"
 
 export default function Footer() {
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="w-full">
       {/* Black line at the top of the footer */}
-      <div className="h-[0.5px] bg-gray-400"></div>
+      <div className="h-[1px] bg-gray-400"></div>
 
       <footer className="bg-white p-4 flex justify-between items-center">
         {/* Left Section with Logo and Address */}
@@ -70,7 +70,8 @@ export default function Footer() {
 
       <div className="w-full text-center mt-2">
         <p className="text-gray-400 text-xs font-ibm">
-          Copyright © 2024 Thai Financial Planners Association
+          Copyright © {new Date().getFullYear()} Thai Financial Planners
+          Association
         </p>
       </div>
     </div>

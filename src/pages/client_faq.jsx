@@ -28,7 +28,7 @@ export default function FAQPage() {
         transition={pageTransition}
         className="flex-1"
       >
-        <main className="flex-grow">
+        <main className="flex-grow font-ibm">
           <Banner />
           <FAQSection />
         </main>
