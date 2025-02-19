@@ -67,7 +67,7 @@ export default function EasyGoal() {
           {/* Content */}
           <form
             onSubmit={handleSubmit}
-            className="mt-16 relative bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-2xl mx-auto"
+            className="mt-12 relative bg-white bg-opacity-90 rounded-lg shadow-lg p-6 max-w-2xl mx-auto"
           >
             <h2 className="text-2xl font-bold text-tfpa_blue mb-4 text-center">
               วางแผนเป้าหมายทางการเงินได้ง่าย ๆ เพื่ออนาคตที่ชัดเจน
