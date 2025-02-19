@@ -1,8 +1,9 @@
-import React from "react"
+import React, { useState } from "react"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import wallpaper from "../assets/planner.jpg"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { FaChevronDown } from "react-icons/fa"
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -65,40 +66,19 @@ const FAQSection = () => {
     "ทำไมฉันจึงต้องปรึกษาทางการเงินกับนักวางแผนการเงิน?",
   ]
 
-  return (
-    <section className="bg-white py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-2xl font-bold text-center text-tfpa_blue mb-8">
-          คำถามที่พบบ่อยทั่วไปบางส่วน
-        </h2>
-        <div className="space-y-6">
-          {faqItems.map((question, index) => (
-            <FaqItem key={index} question={question} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// FAQ Item Component
-const FaqItem = ({ question }) => (
-  <details className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-    <summary className="text-tfpa_blue cursor-pointer text-lg font-semibold">
-      {question}
-    </summary>
-    <p className="mt-2 text-gray-700 pl-4">
-      {/* Add actual answers here when available */}
-      วางแผนเกษียณ คืออะไร <br></br>
+  // This answer is used for all FAQ items for now.
+  const answerText = (
+    <>
+      วางแผนเกษียณ คืออะไร <br />
       การวางแผนเกษียณเป็นวิธีเก็บเงินที่ช่วยให้เรามีเงินพอใช้ในช่วงบั้นปลายชีวิตเมื่อไม่สามารถหารายได้จากการ
       ทำงานอีกแล้ว เพราะลาออกก่อนครบกำหนดเกษียณ (Early Retire)
       หรือเกษียณในกรณีอายุครบ 60 ปี โดยเงินเก็บที่ใช้สำหรับชีวิตหลังเกษียณ
       ควรครอบคลุมทุกค่าใช้จ่าย เช่น ค่าเล่าเรียนของบุตรหลาน หรือค่าใช้จ่ายเล็กๆ
       อย่างค่าน้ำมันรถยนต์, ค่าอาหารในแต่ละมื้อ เป็นต้น
       เพื่อมั่นใจได้ว่าแผนเกษียณ จะรัดกุมเพียงพอ
-      จนไม่ต้องทำงานหาเงินเพิ่มในยามที่สุขภาพเริ่มทรุดโทรม <br></br>
-      <br></br>
-      ทำไมต้องวางแผนเกษียณ <br></br>
+      จนไม่ต้องทำงานหาเงินเพิ่มในยามที่สุขภาพเริ่มทรุดโทรม <br />
+      <br />
+      ทำไมต้องวางแผนเกษียณ <br />
       แม้ว่าคุณทำอาชีพรับราชการได้รับเงินบำนาญจากกบข.
       หรือเป็นพนักงานเอกชนที่มีกองทุนสำรองเลี้ยงชีพ แต่การวางแผนเกษียณ
       เราไม่สามารถพึ่งพาเงินจากแหล่งดังกล่าวได้เพียงช่องทางเดียว
@@ -109,6 +89,57 @@ const FaqItem = ({ question }) => (
       เพื่อเก็บเงินถึงเป้าหมายให้เร็วที่สุด และมองหาช่องทางลงทุนอื่นๆ
       สำหรับต่อยอดรายได้เพิ่มเติมในกรณีที่ไม่มีแรงหารายได้
       และยังช่วยให้เรามีเงินใช้จ่ายเพิ่มเติมในยามฉุกเฉินด้วย
-    </p>
-  </details>
-)
+    </>
+  )
+
+  return (
+    <section className="bg-white py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <h2 className="text-2xl font-bold text-center text-tfpa_blue mb-8">
+          คำถามที่พบบ่อยทั่วไปบางส่วน
+        </h2>
+        <div className="space-y-6">
+          {faqItems.map((question, index) => (
+            <FaqItem key={index} question={question} answer={answerText} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// FAQ Item Component with Animation and Arrow Icon
+const FaqItem = ({ question, answer }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const toggleOpen = () => setIsOpen((prev) => !prev)
+
+  return (
+    <div className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+      <div
+        onClick={toggleOpen}
+        className="flex justify-between text-tfpa_blue items-center cursor-pointer"
+      >
+        <h3 className="text-tfpa_blue text-lg font-semibold">{question}</h3>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <FaChevronDown />
+        </motion.span>
+      </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-2 text-gray-700 overflow-hidden"
+          >
+            <p className="pl-4">{answer}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
