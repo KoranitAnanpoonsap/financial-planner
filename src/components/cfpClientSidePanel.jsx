@@ -74,6 +74,7 @@ export default function CfpSidePanel() {
         `/goal-base-dashboard/`,
         `/retirement-goal/`,
         `/retirement-goal-calculated/`,
+        `/retirement-goal-dashboard`,
       ],
     },
     {
