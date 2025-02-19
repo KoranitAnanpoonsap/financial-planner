@@ -167,7 +167,7 @@ export default function FinancialResults() {
         transition={pageTransition}
         className="flex-1"
       >
-        <main className="container mx-auto py-12">
+        <main className="container mx-auto py-12 font-ibm">
           <section className="bg-tfpa_blue text-white p-6 text-center rounded-lg mb-8">
             <h2 className="text-2xl font-bold">ผลการตรวจสุขภาพการเงินของคุณ</h2>
             <p className="text-lg">
@@ -187,17 +187,19 @@ export default function FinancialResults() {
           </div>
 
           <section className="bg-white p-6 rounded-lg inset-shadow ring-1 ring-gray-700 mt-6">
-            <h3 className="text-tfpa_blue text-xl text-center font-semibold mb-4">คำแนะนำทางการเงิน</h3>
+            <h3 className="text-tfpa_blue text-xl text-center font-bold mb-4">
+              คำแนะนำทางการเงิน
+            </h3>
             <p className="text-gray-700 mb-4">
-              <strong>ด้านสภาพคล่องพื้นฐาน:</strong>{" "} <br></br>
+              <strong>ด้านสภาพคล่องพื้นฐาน:</strong> <br></br>
               {getFinancialAdvice("liquidity", value1).message}
             </p>
             <p className="text-gray-700 mb-4">
-              <strong>ด้านการชำระหนี้:</strong>{" "} <br></br>
+              <strong>ด้านการชำระหนี้:</strong> <br></br>
               {getFinancialAdvice("debt", value2).message}
             </p>
             <p className="text-gray-700 mb-4">
-              <strong>ด้านการออม:</strong>{" "} <br></br>
+              <strong>ด้านการออม:</strong> <br></br>
               {getFinancialAdvice("savings", value3).message}
             </p>
           </section>
