@@ -227,25 +227,40 @@ public class ClientInfoController {
 
             // Update start date if status is "กำลังดำเนินการ" or "ดำเนินการเรียบร้อย"
             if (updates.containsKey("clientStartDate")) {
-                if (Arrays.asList(2, 3).contains(client.getClientStatus())) {
-                    String startDateStr = updates.get("clientStartDate").toString();
-                    LocalDate startDate = LocalDate.parse(startDateStr); // Ensure correct format
-                    client.setClientStartDate(startDate);
+                Object startDateObj = updates.get("clientStartDate");
+                if (startDateObj != null && !startDateObj.toString().trim().isEmpty()) {
+                    // Only update the start date if the client status allows it
+                    if (Arrays.asList(2, 3).contains(client.getClientStatus())) {
+                        String startDateStr = startDateObj.toString();
+                        LocalDate startDate = LocalDate.parse(startDateStr); // Ensure correct format
+                        client.setClientStartDate(startDate);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Start date can only be set if status is กำลังดำเนินการ or ดำเนินการเรียบร้อย");
+                    }
                 } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Start date can only be set if status is กำลังดำเนินการ or ดำเนินการเรียบร้อย");
+                    // If the value is null or empty, clear the start date
+                    client.setClientStartDate(null);
                 }
             }
 
             // Update completion date if status is "ดำเนินการเรียบร้อย"
             if (updates.containsKey("clientCompletionDate")) {
-                if (3 == (client.getClientStatus())) {
-                    String completionDateStr = updates.get("clientCompletionDate").toString();
-                    LocalDate completionDate = LocalDate.parse(completionDateStr); // Ensure correct format
-                    client.setClientCompletionDate(completionDate);
+                Object completionDateObj = updates.get("clientCompletionDate");
+                if (completionDateObj != null && !completionDateObj.toString().trim().isEmpty()) {
+                    // Only update the completion date if the client status is ดำเนินการเรียบร้อย
+                    // (3)
+                    if (client.getClientStatus() == 3) {
+                        String completionDateStr = completionDateObj.toString();
+                        LocalDate completionDate = LocalDate.parse(completionDateStr); // Ensure correct format
+                        client.setClientCompletionDate(completionDate);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Completion date can only be set if status is ดำเนินการเรียบร้อย");
+                    }
                 } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Completion date can only be set if status is ดำเนินการเรียบร้อย");
+                    // If the value is null or empty, clear the completion date
+                    client.setClientCompletionDate(null);
                 }
             }
 
