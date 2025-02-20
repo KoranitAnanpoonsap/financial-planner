@@ -47,12 +47,8 @@ export default function FinancialHealthForm() {
     )
 
     const value1 =
-      numericData.annualIncome -
-        (numericData.annualExpense + numericData.annualSavings) !==
-      0
-        ? numericData.liquidAssets /
-          (numericData.annualIncome -
-            (numericData.annualExpense + numericData.annualSavings))
+      numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings) !== 0
+        ? numericData.liquidAssets / (numericData.annualIncome - (numericData.annualExpense + numericData.annualSavings))
         : 0
     const value2 =
       numericData.annualIncome !== 0
