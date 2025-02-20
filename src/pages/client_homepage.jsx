@@ -128,19 +128,50 @@ const About = () => (
 )
 
 // FAQ Section with Animated FAQ Items
-const FAQ = () => (
-  <section className="bg-white py-8">
-    <div className="container mx-auto">
-      <h2 className="text-xl font-bold text-center text-tfpa_blue mb-6">FAQ</h2>
-      <FaqItem question="TFPA คืออะไร?" />
-      <FaqItem question="ประโยชน์ของการวางแผนทางการเงิน?" />
-      <FaqItem question="ทำไมฉันจึงต้องไปปรึกษานักวางแผนการเงิน?" />
-    </div>
-  </section>
-)
+const FAQ = () => {
+  const faqItems = [
+    {
+      question: "TFPA คืออะไร?",
+      answer: [
+        "TFPA ย่อมาจาก Thai Financial Planners Association.",
+        "เป็นองค์กรที่ส่งเสริมและพัฒนาความรู้ด้านการวางแผนการเงินในประเทศไทย.",
+        "มีบทบาทสำคัญในการให้ความรู้แก่ประชาชนและนักวางแผนการเงิน."
+      ]
+    },
+    {
+      question: "ประโยชน์ของการวางแผนทางการเงิน?",
+      answer: [
+        "1. ช่วยให้มีเป้าหมายทางการเงินที่ชัดเจน.",
+        "2. ลดความเครียดเกี่ยวกับการเงินในอนาคต.",
+        "3. บริหารจัดการรายรับ-รายจ่ายอย่างมีประสิทธิภาพ.",
+        "4. สร้างความมั่นคงทางการเงินระยะยาว."
+      ]
+    },
+    {
+      question: "ทำไมฉันจึงต้องไปปรึกษานักวางแผนการเงิน?",
+      answer: [
+        "1. นักวางแผนการเงินช่วยให้คุณเห็นภาพรวมของการเงินของคุณ.",
+        "2. แนะนำกลยุทธ์ในการออมและการลงทุนที่เหมาะสม.",
+        "3. ปรับแผนการเงินให้เหมาะกับเป้าหมายในแต่ละช่วงชีวิต.",
+        "4. ช่วยวางแผนภาษีและการเกษียณอย่างมีประสิทธิภาพ."
+      ]
+    }
+  ]
+
+  return (
+    <section className="bg-white py-8">
+      <div className="container mx-auto">
+        <h2 className="text-xl font-bold text-center text-tfpa_blue mb-6">FAQ</h2>
+        {faqItems.map((item, index) => (
+          <FaqItem key={index} question={item.question} answer={item.answer} />
+        ))}
+      </div>
+    </section>
+  )
+}
 
 // FAQ Item Component with Smooth Animation and Animated Arrow
-const FaqItem = ({ question }) => {
+const FaqItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false)
   const toggleOpen = () => setIsOpen((prev) => !prev)
 
@@ -167,10 +198,15 @@ const FaqItem = ({ question }) => {
             transition={{ duration: 0.3 }}
             className="mt-2 text-gray-700 overflow-hidden"
           >
-            <p>เนื้อหาของคำตอบเกี่ยวกับ {question}</p>
+            <div className="pl-4">
+              {answer.map((line, idx) => (
+                <p key={idx}>{line}</p>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
 }
+
