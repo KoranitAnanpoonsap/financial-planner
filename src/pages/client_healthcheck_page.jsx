@@ -118,14 +118,14 @@ export default function FinancialHealthForm() {
                 name="liquidAssets"
                 value={formData.liquidAssets}
                 onChange={handleInputChange}
-                info="สินทรัพย์ที่สามารถเปลี่ยนเป็นเงินสดได้ง่าย เช่น เงินฝากธนาคาร"
+                info="สินทรัพย์ที่สามารถเปลี่ยนเป็นเงินสดได้ง่าย เช่น เงินฝากธนาคาร กองทุนรวม หุ้น"
               />
               <InputField
                 label="รายจ่าย"
                 name="annualExpense"
                 value={formData.annualExpense}
                 onChange={handleInputChange}
-                info="รายจ่ายทั้งหมดในหนึ่งเดือน เช่น ค่าน้ำ ค่าไฟ ค่าเพื่อบันเทิง"
+                info="รายจ่ายทั้งหมดในหนึ่งเดือน เช่น ค่าน้ำ ค่าไฟ ค่าใช้จ่ายเพื่อความบันเทิง"
                 unit="(ต่อเดือน)"
               />
               <InputField
