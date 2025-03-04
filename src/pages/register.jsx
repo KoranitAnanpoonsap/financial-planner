@@ -196,7 +196,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
+                className="absolute right-3 top-10 transform text-gray-600 font-ibm"
               >
                 {showPassword ? "ซ่อน" : "แสดง"}
               </button>
@@ -216,7 +216,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={toggleConfirmPasswordVisibility}
-                className="absolute right-3 top-1/2 transform text-gray-600 font-ibm"
+                className="absolute right-3 top-10 transform text-gray-600 font-ibm"
               >
                 {showConfirmPassword ? "ซ่อน" : "แสดง"}
               </button>
@@ -359,13 +359,6 @@ export default function RegisterPage() {
             </div>
             <div className="flex justify-end space-x-2">
               <button
-                type="button"
-                onClick={handleClosePrivacyModal}
-                className="px-4 py-2 rounded font-bold bg-gray-300 hover:bg-gray-400 text-gray-700"
-              >
-                ปิด
-              </button>
-              <button
                 disabled={!acceptedPrivacy}
                 onClick={handleConfirmPrivacy}
                 className={`px-4 py-2 rounded font-bold ${
@@ -375,6 +368,13 @@ export default function RegisterPage() {
                 }`}
               >
                 ยืนยัน
+              </button>
+              <button
+                type="button"
+                onClick={handleClosePrivacyModal}
+                className="px-4 py-2 rounded font-bold bg-gray-300 hover:bg-gray-400 text-gray-700"
+              >
+                ปิด
               </button>
             </div>
           </div>

@@ -115,25 +115,6 @@ export default function ClientInfoPage() {
           {clientInfo && (
             <div className="mx-auto max-w-3xl bg-white shadow rounded p-6">
               <div className="space-y-4">
-                {/* ID Card */}
-                <div className="grid grid-cols-2 items-center">
-                  <div className="text-tfpa_blue font-bold">
-                    เลขประจำตัวประชาชน
-                  </div>
-                  <div className="text-tfpa_blue">
-                    {!isEditing ? (
-                      <span>{clientInfo.clientNationalId || "-"}</span>
-                    ) : (
-                      <input
-                        type="text"
-                        name="clientNationalId"
-                        value={editedInfo.clientNationalId}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded px-2 py-1"
-                      />
-                    )}
-                  </div>
-                </div>
                 {/* Title */}
                 <div className="grid grid-cols-2 items-center">
                   <div className="text-tfpa_blue font-bold">คำนำหน้าชื่อ</div>

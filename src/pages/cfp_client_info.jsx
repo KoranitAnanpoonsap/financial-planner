@@ -148,7 +148,6 @@ export default function CFPClientInfoPage() {
             </h3>
             <div className="mx-80 grid grid-cols-2">
               <div className="text-tfpa_blue font-bold space-y-4">
-                <div>เลขประจำตัวประชาชน</div>
                 <div>คำนำหน้าชื่อ</div>
                 <div>ชื่อ</div>
                 <div>นามสกุล</div>
@@ -158,7 +157,6 @@ export default function CFPClientInfoPage() {
                 <div>อีเมล</div>
               </div>
               <div className="text-tfpa_blue space-y-4">
-                <div>{clientInfo?.clientNationalId || "-"}</div>
                 <div>
                   {/* Display title as radio-like but read-only */}
                   <div className="flex items-center space-x-4">
