@@ -38,9 +38,6 @@ public class ClientInfo {
     @Column(name = "client_password", nullable = false)
     private String clientPassword;
 
-    @Column(name = "client_national_id", nullable = false, length = 20)
-    private String clientNationalId;
-
     @Column(name = "client_title", nullable = false)
     private Integer clientTitle;
 
@@ -127,14 +124,6 @@ public class ClientInfo {
 
     public void setClientPassword(String clientPassword) {
         this.clientPassword = clientPassword;
-    }
-
-    public String getClientNationalId() {
-        return clientNationalId;
-    }
-
-    public void setClientNationalId(String clientNationalId) {
-        this.clientNationalId = clientNationalId;
     }
 
     public Integer getClientTitle() {

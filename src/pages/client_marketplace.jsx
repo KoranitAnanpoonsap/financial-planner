@@ -5,6 +5,7 @@ import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import personIcon from "../assets/man.png"
 import wallpaper from "../assets/login_wallpaper.jpg"
+import { useNavigate } from "react-router-dom"
 
 // Import rc-checkbox and its styles
 import Checkbox from "rc-checkbox"
@@ -73,10 +74,10 @@ function CfpModal({
   cfp,
   onClose,
   onSendRequestClick,
-  alreadyRequested,
   clientStatus,
   clientCfp,
-  isLoggedIn, // new prop
+  isLoggedIn,
+  register,
 }) {
   if (!cfp) return null
 
@@ -245,14 +246,11 @@ function CfpModal({
               {!isLoggedIn ? (
                 <>
                   <button
-                    disabled
-                    className="bg-gray-400 text-white py-2 px-4 rounded"
+                    onClick={register}
+                    className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
                   >
                     ส่งคำร้อง
                   </button>
-                  <p className="text-red-600 mt-2">
-                    กรุณาเข้าสู่ระบบก่อนส่งคำร้อง
-                  </p>
                 </>
               ) : clientStatus === 1 || clientStatus === 2 ? (
                 <>
@@ -289,6 +287,7 @@ function CfpModal({
 }
 
 export default function MarketplacePage() {
+  const navigate = useNavigate()
   const clientLoginUuid = localStorage.getItem("clientLoginUuid") || null
   // Use clientLoginUuid = "0" to indicate a logged-out client.
   const isLoggedIn = clientLoginUuid && clientLoginUuid !== "0"
@@ -485,6 +484,10 @@ export default function MarketplacePage() {
     }
   }
 
+  const handleRegister = () => {
+    navigate(`/register`)
+  }
+
   const dropdownClass =
     "border p-2 rounded text-sm w-full hover:bg-gray-100 transition-colors"
 
@@ -656,10 +659,10 @@ export default function MarketplacePage() {
               cfp={selectedCfp}
               onClose={closeModal}
               onSendRequestClick={isLoggedIn ? handleSendRequest : null}
-              alreadyRequested={clientAlreadyHasCfp}
               clientStatus={clientStatus}
               clientCfp={clientCfpData}
               isLoggedIn={isLoggedIn}
+              register={handleRegister}
             />
           )}
         </AnimatePresence>

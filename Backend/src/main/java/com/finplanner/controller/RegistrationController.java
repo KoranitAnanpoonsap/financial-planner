@@ -33,7 +33,6 @@ public class RegistrationController {
         ClientInfo clientInfo = new ClientInfo();
         clientInfo.setClientEmail(email);
         clientInfo.setClientPassword(password); // Store the hashed password
-        clientInfo.setClientNationalId(nationalId);
         clientInfo.setClientFirstName(firstName);
         clientInfo.setClientLastName(lastName);
         clientInfo.setClientGender(gender);

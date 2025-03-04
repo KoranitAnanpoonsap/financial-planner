@@ -94,7 +94,6 @@ public class ClientInfoController {
             dto.setClientStartDate(client.getClientStartDate());
             dto.setClientCompletionDate(client.getClientCompletionDate());
             dto.setClientEmail(client.getClientEmail());
-            dto.setClientNationalId(client.getClientNationalId());
             dto.setClientTitle(client.getClientTitle());
             dto.setClientFirstName(client.getClientFirstName());
             dto.setClientLastName(client.getClientLastName());

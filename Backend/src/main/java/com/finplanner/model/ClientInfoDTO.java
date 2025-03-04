@@ -10,7 +10,6 @@ public class ClientInfoDTO {
     private LocalDate clientStartDate;
     private LocalDate clientCompletionDate;
     private String clientEmail;
-    private String clientNationalId;
     private Integer clientTitle;
     private String clientFirstName;
     private String clientLastName;
@@ -65,14 +64,6 @@ public class ClientInfoDTO {
 
     public void setClientEmail(String clientEmail) {
         this.clientEmail = clientEmail;
-    }
-
-    public String getClientNationalId() {
-        return clientNationalId;
-    }
-
-    public void setClientNationalId(String clientNationalId) {
-        this.clientNationalId = clientNationalId;
     }
 
     public Integer getClientTitle() {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import InputField from "../components/registertInputField.jsx"
 import RadioButtonGroup from "../components/registerRadioButtonGroup.jsx"
@@ -24,7 +24,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [idNumber, setIdNumber] = useState("")
   const [title, setTitle] = useState("")
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -80,7 +79,6 @@ export default function RegisterPage() {
       !email ||
       !password ||
       !confirmPassword ||
-      !idNumber ||
       !title ||
       !firstName ||
       !lastName ||
@@ -121,7 +119,6 @@ export default function RegisterPage() {
     const payload = {
       clientEmail: email,
       clientPassword: password,
-      clientNationalId: idNumber,
       clientTitle: titleMapping[title], // Convert to number
       clientFirstName: firstName,
       clientLastName: lastName,
@@ -228,13 +225,6 @@ export default function RegisterPage() {
             <h2 className="text-tfpa_gold mb-4 text-xl font-bold font-ibm">
               ข้อมูลส่วนตัว
             </h2>
-            <InputField
-              type="text"
-              label="เลขประจำตัวประชาชน"
-              placeholder="รหัสบัตรประชาชนจำนวน 13 หลัก"
-              value={idNumber}
-              onChange={(e) => setIdNumber(e.target.value)}
-            />
             <RadioButtonGroup
               label="คำนำหน้าชื่อ"
               options={[

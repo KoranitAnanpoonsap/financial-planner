@@ -24,54 +24,93 @@ import {
   PointElement,
   Title,
   Tooltip,
-  Filler, ArcElement,
+  Filler,
+  ArcElement,
 } from "chart.js"
 import ChartDataLabels from "chartjs-plugin-datalabels"
 import html2canvas from "html2canvas"
+
 // Register Chart.js components
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ChartDataLabels,
-    Filler,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartDataLabels,
+  Filler
 )
+
 Chart.overrides.line.plugins = {
   datalabels: {
     formatter: function (value, context) {
-      if(value>=100000 || value<=-100000){
-        return (
-            (Number(value)/1000000).toFixed(2) + " ล้านบาท"
-        )
-      }
-      else if(value>=10000 || value<=-10000) {
-        return (
-            (Number(value) / 10000).toFixed(2) + " หมื่นบาท"
-        )
-      }
-      else {
-        return (
-            Number(value).toFixed(2) + " บาท"
-        )
+      if (value >= 100000 || value <= -100000) {
+        return (Number(value) / 1000000).toFixed(2) + " ล้านบาท"
+      } else if (value >= 10000 || value <= -10000) {
+        return (Number(value) / 10000).toFixed(2) + " หมื่นบาท"
+      } else {
+        return Number(value).toFixed(2) + " บาท"
       }
     },
     align: -45,
     color: "black",
-  }
+  },
 }
+
 const lineChartProps = {
   borderWidth: 3,
   fill: {
-    target: 'origin',
-    above: 'rgba(146,202,104,0.5)',
-    below: 'rgba(255,109,109,0.5)',
+    target: "origin",
+    above: "rgba(146,202,104,0.5)",
+    below: "rgba(255,109,109,0.5)",
   },
-  borderColor: 'rgba(0,51,117,0.75)',
+  borderColor: "rgba(0,51,117,0.75)",
   tension: 0.25,
+}
+
+// New constant for chart options with axis labels in Thai
+const lineChartOptions = {
+  responsive: true,
+  plugins: {
+    legend: { position: "top" },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: "ปี", // X-axis label in Thai: Year
+      },
+    },
+    y: {
+      title: {
+        display: true,
+        text: "กระแสเงินสดสุทธิหลังเป้าหมาย (บาท)", // Y-axis label in Thai: Amount in Baht
+      },
+    },
+  },
+}
+
+const lineChartOptionsTwo = {
+  responsive: true,
+  plugins: {
+    legend: { position: "top" },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: "ปี", // X-axis label in Thai: Year
+      },
+    },
+    y: {
+      title: {
+        display: true,
+        text: "กระเเสเงินสดสุทธิ (บาท)", // Y-axis label in Thai: Amount in Baht
+      },
+    },
+  },
 }
 
 const pageVariants = {
@@ -126,7 +165,6 @@ export default function CFPCashflowBaseDashboard() {
       setGoals(goalsData)
 
       const initialCheck = []
-
       goalsData.forEach(() => {
         initialCheck.push(true)
       })
@@ -216,10 +254,6 @@ export default function CFPCashflowBaseDashboard() {
           label: "กระแสเงินสดสุทธิหลังหักเป้าหมาย",
           data: data,
           borderWidth: lineChartProps.borderWidth,
-          // borderColor: (context) => {
-          //   const values = context.dataset.data;
-          //   return values.map((val) => (val >= 0 ? "green" : "red")); // Green for positive, Red for negative
-          // },
           borderColor: lineChartProps.borderColor,
           fill: lineChartProps.fill,
           tension: lineChartProps.tension,
@@ -242,20 +276,24 @@ export default function CFPCashflowBaseDashboard() {
       <div className="text-3xl flex flex-col w-full items-center border-black border-2 rounded-2xl p-4">
         {sufficients ? (
           <div className={"mb-8 text-[green] flex gap-2"}>
-            "{"คุณมีกระเเสเงินสดเพียงพอต่อการออมเพื่อ"}{" "}
+            "คุณมีกระเเสเงินสดเพียงพอต่อการออมเพื่อ{" "}
             {goals.map((goal, index) => {
               if (check[index]) {
-                return <div>{goal.clientGoalName}</div>
+                return (
+                  <div key={goal.clientGoalName}>{goal.clientGoalName}</div>
+                )
               }
             })}
             "
           </div>
         ) : (
           <div className={"mb-8 text-[red] flex gap-2"}>
-            "{"คุณมีกระเเสเงินสดไม่เพียงพอต่อการออมเพื่อ"}{" "}
+            "คุณมีกระเเสเงินสดไม่เพียงพอต่อการออมเพื่อ{" "}
             {goals.map((goal, index) => {
               if (check[index]) {
-                return <div>{goal.clientGoalName}</div>
+                return (
+                  <div key={goal.clientGoalName}>{goal.clientGoalName}</div>
+                )
               }
             })}
             "
@@ -266,12 +304,15 @@ export default function CFPCashflowBaseDashboard() {
         </div>
         <div className="flex w-full px-60">
           <div className="w-full">
-            <Line data={chartData} />
+            <Line data={chartData} options={lineChartOptions} />
           </div>
           <div className="absolute right-0 mr-[10%] mt-[10%] flex flex-col gap-2 text-base">
             {goals.map((goal, index) => {
               return (
-                <div className="flex gap-x-2 items-center">
+                <div
+                  className="flex gap-x-2 items-center"
+                  key={goal.clientGoalName}
+                >
                   <input
                     className="w-6 h-6"
                     type="checkbox"
@@ -346,7 +387,7 @@ export default function CFPCashflowBaseDashboard() {
       <div className="text-xl flex flex-col w-full items-start border-black border-2 rounded-2xl p-4 min-w-[300px]">
         <div className="text-2xl mb-2">กระเเสเงินสดสุทธิเเต่ละปี</div>
         <div className="w-full">
-          <Line data={chartData} />
+          <Line data={chartData} options={lineChartOptionsTwo} />
         </div>
       </div>
     )
