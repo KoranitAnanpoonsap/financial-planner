@@ -570,7 +570,7 @@ export default function TaxIncomePage() {
           onClick={() => setShow408Details(false)}
         >
           <motion.div
-            className="relative w-full max-w-4xl mx-2 bg-white rounded-lg p-6 overflow-y-auto max-h-[90vh]"
+            className="relative w-full max-w-4xl mx-2 bg-white rounded-lg p-6 overflow-y-auto thin-scroll max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
             variants={modalVariants}
             initial="initial"

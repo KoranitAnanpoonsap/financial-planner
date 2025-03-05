@@ -1,30 +1,16 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactDOM from "react-dom"
+import { useNavigate } from "react-router-dom"
 import Header from "../components/clientHeader.jsx"
 import Footer from "../components/footer.jsx"
 import personIcon from "../assets/man.png"
 import wallpaper from "../assets/login_wallpaper.jpg"
-import { useNavigate } from "react-router-dom"
-
-// Import rc-checkbox and its styles
 import Checkbox from "rc-checkbox"
 import "rc-checkbox/assets/index.css"
+import { FaChevronDown } from "react-icons/fa"
 
-// Page transition variants
-const pageVariants = {
-  initial: { opacity: 0 },
-  in: { opacity: 1 },
-  out: { opacity: 1 },
-}
-
-const pageTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.4,
-}
-
-// ----- Mapping objects for charge, expertise, and service area -----
+// ----- Mapping objects -----
 const chargeMapping = {
   1: "คิดค่าบริการจัดทำแผนการเงิน",
   2: "คิดค่านายหน้าจากการแนะนำผลิตภัณฑ์",
@@ -56,20 +42,32 @@ const serviceAreaMapping = {
   7: "ภาคใต้",
 }
 
-// Framer Motion variants for modal
-const modalVariants = {
-  initial: { y: -40, opacity: 0 },
-  animate: { y: 0, opacity: 1 },
-  exit: { y: 20, opacity: 0 },
-}
-
-// Client status mapping (numbers to text)
 const statusMapping = {
   1: "ส่งคำร้อง",
   2: "กำลังดำเนินการ",
   3: "ดำเนินการเรียบร้อย",
 }
 
+// Framer Motion variants for modals and page transitions
+const modalVariants = {
+  initial: { y: -40, opacity: 0 },
+  animate: { y: 0, opacity: 1 },
+  exit: { y: 20, opacity: 0 },
+}
+
+const pageVariants = {
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 1 },
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.4,
+}
+
+// ------------------------ CFP Detail Modal ------------------------
 function CfpModal({
   cfp,
   onClose,
@@ -81,7 +79,14 @@ function CfpModal({
 }) {
   if (!cfp) return null
 
-  // Split any comma-separated fields if needed
+  // Disable background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [])
+
   const charges = cfp.cfpCharge ? cfp.cfpCharge.split(",") : []
   const expertise = cfp.cfpExpertise ? cfp.cfpExpertise.split(",") : []
   const serviceAreas = cfp.cfpServiceArea ? cfp.cfpServiceArea.split(",") : []
@@ -102,7 +107,7 @@ function CfpModal({
       onClick={onClose}
     >
       <motion.div
-        className="relative w-full max-w-4xl mx-2 bg-white rounded-lg p-6 overflow-y-auto max-h-[90vh]"
+        className="relative w-full max-w-4xl mx-2 bg-white rounded-lg p-6 overflow-y-auto max-h-[90vh] thin-scroll"
         onClick={(e) => e.stopPropagation()}
         variants={modalVariants}
         initial="initial"
@@ -117,13 +122,12 @@ function CfpModal({
         >
           ✕
         </button>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
           {/* Left Column */}
           <div>
             <img
               src={imageUrl}
-              alt={`${cfp.cfpFirstName}`}
+              alt={cfp.cfpFirstName}
               className="w-32 h-32 rounded-full mx-auto object-cover"
             />
             <h2 className="mt-4 text-xl font-bold text-tfpa_blue text-center">
@@ -143,7 +147,6 @@ function CfpModal({
               {cfp.cfpLinkedin && <p>LinkedIn: {cfp.cfpLinkedin}</p>}
             </div>
           </div>
-
           {/* Right Column */}
           <div>
             {charges.length > 0 && (
@@ -240,18 +243,14 @@ function CfpModal({
                 </ul>
               </div>
             )}
-
-            {/* Send Request Button & Confirmation Message */}
             <div className="mt-6 border-t pt-4">
               {!isLoggedIn ? (
-                <>
-                  <button
-                    onClick={register}
-                    className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
-                  >
-                    ส่งคำร้อง
-                  </button>
-                </>
+                <button
+                  onClick={register}
+                  className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
+                >
+                  ส่งคำร้อง
+                </button>
               ) : clientStatus === 1 || clientStatus === 2 ? (
                 <>
                   <button
@@ -286,10 +285,280 @@ function CfpModal({
   return ReactDOM.createPortal(modalContent, document.body)
 }
 
+// ------------------------ Filter Wizard Modal ------------------------
+function FilterWizardModal({
+  initialExpertise,
+  initialCharge,
+  initialServiceArea,
+  initialGender,
+  onFinish,
+  onClose,
+}) {
+  const [step, setStep] = useState(1)
+  const [selectedExpertise, setSelectedExpertise] = useState(initialExpertise)
+  const [selectedCharge, setSelectedCharge] = useState(initialCharge)
+  const [selectedServiceAreaLocal, setSelectedServiceAreaLocal] =
+    useState(initialServiceArea)
+  const [selectedGenderLocal, setSelectedGenderLocal] = useState(initialGender)
+
+  // Calculate progress percentage (4 steps total)
+  const progressPercentage = (step / 4) * 100
+
+  // Framer Motion variants for step transitions
+  const stepVariants = {
+    initial: { opacity: 0, x: 50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 },
+  }
+
+  const nextStep = () => setStep((prev) => prev + 1)
+  const prevStep = () => setStep((prev) => prev - 1)
+
+  const handleFinish = () => {
+    onFinish({
+      selectedExpertise,
+      selectedCharge,
+      selectedServiceArea: selectedServiceAreaLocal,
+      selectedGender: selectedGenderLocal,
+    })
+    onClose()
+  }
+
+  // Disable background scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [])
+
+  let content
+  if (step === 1) {
+    content = (
+      <motion.div
+        variants={stepVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">
+          เลือกการให้บริการ
+        </h2>
+        <div className="space-y-2 thin-scroll max-h-full overflow-y-auto">
+          {Object.entries(expertiseMapping).map(([key, value]) => (
+            <label key={key} className="flex items-center gap-2 text-gray-700">
+              <Checkbox
+                checked={selectedExpertise.includes(key)}
+                onChange={() => {
+                  if (selectedExpertise.includes(key)) {
+                    setSelectedExpertise(
+                      selectedExpertise.filter((item) => item !== key)
+                    )
+                  } else {
+                    setSelectedExpertise([...selectedExpertise, key])
+                  }
+                }}
+                className="w-4 h-4"
+              />
+              <span>{value}</span>
+            </label>
+          ))}
+        </div>
+      </motion.div>
+    )
+  } else if (step === 2) {
+    content = (
+      <motion.div
+        variants={stepVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">
+          เลือกการคิดค่าบริการ
+        </h2>
+        <div className="space-y-2 thin-scroll max-h-full overflow-y-auto">
+          {Object.entries(chargeMapping).map(([key, value]) => (
+            <label key={key} className="flex items-center gap-2 text-gray-700">
+              <Checkbox
+                checked={selectedCharge.includes(key)}
+                onChange={() => {
+                  if (selectedCharge.includes(key)) {
+                    setSelectedCharge(
+                      selectedCharge.filter((item) => item !== key)
+                    )
+                  } else {
+                    setSelectedCharge([...selectedCharge, key])
+                  }
+                }}
+                className="w-4 h-4"
+              />
+              <span>{value}</span>
+            </label>
+          ))}
+        </div>
+      </motion.div>
+    )
+  } else if (step === 3) {
+    content = (
+      <motion.div
+        variants={stepVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">
+          เลือกพื้นที่ให้บริการ
+        </h2>
+        <div className="space-y-2">
+          <button
+            onClick={() => setSelectedServiceAreaLocal("")}
+            className={`w-full text-left p-2 border rounded ${
+              selectedServiceAreaLocal === ""
+                ? "bg-tfpa_blue text-white"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            ไม่ระบุพื้นที่ให้บริการ
+          </button>
+          {Object.entries(serviceAreaMapping).map(([key, value]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedServiceAreaLocal(key)}
+              className={`w-full text-left p-2 border rounded ${
+                selectedServiceAreaLocal === key
+                  ? "bg-tfpa_blue text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    )
+  } else if (step === 4) {
+    content = (
+      <motion.div
+        variants={stepVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-700">เลือกเพศ</h2>
+        <div className="space-y-2">
+          <button
+            onClick={() => setSelectedGenderLocal("")}
+            className={`w-full text-left p-2 border rounded ${
+              selectedGenderLocal === ""
+                ? "bg-tfpa_blue text-white"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            ไม่ระบุเพศ
+          </button>
+          <button
+            onClick={() => setSelectedGenderLocal("0")}
+            className={`w-full text-left p-2 border rounded ${
+              selectedGenderLocal === "0"
+                ? "bg-tfpa_blue text-white"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            ชาย
+          </button>
+          <button
+            onClick={() => setSelectedGenderLocal("1")}
+            className={`w-full text-left p-2 border rounded ${
+              selectedGenderLocal === "1"
+                ? "bg-tfpa_blue text-white"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            หญิง
+          </button>
+        </div>
+      </motion.div>
+    )
+  }
+
+  return ReactDOM.createPortal(
+    <div
+      className="fixed inset-0 z-[1100] flex items-center justify-center bg-black bg-opacity-50 font-ibm"
+      onClick={onClose}
+    >
+      <motion.div
+        className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 fixed"
+        style={{ height: "650px" }}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        {/* Top Right X Icon for closing */}
+        <button
+          onClick={onClose}
+          className="absolute top-1 right-2 text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+        {/* Progress Bar */}
+        <div className="flex items-center mb-4">
+          <div className="relative flex-1 h-2 bg-gray-300 rounded">
+            <motion.div
+              className="absolute top-0 left-0 h-2 bg-tfpa_gold rounded"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.3 }}
+            ></motion.div>
+          </div>
+          <span className="ml-2 text-xs text-gray-600">
+            {Math.round(progressPercentage)}%
+          </span>
+        </div>
+        <div
+          className="overflow-y-auto overflow-x-hidden thin-scroll"
+          style={{ height: "calc(100% - 80px)" }}
+        >
+          {content}
+        </div>
+        <div className="flex justify-end mt-6">
+          {step > 1 && (
+            <button
+              onClick={prevStep}
+              className="bg-gray-300 text-gray-800 py-2 px-4 mx-3 rounded hover:bg-gray-400"
+            >
+              ย้อนกลับ
+            </button>
+          )}
+          {step < 4 && (
+            <button
+              onClick={nextStep}
+              className="bg-tfpa_blue text-white py-2 px-4 rounded hover:bg-tfpa_blue_hover transition-all"
+            >
+              ถัดไป
+            </button>
+          )}
+          {step === 4 && (
+            <button
+              onClick={handleFinish}
+              className="bg-tfpa_blue text-white py-2 px-4 rounded hover:opacity-90"
+            >
+              เสร็จสิ้น
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>,
+    document.body
+  )
+}
+
+// ------------------------ Marketplace Page ------------------------
 export default function MarketplacePage() {
   const navigate = useNavigate()
   const clientLoginUuid = localStorage.getItem("clientLoginUuid") || null
-  // Use clientLoginUuid = "0" to indicate a logged-out client.
   const isLoggedIn = clientLoginUuid && clientLoginUuid !== "0"
   const [allCfps, setAllCfps] = useState([])
   const [filteredCfps, setFilteredCfps] = useState([])
@@ -301,7 +570,10 @@ export default function MarketplacePage() {
   const [selectedGender, setSelectedGender] = useState("")
   const [selectedServiceArea, setSelectedServiceArea] = useState("")
 
-  // Modal state
+  // Show/hide Filter Wizard modal
+  const [showFilterWizard, setShowFilterWizard] = useState(false)
+
+  // Modal state for CFP details
   const [selectedCfp, setSelectedCfp] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -338,7 +610,6 @@ export default function MarketplacePage() {
       )
       if (res.ok) {
         const data = await res.json()
-        // Convert numeric clientStatus using mapping
         const statusText = statusMapping[data.clientStatus] || ""
         setClientAlreadyHasCfp(
           !!data.cfpOfThisClient &&
@@ -400,7 +671,6 @@ export default function MarketplacePage() {
         return areaArray.map((a) => a.trim()).includes(selectedServiceArea)
       })
     }
-    // --- Sort the CFPs by their numeric ID extracted from cfpFormatId ---
     updated.sort((a, b) => {
       const idA = parseInt(a.cfpFormatId.replace(/\D/g, ""), 10) || 0
       const idB = parseInt(b.cfpFormatId.replace(/\D/g, ""), 10) || 0
@@ -442,7 +712,7 @@ export default function MarketplacePage() {
     if (clientAlreadyHasCfp && clientStatus !== 3) return
     const payload = {
       cfpOfThisClient: selectedCfp.cfpUuid,
-      clientStatus: 1, // numeric 1 represents "ส่งคำร้อง"
+      clientStatus: 1,
     }
     try {
       const res = await fetch(
@@ -476,25 +746,13 @@ export default function MarketplacePage() {
     selectedServiceArea,
   ])
 
-  const toggleFilterValue = (value, array, setArray) => {
-    if (array.includes(value)) {
-      setArray(array.filter((v) => v !== value))
-    } else {
-      setArray([...array, value])
-    }
-  }
-
   const handleRegister = () => {
     navigate(`/register`)
   }
 
-  const dropdownClass =
-    "border p-2 rounded text-sm w-full hover:bg-gray-100 transition-colors"
-
   return (
     <div className="font-ibm min-h-screen flex flex-col">
       <Header />
-      {/* Main content wrapped with motion.div */}
       <motion.div
         initial="initial"
         animate="in"
@@ -508,108 +766,24 @@ export default function MarketplacePage() {
           style={{ backgroundImage: `url(${wallpaper})` }}
         >
           <div className="absolute inset-0 bg-tfpa_blue opacity-70"></div>
-          <div className="relative z-10 max-w-6xl mx-auto px-4 py-10 text-white text-center">
+          <div className="relative z-10 max-w-6xl mx-auto px-64 py-10 text-white text-center">
             <h1 className="text-2xl md:text-3xl font-bold mb-6">
               ติดต่อขอรับบริการวางแผนการเงิน
               <br className="hidden md:block" />
               กับนักวางแผนการเงิน CFP<sup>®</sup>
             </h1>
-            {/* Filter & Search Container */}
-            <div className="bg-white rounded-xl shadow py-4 px-4 text-gray-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-32">
-                {/* Left: Service (Expertise) checkboxes */}
-                <div>
-                  <h3 className="font-bold text-gray-700 mb-2">การให้บริการ</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-56 gap-y-2 text-sm">
-                    {Object.entries(expertiseMapping).map(([key, value]) => (
-                      <label
-                        key={key}
-                        className="flex flex-nowrap items-center gap-2"
-                      >
-                        <Checkbox
-                          checked={selectedExpertiseFilters.includes(key)}
-                          onChange={() =>
-                            toggleFilterValue(
-                              key,
-                              selectedExpertiseFilters,
-                              setSelectedExpertiseFilters
-                            )
-                          }
-                          className="w-4 h-4"
-                        />
-                        <span className="whitespace-nowrap">{value}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                {/* Right: Gender, Service Area, Charge filters */}
-                <div className="flex flex-col space-y-4">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-700 mb-1">เพศ</h3>
-                      <select
-                        className={dropdownClass}
-                        value={selectedGender}
-                        onChange={(e) => setSelectedGender(e.target.value)}
-                      >
-                        <option value="">ไม่ระบุเพศ</option>
-                        <option value="0">ชาย</option>
-                        <option value="1">หญิง</option>
-                      </select>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-700 mb-1">
-                        พื้นที่ให้บริการ
-                      </h3>
-                      <select
-                        className={dropdownClass}
-                        value={selectedServiceArea}
-                        onChange={(e) => setSelectedServiceArea(e.target.value)}
-                      >
-                        <option value="">ไม่ระบุพื้นที่ให้บริการ</option>
-                        {Object.entries(serviceAreaMapping).map(
-                          ([key, value]) => (
-                            <option key={key} value={key}>
-                              {value}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-700 mb-2 text-center">
-                      การคิดค่าบริการ
-                    </h3>
-                    <div className="space-y-1 text-sm text-center">
-                      {Object.entries(chargeMapping).map(([key, value]) => (
-                        <label
-                          key={key}
-                          className="flex flex-nowrap items-center gap-2 px-32 justify-left"
-                        >
-                          <Checkbox
-                            checked={selectedChargeFilters.includes(key)}
-                            onChange={() =>
-                              toggleFilterValue(
-                                key,
-                                selectedChargeFilters,
-                                setSelectedChargeFilters
-                              )
-                            }
-                            className="w-4 h-4"
-                          />
-                          <span className="whitespace-nowrap">{value}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-center">
+            <div className="bg-white rounded-xl shadow py-4 px-4 text-gray-800 mb-4 flex flex-col items-center">
+              <button
+                onClick={() => setShowFilterWizard(true)}
+                className="bg-tfpa_gold text-white py-3 px-6 rounded-2xl hover:bg-tfpa_gold_hover text-lg"
+              >
+                ค้นหา CFP ที่เหมาะกับคุณ
+              </button>
+              <div className="mt-4 w-full flex justify-center">
                 <input
                   type="text"
                   placeholder="ค้นหาด้วยชื่อ CFP หรือหมายเลขคุณวุฒิ..."
-                  className="border p-2 rounded text-sm w-full md:w-1/2 hover:bg-gray-100 transition-colors"
+                  className="border p-2 rounded text-sm w-full md:w-3/4 hover:bg-gray-100 transition-colors"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -617,7 +791,6 @@ export default function MarketplacePage() {
             </div>
           </div>
         </div>
-        {/* CFP Cards */}
         <div className="flex-1 bg-gray-100 p-4">
           <div className="mx-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredCfps.map((cfp) => {
@@ -663,6 +836,28 @@ export default function MarketplacePage() {
               clientCfp={clientCfpData}
               isLoggedIn={isLoggedIn}
               register={handleRegister}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {showFilterWizard && (
+            <FilterWizardModal
+              initialExpertise={selectedExpertiseFilters}
+              initialCharge={selectedChargeFilters}
+              initialServiceArea={selectedServiceArea}
+              initialGender={selectedGender}
+              onFinish={({
+                selectedExpertise,
+                selectedCharge,
+                selectedServiceArea,
+                selectedGender,
+              }) => {
+                setSelectedExpertiseFilters(selectedExpertise)
+                setSelectedChargeFilters(selectedCharge)
+                setSelectedServiceArea(selectedServiceArea)
+                setSelectedGender(selectedGender)
+              }}
+              onClose={() => setShowFilterWizard(false)}
             />
           )}
         </AnimatePresence>

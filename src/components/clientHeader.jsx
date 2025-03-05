@@ -67,7 +67,7 @@ export default function ClientHeader() {
           {clientLoginUuid === "0" ? (
             <button
               onClick={() => navigate(`/client-login`)}
-              className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded"
+              className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded-lg"
             >
               Login
             </button>
@@ -75,7 +75,7 @@ export default function ClientHeader() {
             <div className="inline-block" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded"
+                className="bg-tfpa_blue hover:bg-tfpa_blue_hover text-white px-4 py-2 rounded-lg"
               >
                 Account
               </button>
