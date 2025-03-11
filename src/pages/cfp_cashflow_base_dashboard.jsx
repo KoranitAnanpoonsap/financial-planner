@@ -277,26 +277,18 @@ export default function CFPCashflowBaseDashboard() {
         {sufficients ? (
           <div className={"mb-8 text-[green] flex gap-2"}>
             "คุณมีกระเเสเงินสดเพียงพอต่อการออมเพื่อ{" "}
-            {goals.map((goal, index) => {
-              if (check[index]) {
-                return (
-                  <div key={goal.clientGoalName}>{goal.clientGoalName}</div>
-                )
-              }
-            })}
-            "
+            {goals
+              .filter((_, index) => check[index])
+              .map((goal) => goal.clientGoalName)
+              .join(", ")}
           </div>
         ) : (
           <div className={"mb-8 text-[red] flex gap-2"}>
             "คุณมีกระเเสเงินสดไม่เพียงพอต่อการออมเพื่อ{" "}
-            {goals.map((goal, index) => {
-              if (check[index]) {
-                return (
-                  <div key={goal.clientGoalName}>{goal.clientGoalName}</div>
-                )
-              }
-            })}
-            "
+            {goals
+              .filter((_, index) => check[index])
+              .map((goal) => goal.clientGoalName)
+              .join(", ")}
           </div>
         )}
         <div className="m-2">
