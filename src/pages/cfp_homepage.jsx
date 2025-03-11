@@ -149,9 +149,29 @@ export default function ClientsPage() {
 
   const handleStatusChange = async (clientUuid, newStatus) => {
     try {
-      const payload = {}
-      if (newStatus) {
-        payload.clientStatus = newStatus
+      // Find the current client data from the state
+      const client = clients.find((c) => c.clientUuid === clientUuid)
+      if (!client) return
+
+      const payload = { clientStatus: newStatus }
+      const today = format(new Date(), "yyyy-MM-dd")
+
+      // Handle automatic date setting based on status change
+      if (newStatus === 2) {
+        // กำลังดำเนินการ
+        // Set start date to today if not already set
+        if (!client.clientStartDate) {
+          payload.clientStartDate = today
+        }
+      } else if (newStatus === 3) {
+        // ดำเนินการเรียบร้อย
+        // Set completion date to today
+        payload.clientCompletionDate = today
+
+        // Set start date to today if not already set
+        if (!client.clientStartDate) {
+          payload.clientStartDate = today
+        }
       }
 
       const response = await fetch(
